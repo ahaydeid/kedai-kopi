@@ -11,6 +11,7 @@ import {
   FiChevronRight,
   FiLogOut,
   FiEdit3,
+  FiMail,
 } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
@@ -159,7 +160,13 @@ export default function CustomerProfilePage() {
       <main className="flex-1 w-full max-w-md mx-auto pb-28 space-y-4">
         {/* Header User Info & Poin Saya */}
         <section className="bg-white dark:bg-slate-900 p-4 rounded border-none space-y-3.5">
-          <div className="flex items-center justify-between gap-3">
+          {/* Baris Email Paling Atas */}
+          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-400 font-normal pb-1 border-b border-slate-100 dark:border-slate-800/80">
+            <FiMail className="h-3 w-3 shrink-0 text-slate-400" />
+            <span className="truncate">{userEmail}</span>
+          </div>
+
+          <div className="flex items-center justify-between gap-3 pt-0.5">
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <Avatar name={userName} photo={userPhoto} size="medium" />
               <div className="min-w-0 flex-1">
@@ -168,14 +175,15 @@ export default function CustomerProfilePage() {
                     {userName}
                   </h1>
                 </div>
-                {userPhone && (
-                  <p className="text-xs text-slate-700 dark:text-slate-200 font-medium truncate">
+                {userPhone ? (
+                  <p className="text-xs text-slate-700 dark:text-slate-200 font-medium truncate mt-0.5">
                     {userPhone}
                   </p>
+                ) : (
+                  <p className="text-xs text-slate-400 font-normal italic truncate mt-0.5">
+                    Belum ada No. HP
+                  </p>
                 )}
-                <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
-                  {userEmail}
-                </p>
               </div>
             </div>
 
