@@ -147,25 +147,14 @@ const server = http.createServer((req, res) => {
 
   // Status check endpoint
   if (req.method === 'GET' && (url === '/api/status' || url === '/status')) {
-    let isConnected = false
-    try {
-      if (fs.existsSync(DEVICE_PATH)) {
-        const rfcommOutput = execSync('rfcomm -a 2>&1', { encoding: 'utf8', timeout: 1000 })
-        if (rfcommOutput.includes('connected') && !rfcommOutput.includes('closed')) {
-          isConnected = true
-        }
-      }
-    } catch {
-      isConnected = false
-    }
-
+    const isDeviceExist = fs.existsSync(DEVICE_PATH)
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(
       JSON.stringify({
         status: 'online',
         device: DEVICE_PATH,
-        ready: isConnected,
-        connected: isConnected,
+        ready: isDeviceExist,
+        connected: isDeviceExist,
         printer: 'RPP02N Thermal Printer 58mm',
       })
     )
