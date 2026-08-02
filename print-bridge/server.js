@@ -7,6 +7,7 @@
 const http = require('http')
 const fs = require('fs')
 const path = require('path')
+const { execSync } = require('child_process')
 
 const PORT = process.env.PORT || 5000
 const DEVICE_PATH = process.env.PRINTER_DEVICE_PATH || '/dev/rfcomm0'
@@ -146,13 +147,25 @@ const server = http.createServer((req, res) => {
 
   // Status check endpoint
   if (req.method === 'GET' && (url === '/api/status' || url === '/status')) {
-    const isDeviceExist = fs.existsSync(DEVICE_PATH)
+    let isConnected = false
+    try {
+      if (fs.existsSync(DEVICE_PATH)) {
+        const rfcommOutput = execSync('rfcomm -a 2>&1', { encoding: 'utf8', timeout: 1000 })
+        if (rfcommOutput.includes('connected') && !rfcommOutput.includes('closed')) {
+          isConnected = true
+        }
+      }
+    } catch {
+      isConnected = false
+    }
+
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(
       JSON.stringify({
         status: 'online',
         device: DEVICE_PATH,
-        ready: isDeviceExist,
+        ready: isConnected,
+        connected: isConnected,
         printer: 'RPP02N Thermal Printer 58mm',
       })
     )

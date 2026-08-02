@@ -53,13 +53,16 @@ export function ThermalPrinterTab() {
 
       const res = await fetch(`${targetUrl}/api/status`, {
         method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+        },
         signal: controller.signal,
       })
       clearTimeout(timeoutId)
 
       if (res.ok) {
         const data = await res.json()
-        if (data.ready || data.status === 'online') {
+        if (data.ready === true && data.connected === true) {
           setIsConnected(true)
           if (data.printer) {
             setDeviceName(data.printer)
@@ -135,11 +138,10 @@ export function ThermalPrinterTab() {
 
   const handleTestPrint = () => {
     setIsTestPrintOpen(true)
-    playSwalSound('confirm')
     printThermalReceipt({
       orderNumber: 'TEST-0001',
-      customerName: 'Joko Widodo',
-      tableNumber: 'Meja 05',
+      customerName: 'Pelanggan Uji Coba',
+      tableNumber: '05',
       orderType: 'dine_in',
       dateTime: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
       items: [
@@ -151,19 +153,18 @@ export function ThermalPrinterTab() {
     })
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
-    setDeviceName(settings.printerName || 'POS-58 Thermal Printer')
-    setIsConnected(true)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('setting_thermal_printer', JSON.stringify({ ...settings, isConnected: true }))
+      localStorage.setItem('setting_thermal_printer', JSON.stringify(settings))
     }
     setDraftSettings(settings)
     setIsEditing(false)
+    await checkLivePrinterStatus()
     playSwalSound('success')
     Swal.fire({
       title: 'Pengaturan Disimpan!',
-      text: `Konfigurasi printer '${settings.printerName}' berhasil disimpan & diaktifkan.`,
+      text: `Konfigurasi printer '${settings.printerName}' berhasil disimpan.`,
       icon: 'success',
       confirmButtonColor: '#0284c7',
     })
