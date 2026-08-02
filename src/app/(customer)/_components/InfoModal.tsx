@@ -88,7 +88,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
               <div className="flex items-center gap-4 min-w-0 flex-1">
                 {item.icon}
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-50 tracking-tight truncate">
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 tracking-tight truncate">
                     {item.title}
                   </h3>
                   <p className="text-[11px] font-medium text-slate-400 dark:text-slate-400 truncate mt-0.5">
