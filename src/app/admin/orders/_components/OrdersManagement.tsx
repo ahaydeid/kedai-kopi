@@ -96,7 +96,7 @@ export function OrdersManagement() {
           <div className="lg:col-span-2 space-y-4 lg:pr-6 lg:border-r border-slate-200/80 dark:border-slate-800 lg:min-h-[calc(100vh-160px)]">
             <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span>Pesanan Aktif</span>
+                <span>Berjalan</span>
                 <span className="text-sm font-normal text-slate-400 dark:text-slate-500">
                   ({activeOrders.length})
                 </span>
@@ -120,7 +120,7 @@ export function OrdersManagement() {
           <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-4">
             <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
-                <span>Pesanan Selesai</span>
+                <span>Selesai</span>
                 <span className="text-sm font-normal text-slate-400 dark:text-slate-500">
                   ({completedOrders.length})
                 </span>

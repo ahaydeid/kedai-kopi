@@ -26,13 +26,40 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
 
   const handlePrintClick = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation()
-    playSwalSound('confirm')
+    playSwalSound('success')
+
+    const now = new Date()
+    const tanggal = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    const waktu = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+    const namaPelanggan = (order.customerName || 'Pelanggan').slice(0, 24)
+    const itemsHtml = order.items
+      .map((item) => {
+        const rupiah = formatRupiah(item.price)
+        const label = item.name.length > 18 ? item.name.slice(0, 18) + '…' : item.name
+        return `<div class="flex justify-between"><span>${label}</span><span>${rupiah}</span></div>`
+      })
+      .join('')
+
     Swal.fire({
-      title: 'Fitur Mendatang',
-      text: 'Fitur cetak struk akan segera hadir pada pembaruan berikutnya!',
-      icon: 'info',
-      confirmButtonText: 'Mengerti',
-      confirmButtonColor: '#3b82f6',
+      title: '🖨️ Preview Struk',
+      html: `
+        <div class="text-left text-xs font-mono bg-white p-4 rounded-md border border-slate-200 space-y-1 text-slate-800 mx-auto" style="max-width:280px">
+          <p class="text-center font-bold uppercase text-sm">KEDAI KOPI</p>
+          <p class="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
+          <p class="border-b border-dashed border-zinc-400 my-2"></p>
+          <p>Tgl : ${tanggal} ${waktu} WIB</p>
+          <p>No  : ${order.orderNumber}</p>
+          <p>Nama: ${namaPelanggan}</p>
+          <p class="border-b border-dashed border-zinc-400 my-2"></p>
+          ${itemsHtml}
+          <p class="border-b border-dashed border-zinc-400 my-2"></p>
+          <div class="flex justify-between font-bold"><span>TOTAL</span><span>${formatRupiah(order.totalAmount)}</span></div>
+          <p class="border-b border-dashed border-zinc-400 my-2"></p>
+          <p class="text-center text-[10px] text-zinc-500 mt-2">Terima kasih atas kunjungan Anda! ☕</p>
+        </div>
+      `,
+      confirmButtonText: 'Tutup',
+      confirmButtonColor: '#0284c7',
     })
   }
 
