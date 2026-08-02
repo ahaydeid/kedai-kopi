@@ -28,8 +28,8 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
     if (e) e.stopPropagation()
     playSwalSound('confirm')
     Swal.fire({
-      title: 'Mencetak Struk',
-      text: `Mencetak struk pesanan #${order.orderNumber}...`,
+      title: 'Fitur Mendatang',
+      text: 'Fitur cetak struk akan segera hadir pada pembaruan berikutnya!',
       icon: 'info',
       confirmButtonText: 'Mengerti',
       confirmButtonColor: '#3b82f6',
