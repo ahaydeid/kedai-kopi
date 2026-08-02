@@ -16,6 +16,8 @@ import { playSwalSound } from '@/utils/sound'
 import { getCurrentUser, getCachedUserSync, signOut } from '@/services/supabase/authService'
 import { createClient } from '@/services/supabase/client'
 
+import { InfoModal } from '../_components/InfoModal'
+
 const CUSTOMER_POINTS_CACHE_KEY = 'customer_points_cache_v1'
 let pointsMemoryCache: number | null = null
 
@@ -23,6 +25,7 @@ export default function CustomerProfilePage() {
   const cachedUser = getCachedUserSync()
   const [user, setUser] = useState<any>(cachedUser)
   const [loading, setLoading] = useState<boolean>(() => !cachedUser)
+  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
   const router = useRouter()
 
   const [userPoints, setUserPoints] = useState<number>(() => {
@@ -174,7 +177,7 @@ export default function CustomerProfilePage() {
         {/* List Menu Utama Datar & Bersih (Rounded Reguler) */}
         <section className="bg-white dark:bg-slate-900 rounded overflow-hidden border-none divide-y divide-slate-100/60 dark:divide-slate-800/60">
           <Link
-            href="/orders"
+            href="/history"
             className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
           >
             <div className="flex items-center gap-3">
@@ -199,9 +202,9 @@ export default function CustomerProfilePage() {
             <FiChevronRight className="h-4 w-4 text-slate-400" />
           </div>
 
-          <Link
-            href="/info"
-            className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+          <div
+            onClick={() => setIsInfoOpen(true)}
+            className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
               <FiInfo className="h-4 w-4 text-slate-500" />
@@ -210,9 +213,12 @@ export default function CustomerProfilePage() {
               </span>
             </div>
             <FiChevronRight className="h-4 w-4 text-slate-400" />
-          </Link>
+          </div>
         </section>
       </main>
+
+      {/* Modal Info Kedai Kopi */}
+      <InfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
 
       {/* Tombol Keluar Akun - Fixed di atas BottomBar */}
       <div className="fixed bottom-14 left-0 right-0 z-30 flex justify-center pb-3 pt-2">
