@@ -194,25 +194,24 @@ export function ThermalPrinterTab() {
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
               Status Thermal Printer
             </h3>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">
-              {isConnected ? `Terhubung: ${deviceName}` : 'Belum terhubung ke printer thermal kasir'}
-            </p>
+            {isConnected ? (
+              <div className="flex items-center gap-2 mt-0.5 text-xs font-medium">
+                <span className="text-zinc-700 dark:text-zinc-300">{deviceName}</span>
+                <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
+                  <CheckCircle size="sm" />
+                  <span>Terhubung</span>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center gap-1.5 mt-0.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+                <CrossCircle size="sm" />
+                <span>Terputus</span>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {isConnected ? (
-            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              <CheckCircle size="sm" />
-              <span>Terhubung</span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-1.5 text-xs font-medium text-rose-500 dark:text-rose-400">
-              <CrossCircle size="sm" />
-              <span>Terputus</span>
-            </div>
-          )}
-
+        <div>
           <Button
             type="button"
             variant="secondary"
