@@ -15,6 +15,17 @@ function formatOrderDateTime(isoString: string): string {
   return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}, ${hours}:${mins} WIB`
 }
 
+function isToday(isoString?: string): boolean {
+  if (!isoString) return false
+  const date = new Date(isoString)
+  const today = new Date()
+  return (
+    date.getDate() === today.getDate() &&
+    date.getMonth() === today.getMonth() &&
+    date.getFullYear() === today.getFullYear()
+  )
+}
+
 function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | null {
   if (item.status === 'Dibatalkan') return null
 
@@ -24,6 +35,7 @@ function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | nu
     customerName: item.customer_name,
     customerAvatarUrl: item.customer_avatar_url,
     dateTime: formatOrderDateTime(item.created_at),
+    createdAt: item.created_at,
     items: item.order_items.map((i) => ({
       name: `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.menu_name}`,
       price: Number(i.price) * i.quantity,
@@ -63,7 +75,7 @@ export function OrdersManagement() {
   }, [fetchOrders])
 
   const activeOrders = allOrders.filter((o) => o.status === 'Menunggu' || o.status === 'Diproses')
-  const completedOrders = allOrders.filter((o) => o.status === 'Selesai')
+  const completedOrders = allOrders.filter((o) => o.status === 'Selesai' && isToday(o.createdAt))
 
   return (
     <div className="space-y-6">

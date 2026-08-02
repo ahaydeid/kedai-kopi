@@ -15,6 +15,7 @@ export interface OrderItem {
   customerName: string
   customerAvatarUrl?: string | null
   dateTime: string
+  createdAt?: string
   items: OrderCartItem[]
   totalAmount: number
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
