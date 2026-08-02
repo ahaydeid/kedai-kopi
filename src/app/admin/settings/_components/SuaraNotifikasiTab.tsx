@@ -78,22 +78,16 @@ const SoundModeToggle: React.FC<{
 };
 
 export function SuaraNotifikasiTab() {
-  const [soundMode, setSoundMode] = useState(true);
+  const [soundMode, setSoundMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("setting_sound_mode") !== "hening"
+    }
+    return true
+  });
   const [notifOrder, setNotifOrder] = useState(true);
   const [notifBayar, setNotifBayar] = useState(true);
   const [notifChat, setNotifChat] = useState(true);
   const [notifStok, setNotifStok] = useState(true);
-
-  React.useEffect(() => {
-    if (typeof window !== "undefined") {
-      const mode = localStorage.getItem("setting_sound_mode");
-      if (mode === "hening") {
-        setSoundMode(false);
-      } else {
-        setSoundMode(true);
-      }
-    }
-  }, []);
 
   const playPreviewSound = (id: string) => {
     if (!soundMode) return;
