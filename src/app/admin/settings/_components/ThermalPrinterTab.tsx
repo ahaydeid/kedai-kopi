@@ -192,7 +192,7 @@ export function ThermalPrinterTab() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-zinc-800 dark:text-zinc-100">
-              Status Thermal Printer
+              Status Printer
             </h3>
             {isConnected ? (
               <div className="flex items-center gap-2 mt-0.5 text-xs font-medium">

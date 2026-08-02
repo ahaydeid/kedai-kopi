@@ -17,7 +17,7 @@ export interface OrderItem {
   dateTime: string
   items: OrderCartItem[]
   totalAmount: number
-  status: 'Menunggu' | 'Diproses'
+  status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
 }
 
 interface OrderCardProps {
@@ -42,10 +42,14 @@ export function OrderCard({ order }: OrderCardProps) {
             </span>
           </div>
           <span
-            className={`text-xs font-light ${
+            className={`text-xs font-medium ${
               order.status === 'Menunggu'
                 ? 'text-amber-600 dark:text-amber-400'
-                : 'text-sky-600 dark:text-sky-400'
+                : order.status === 'Diproses'
+                ? 'text-sky-600 dark:text-sky-400'
+                : order.status === 'Selesai'
+                ? 'text-emerald-600 dark:text-emerald-400'
+                : 'text-rose-500 dark:text-rose-400'
             }`}
           >
             {order.status}

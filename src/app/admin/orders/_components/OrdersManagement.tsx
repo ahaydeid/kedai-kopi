@@ -16,7 +16,7 @@ function formatOrderDateTime(isoString: string): string {
 }
 
 function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | null {
-  if (item.status === 'Selesai' || item.status === 'Dibatalkan') return null
+  if (item.status === 'Dibatalkan') return null
 
   return {
     id: item.id,
@@ -29,12 +29,12 @@ function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | nu
       price: Number(i.price) * i.quantity,
     })),
     totalAmount: Number(item.total_amount),
-    status: item.status as 'Menunggu' | 'Diproses',
+    status: item.status as 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan',
   }
 }
 
 export function OrdersManagement() {
-  const [orders, setOrders] = useState<OrderItem[]>(() => ordersClientCache || [])
+  const [allOrders, setAllOrders] = useState<OrderItem[]>(() => ordersClientCache || [])
   const [loading, setLoading] = useState(!ordersClientCache && !hasOrdersCache())
 
   const fetchOrders = useCallback(async (isSilent = false) => {
@@ -42,11 +42,11 @@ export function OrdersManagement() {
       setLoading(true)
     }
     const data = await getOrders()
-    const activeOnly = data
+    const mapped = data
       .map(mapFetchedToAdminOrderItem)
       .filter((o): o is OrderItem => o !== null)
-    setOrders(activeOnly)
-    ordersClientCache = activeOnly
+    setAllOrders(mapped)
+    ordersClientCache = mapped
     setLoading(false)
   }, [])
 
@@ -62,27 +62,70 @@ export function OrdersManagement() {
     }
   }, [fetchOrders])
 
+  const activeOrders = allOrders.filter((o) => o.status === 'Menunggu' || o.status === 'Diproses')
+  const completedOrders = allOrders.filter((o) => o.status === 'Selesai')
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-          Pesanan Aktif
+          Manajemen Pesanan
         </h1>
       </div>
 
-      {/* Grid Card */}
+      {/* Grid Layout: 2 Columns Active + 1 Column Completed */}
       {loading ? (
-        <div className="p-8 text-center text-sm text-slate-500">Memuat pesanan aktif...</div>
-      ) : orders.length === 0 ? (
-        <div className="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900/40 rounded-lg border border-slate-200/80 dark:border-slate-800">
-          Tidak ada pesanan aktif saat ini.
-        </div>
+        <div className="p-8 text-center text-sm text-slate-500">Memuat data pesanan...</div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {orders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          {/* Section 1: Pesanan Aktif (2 Kolom di Desktop) */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span>Pesanan Aktif</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
+                  {activeOrders.length}
+                </span>
+              </h2>
+            </div>
+
+            {activeOrders.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900/40 rounded-lg border border-slate-200/80 dark:border-slate-800">
+                Tidak ada pesanan aktif saat ini.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {activeOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Section 2: Pesanan Selesai (1 Kolom di Desktop) */}
+          <div className="lg:col-span-1 space-y-4">
+            <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                <span>Pesanan Selesai</span>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                  {completedOrders.length}
+                </span>
+              </h2>
+            </div>
+
+            {completedOrders.length === 0 ? (
+              <div className="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900/40 rounded-lg border border-slate-200/80 dark:border-slate-800">
+                Belum ada pesanan selesai.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {completedOrders.map((order) => (
+                  <OrderCard key={order.id} order={order} />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>
