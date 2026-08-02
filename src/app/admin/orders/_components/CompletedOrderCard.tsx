@@ -65,31 +65,37 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded p-4 space-y-3 flex flex-col justify-between transition-colors">
+    <div className="bg-white dark:bg-slate-900 rounded p-3 space-y-3 flex flex-col justify-between transition-colors">
       <div className="space-y-2">
-        {/* Header Card */}
-        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
-          <div>
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 block">
+        {/* Header Card (100% Identikal dengan Collapsed Mode) */}
+        <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
               {formatOrderIdDisplay(order.orderNumber)}
             </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
-              {order.dateTime}
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              • {order.customerName}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-              Selesai
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+              {formatRupiah(order.totalAmount)}
             </span>
             <button
               type="button"
               onClick={() => setIsExpanded(false)}
-              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+              className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
             >
               <FiChevronUp className="w-4 h-4" />
             </button>
           </div>
         </div>
+
+        {/* Waktu & Jumlah Item */}
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+          {order.dateTime} • {totalItemsCount} item
+        </p>
 
         {/* Detail Pelanggan */}
         <div className="text-xs text-slate-700 dark:text-slate-300 pt-1">
@@ -122,14 +128,6 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
             )
           })}
         </div>
-      </div>
-
-      {/* Footer Card */}
-      <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between">
-        <span className="text-[10px] text-slate-400">Total</span>
-        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 text-right">
-          {formatRupiah(order.totalAmount)}
-        </span>
       </div>
     </div>
   )
