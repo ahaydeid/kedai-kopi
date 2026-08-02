@@ -7,6 +7,7 @@ import { CrossCircle } from '@/components/ui/CrossCircle'
 import { playSwalSound } from '@/utils/sound'
 import { FiPrinter, FiBluetooth, FiCpu, FiRefreshCw } from 'react-icons/fi'
 import Swal from 'sweetalert2'
+import { Modal } from '@/components/ui/Modal'
 
 interface PrinterSettings {
   connectionType: 'bluetooth' | 'usb'
@@ -44,6 +45,7 @@ export function ThermalPrinterTab() {
   const [isConnected, setIsConnected] = useState(false)
   const [deviceName, setDeviceName] = useState<string>('')
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isTestPrintOpen, setIsTestPrintOpen] = useState(false)
 
   const updateSetting = <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
@@ -127,29 +129,7 @@ export function ThermalPrinterTab() {
 
   const handleTestPrint = () => {
     playSwalSound('success')
-    Swal.fire({
-      title: 'Mencetak Struk Uji Coba...',
-      html: `
-        <div class="text-left text-xs font-mono bg-white dark:bg-slate-950 p-4 rounded-md border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-200">
-          <p class="text-center font-bold uppercase text-sm">${settings.headerText}</p>
-          <p class="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
-          <p class="border-b border-dashed border-zinc-400 my-2"></p>
-          <p>Tgl&nbsp;: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}</p>
-          <p>No&nbsp;&nbsp;: #TEST-0001</p>
-          <p>Nama: Budi Santoso</p>
-          <p class="border-b border-dashed border-zinc-400 my-2"></p>
-          <div class="flex justify-between"><span>1x Kopi Susu Aren</span><span>Rp 13.000</span></div>
-          <div class="flex justify-between"><span>1x Cireng Rujak</span><span>Rp 10.000</span></div>
-          <p class="border-b border-dashed border-zinc-400 my-2"></p>
-          <div class="flex justify-between font-bold"><span>TOTAL</span><span>Rp 23.000</span></div>
-          <p class="border-b border-dashed border-zinc-400 my-2"></p>
-          <p class="text-center text-[10px] text-zinc-500 mt-2">${settings.footerText}</p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonText: 'Tutup',
-      confirmButtonColor: '#0284c7',
-    })
+    setIsTestPrintOpen(true)
   }
 
   const handleSave = (e: React.FormEvent) => {
@@ -167,7 +147,8 @@ export function ThermalPrinterTab() {
   }
 
   return (
-    <form onSubmit={handleSave} className="space-y-6">
+    <>
+      <form onSubmit={handleSave} className="space-y-6">
       {/* Header Info & Status Connection Badge */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 dark:bg-zinc-800/50 border border-none dark:border-zinc-700/80">
         <div className="flex items-center gap-3">
@@ -356,5 +337,52 @@ export function ThermalPrinterTab() {
         </Button>
       </div>
     </form>
+
+    {/* Modal Preview Struk Uji Coba */}
+    <Modal
+      isOpen={isTestPrintOpen}
+      onClose={() => setIsTestPrintOpen(false)}
+      title="Preview Struk Uji Coba"
+      size="xs"
+    >
+      <div className="p-5">
+        {/* Kertas struk dengan lebar terbatas seperti 58mm/80mm */}
+        <div className="mx-auto font-mono text-xs bg-white dark:bg-zinc-950 border border-dashed border-zinc-300 dark:border-zinc-700 rounded p-4 space-y-1 text-zinc-800 dark:text-zinc-200"
+          style={{ maxWidth: settings.paperWidth === '58mm' ? '220px' : '280px' }}
+        >
+          {/* Header */}
+          <p className="text-center font-bold uppercase text-sm">{settings.headerText}</p>
+          <p className="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
+
+          <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
+
+          {/* Info Order */}
+          <p>Tgl&nbsp;: {new Date().toLocaleDateString('id-ID')} {new Date().toLocaleTimeString('id-ID')}</p>
+          <p>No&nbsp;&nbsp;: #TEST-0001</p>
+          <p>Nama: Budi Santoso</p>
+
+          <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
+
+          {/* Items */}
+          <div className="flex justify-between"><span>1x Kopi Susu Aren</span><span>Rp 13.000</span></div>
+          <div className="flex justify-between"><span>1x Cireng Rujak</span><span>Rp 10.000</span></div>
+
+          <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
+
+          {/* Total */}
+          <div className="flex justify-between font-bold"><span>TOTAL</span><span>Rp 23.000</span></div>
+
+          <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
+
+          {/* Footer */}
+          <p className="text-center text-[10px] text-zinc-500 pt-1">{settings.footerText}</p>
+        </div>
+
+        <p className="mt-4 text-center text-[11px] text-zinc-400 dark:text-zinc-500">
+          Lebar kertas: {settings.paperWidth} • {settings.printCopies} salinan
+        </p>
+      </div>
+    </Modal>
+    </>
   )
 }
