@@ -134,8 +134,8 @@ export function ThermalPrinterTab() {
           <p class="text-center font-bold uppercase text-sm">${settings.headerText}</p>
           <p class="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
-          <p>Tgl: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}</p>
-          <p>No : #TEST-0001</p>
+          <p>Tgl&nbsp;: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}</p>
+          <p>No&nbsp;&nbsp;: #TEST-0001</p>
           <p>Nama: Budi Santoso</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
           <div class="flex justify-between"><span>1x Kopi Susu Aren</span><span>Rp 13.000</span></div>

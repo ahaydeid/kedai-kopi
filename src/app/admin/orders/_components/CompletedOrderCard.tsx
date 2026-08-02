@@ -47,8 +47,8 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           <p class="text-center font-bold uppercase text-sm">KEDAI KOPI</p>
           <p class="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
-          <p>Tgl : ${tanggal} ${waktu} WIB</p>
-          <p>No  : ${order.orderNumber}</p>
+          <p>Tgl&nbsp;: ${tanggal} ${waktu} WIB</p>
+          <p>No&nbsp;&nbsp;: ${order.orderNumber}</p>
           <p>Nama: ${namaPelanggan}</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
           ${itemsHtml}
