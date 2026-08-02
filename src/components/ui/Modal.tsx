@@ -63,7 +63,7 @@ export function Modal({
 
   const isFullscreen = variant === "fullscreen";
   const isFullSize = size === "full";
-  const overlayClasses = `fixed inset-0 z-[70] bg-black/40 backdrop-blur-[1px] animate-modal-backdrop ${overlayClassName}`;
+  const overlayClasses = `fixed inset-0 z-[70] bg-black/30 animate-modal-backdrop ${overlayClassName}`;
   const containerClasses = isFullscreen
     ? "fixed inset-0 z-[71]"
     : isFullSize
