@@ -53,7 +53,7 @@ export function TableHeaderCell({ children, className, ...props }: React.ThHTMLA
 
 export function TableCell({ children, className, ...props }: React.TdHTMLAttributes<HTMLTableCellElement>) {
   return (
-    <td className={`px-6 py-4 ${className || ""}`} {...props}>
+    <td className={`px-6 py-3 ${className || ""}`} {...props}>
       {children}
     </td>
   );

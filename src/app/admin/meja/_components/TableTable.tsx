@@ -73,7 +73,7 @@ export function TableTable({
             paginatedItems.map((item, index) => (
               <TableRow key={item.id}>
                 {/* Column No */}
-                <TableCell className="text-center text-slate-400 dark:text-slate-500 font-mono text-xs">
+                <TableCell className="text-center font-medium text-slate-700 text-xs dark:text-slate-500">
                   {startIndex + index + 1}
                 </TableCell>
 

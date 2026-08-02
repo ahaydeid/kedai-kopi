@@ -420,13 +420,13 @@ export function TableManagement() {
       <Modal
         isOpen={Boolean(qrModalTable)}
         onClose={() => setQrModalTable(null)}
-        title={`QR Code Pemesanan — Meja #${qrModalTable?.number}`}
+        title={`QR Code Pemesanan - Meja #${qrModalTable?.number}`}
         size="sm"
       >
         {qrModalTable && (
           <div className="p-5 text-center space-y-4">
-            <div className="mx-auto w-64 h-64 bg-white border border-slate-200/80 rounded-2xl p-4 flex flex-col items-center justify-center space-y-3 shadow-xs">
-              <BsQrCode className="w-40 h-40 text-slate-900" />
+            <div className="mx-auto w-64 h-64 bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center space-y-3">
+              <BsQrCode className="w-50 h-50 text-slate-900" />
               <span className="font-extrabold text-sm text-slate-900 tracking-wider">MEJA #{qrModalTable.number}</span>
             </div>
 
