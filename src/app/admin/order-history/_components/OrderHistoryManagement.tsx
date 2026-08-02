@@ -7,6 +7,7 @@ import { OrderHistoryDetailModal } from './OrderHistoryDetailModal'
 import { playSwalSound } from '@/utils/sound'
 import Swal from 'sweetalert2'
 import { getOrders, getPaginatedOrders, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
+import { TableSkeleton } from '@/components/ui/TableSkeleton'
 
 // Client-side in-memory cache untuk instant 0ms render saat navigasi ulang
 let orderHistoryClientCache: {
@@ -146,7 +147,7 @@ export function OrderHistoryManagement() {
 
       {/* Tabel Riwayat */}
       {loading ? (
-        <div className="p-8 text-center text-sm text-slate-500">Memuat riwayat pesanan...</div>
+        <TableSkeleton rows={8} cols={8} hasAvatar />
       ) : (
         <div className={isFetching ? 'pointer-events-none' : ''}>
           <OrderHistoryTable

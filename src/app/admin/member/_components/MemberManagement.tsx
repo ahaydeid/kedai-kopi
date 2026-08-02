@@ -9,6 +9,7 @@ import { ActionButton } from '@/components/ui/ActionButton'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
 import { createClient } from '@/services/supabase/client'
+import { TableSkeleton } from '@/components/ui/TableSkeleton'
 
 export interface MemberData {
   id: string
@@ -240,7 +241,7 @@ export function MemberManagement() {
 
       {/* Konten */}
       {loading ? (
-        <div className="p-8 text-center text-sm text-slate-500">Memuat data member...</div>
+        <TableSkeleton rows={8} cols={9} hasAvatar />
       ) : error && members.length === 0 ? (
         <div className="p-8 text-center text-sm text-rose-500">{error}</div>
       ) : members.length === 0 ? (

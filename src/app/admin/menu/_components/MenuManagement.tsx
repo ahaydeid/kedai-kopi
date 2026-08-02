@@ -19,6 +19,7 @@ import {
   subscribeToMenu,
 } from '@/services/supabase/menuService'
 import { DatabaseMenu } from '@/types/database'
+import { TableSkeleton } from '@/components/ui/TableSkeleton'
 
 // Client-side in-memory cache untuk instant 0ms render saat navigasi ulang
 let menuClientCache: {
@@ -254,7 +255,7 @@ export function MenuManagement() {
 
       {/* Tabel Menu */}
       {loading ? (
-        <div className="p-8 text-center text-sm text-zinc-500">Memuat data menu...</div>
+        <TableSkeleton rows={8} cols={7} hasAvatar />
       ) : (
         <div className={isFetching ? 'pointer-events-none' : ''}>
           <MenuTable
