@@ -129,13 +129,45 @@ function buildEscPosBuffer(data) {
   return Buffer.concat(chunks)
 }
 
+function isBluetoothPrinterHardwareReady() {
+  if (!fs.existsSync(DEVICE_PATH)) {
+    return false
+  }
+
+  // 1. Check Linux OS Bluetooth Radio Power State (rfkill)
+  try {
+    const rfkill = execSync('rfkill list bluetooth 2>&1', { encoding: 'utf8', timeout: 1000 })
+    if (rfkill.includes('Soft blocked: yes') || rfkill.includes('Hard blocked: yes')) {
+      return false
+    }
+  } catch {}
+
+  // 2. Check active Bluetooth HCI adapter availability
+  try {
+    const hcitool = execSync('hcitool dev 2>&1', { encoding: 'utf8', timeout: 1000 })
+    if (!hcitool.includes('hci')) {
+      return false
+    }
+  } catch {}
+
+  // 3. Check RFCOMM binding existence
+  try {
+    const rfcomm = execSync('rfcomm -a 2>&1', { encoding: 'utf8', timeout: 1000 })
+    if (!rfcomm.includes('rfcomm0')) {
+      return false
+    }
+  } catch {}
+
+  return true
+}
+
 // Create HTTP Server with CORS & Private Network Access (PNA) Headers
 const server = http.createServer((req, res) => {
   // CORS & PNA Headers for Cloud HTTPS -> Localhost HTTP calls
   res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Private-Network', 'true')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+  res.setHeader('Access-Control-Allow-Private-Network', 'true')
 
   if (req.method === 'OPTIONS') {
     res.writeHead(204)
@@ -147,14 +179,14 @@ const server = http.createServer((req, res) => {
 
   // Status check endpoint
   if (req.method === 'GET' && (url === '/api/status' || url === '/status')) {
-    const isDeviceExist = fs.existsSync(DEVICE_PATH)
+    const isReady = isBluetoothPrinterHardwareReady()
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(
       JSON.stringify({
         status: 'online',
         device: DEVICE_PATH,
-        ready: isDeviceExist,
-        connected: isDeviceExist,
+        ready: isReady,
+        connected: isReady,
         printer: 'RPP02N Thermal Printer 58mm',
       })
     )
