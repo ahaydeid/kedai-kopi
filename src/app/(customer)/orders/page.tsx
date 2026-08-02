@@ -30,6 +30,9 @@ interface Order {
   items: OrderItem[]
 }
 
+const CUSTOMER_ACTIVE_ORDERS_CACHE_KEY = 'customer_active_orders_cache_v1'
+let activeOrdersClientMemoryCache: Order[] | null = null
+
 const STATUS_CONFIG: Record<OrderStatus, { label: string; className: string }> = {
   menunggu: {
     label: 'Menunggu',
@@ -73,35 +76,72 @@ function mapToCustomerActiveOrder(item: FetchedOrderWithItems): Order | null {
 
 export default function CustomerOrdersPage() {
   const router = useRouter()
-  const [orders, setOrders] = useState<Order[]>([])
-  const [loading, setLoading] = useState(true)
 
-  const fetchActiveOrders = useCallback(async () => {
+  const [orders, setOrders] = useState<Order[]>(() => {
+    if (activeOrdersClientMemoryCache) return activeOrdersClientMemoryCache
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(CUSTOMER_ACTIVE_ORDERS_CACHE_KEY)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          activeOrdersClientMemoryCache = parsed
+          return parsed
+        }
+      } catch {}
+    }
+    return []
+  })
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (activeOrdersClientMemoryCache && activeOrdersClientMemoryCache.length > 0) return false
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(CUSTOMER_ACTIVE_ORDERS_CACHE_KEY)
+        if (saved && JSON.parse(saved).length > 0) return false
+      } catch {}
+    }
+    return true
+  })
+
+  const fetchActiveOrders = useCallback(async (isSilent = false) => {
     const user = await getCurrentUser()
     if (!user) {
       router.push('/login')
       return
     }
-    setLoading(true)
+
+    const hasData = activeOrdersClientMemoryCache !== null || orders.length > 0
+    if (!isSilent && !hasData) {
+      setLoading(true)
+    }
+
     const myOrders = await getMyOrders(user.id, ['Menunggu', 'Diproses'])
     const activeOnly = myOrders
       .map(mapToCustomerActiveOrder)
       .filter((o): o is Order => o !== null)
+
     setOrders(activeOnly)
+    activeOrdersClientMemoryCache = activeOnly
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(CUSTOMER_ACTIVE_ORDERS_CACHE_KEY, JSON.stringify(activeOnly))
+      } catch {}
+    }
     setLoading(false)
-  }, [router])
+  }, [router, orders.length])
 
   useEffect(() => {
-    fetchActiveOrders()
+    const hasData = activeOrdersClientMemoryCache !== null || orders.length > 0
+    fetchActiveOrders(hasData)
 
     const unsubscribe = subscribeToOrders(() => {
-      fetchActiveOrders()
+      fetchActiveOrders(true)
     })
 
     return () => {
       unsubscribe()
     }
-  }, [fetchActiveOrders])
+  }, [fetchActiveOrders, orders.length])
 
   const hasOrders = orders.length > 0
 
@@ -157,7 +197,28 @@ export default function CustomerOrdersPage() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-md mx-auto px-1.5 pt-1.5 pb-28">
         {loading ? (
-          <div className="py-16 text-center text-slate-400 text-sm">Memuat pesanan aktif...</div>
+          /* Skeleton Loader (Hanya saat pertama kali tanpa cache) */
+          <div className="space-y-3">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-white dark:bg-slate-900 rounded p-3.5 space-y-2 animate-pulse">
+                <div className="flex justify-between items-center">
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-28" />
+                  <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-full w-16" />
+                </div>
+                <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-36" />
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex justify-between">
+                    <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-40" />
+                    <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-16" />
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between">
+                  <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-10" />
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-20" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : hasOrders ? (
           <div className="space-y-3">
             {orders.map((order) => {
