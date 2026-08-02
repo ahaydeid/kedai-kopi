@@ -27,31 +27,31 @@ const SOCIAL_LINKS: SocialLink[] = [
     title: 'Google Maps (Lokasi Kedai)',
     subtitle: 'maps.google.com/kedaikopi',
     url: 'https://maps.google.com/?q=Kedai+Kopi',
-    icon: <FiMapPin className="h-5 w-5 text-rose-600 dark:text-rose-400" />,
+    icon: <FiMapPin className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
   },
   {
     title: 'WhatsApp',
     subtitle: 'wa.me/6281234567890',
     url: 'https://wa.me/6281234567890',
-    icon: <FaWhatsapp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
+    icon: <FaWhatsapp className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
   },
   {
     title: 'Instagram',
     subtitle: '@kedaikopi.official',
     url: 'https://instagram.com/kedaikopi.official',
-    icon: <FiInstagram className="h-5 w-5 text-pink-600 dark:text-pink-400" />,
+    icon: <FiInstagram className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
   },
   {
     title: 'TikTok',
     subtitle: '@kedaikopi.official',
     url: 'https://tiktok.com/@kedaikopi.official',
-    icon: <FaTiktok className="h-5 w-5 text-slate-900 dark:text-slate-100" />,
+    icon: <FaTiktok className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
   },
   {
     title: 'ShopeeFood',
     subtitle: 'shopeefood/kedaikopi.official',
     url: 'https://shopee.co.id/universal-link/now-food/shop/kedaikopi',
-    icon: <FiShoppingBag className="h-5 w-5 text-orange-600 dark:text-orange-400" />,
+    icon: <FiShoppingBag className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
   },
 ]
 
@@ -64,42 +64,40 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
       title="Informasi & Kontak Kedai"
       bodyClassName="p-0"
     >
-      <div className="relative w-full overflow-hidden p-4 min-h-[340px] flex flex-col justify-center bg-slate-50/70 dark:bg-slate-950/70">
-        {/* Background Logo Kedai Watermark Artistik */}
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] dark:opacity-[0.08]">
+      <div className="relative w-full overflow-hidden p-4 min-h-[380px] flex flex-col justify-center bg-[#eef2f6] dark:bg-slate-950">
+        {/* Background Logo Kedai Watermark Artistik Besar */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.12] dark:opacity-[0.15]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src="/img/kedai-kopi.jpeg"
             alt="Kedai Kopi Watermark"
-            className="w-80 h-80 object-cover rounded-full filter grayscale contrast-125"
+            className="w-96 h-96 object-cover rounded-full filter grayscale contrast-150"
           />
         </div>
 
-        {/* List Card Link Glassmorphism */}
-        <div className="relative z-10 space-y-2.5 my-auto">
+        {/* List Card Link Glassmorphism Sesuai Referensi Gambar */}
+        <div className="relative z-10 space-y-3 my-auto">
           {SOCIAL_LINKS.map((item, idx) => (
             <a
               key={idx}
               href={item.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center justify-between p-3.5 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/70 dark:border-slate-800/80 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 hover:-translate-y-0.5 transition-all duration-200"
+              className="group flex items-center justify-between px-4 py-3.5 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-white/90 dark:border-slate-800/80 shadow-xs hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 hover:-translate-y-0.5 transition-all duration-200"
             >
-              <div className="flex items-center gap-3.5 min-w-0">
-                <div className="p-2 rounded-lg bg-slate-100 dark:bg-slate-800 shrink-0 group-hover:scale-105 transition-transform">
-                  {item.icon}
-                </div>
+              <div className="flex items-center gap-4 min-w-0 flex-1">
+                {item.icon}
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100 truncate">
+                  <h3 className="text-sm font-extrabold text-slate-900 dark:text-slate-50 tracking-tight truncate">
                     {item.title}
                   </h3>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-400 font-medium truncate">
+                  <p className="text-[11px] font-medium text-slate-400 dark:text-slate-400 truncate mt-0.5">
                     {item.subtitle}
                   </p>
                 </div>
               </div>
 
-              <FiArrowUpRight className="h-4 w-4 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-slate-200 shrink-0 ml-2 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <FiArrowUpRight className="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-800 dark:group-hover:text-slate-100 shrink-0 ml-2 self-start mt-0.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           ))}
         </div>
