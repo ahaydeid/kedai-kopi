@@ -67,34 +67,24 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
   return (
     <div className="bg-white dark:bg-slate-900 rounded p-3 space-y-3 flex flex-col justify-between transition-colors">
       <div className="space-y-2">
-        {/* Header Card (100% Identikal dengan Collapsed Mode) */}
+        {/* Header Card Expanded Mode */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-              {formatOrderIdDisplay(order.orderNumber)}
-            </span>
-            <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-              • {order.customerName}
-            </span>
-          </div>
+          <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
+            {formatOrderIdDisplay(order.orderNumber)}
+          </span>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-              {formatRupiah(order.totalAmount)}
-            </span>
-            <button
-              type="button"
-              onClick={() => setIsExpanded(false)}
-              className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-            >
-              <FiChevronUp className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setIsExpanded(false)}
+            className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors shrink-0"
+          >
+            <FiChevronUp className="w-4 h-4" />
+          </button>
         </div>
 
-        {/* Waktu & Jumlah Item */}
+        {/* Waktu */}
         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-          {order.dateTime} • {totalItemsCount} item
+          {order.dateTime}
         </p>
 
         {/* Detail Pelanggan */}
@@ -128,6 +118,14 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
             )
           })}
         </div>
+      </div>
+
+      {/* Footer Card: Total Rp */}
+      <div className="border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
+        <span className="text-[10px] text-slate-400">Total</span>
+        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 text-right">
+          {formatRupiah(order.totalAmount)}
+        </span>
       </div>
     </div>
   )
