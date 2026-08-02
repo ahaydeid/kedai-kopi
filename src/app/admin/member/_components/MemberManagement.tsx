@@ -12,6 +12,7 @@ import { createClient } from '@/services/supabase/client'
 export interface MemberData {
   id: string
   name: string
+  phone: string | null
   email: string
   avatarUrl: string | null
   joinedAt: string
@@ -252,6 +253,7 @@ export function MemberManagement() {
               <tr>
                 <TableHeaderCell scope="col" className="text-center w-12 whitespace-nowrap">No</TableHeaderCell>
                 <TableHeaderCell scope="col" className="whitespace-nowrap">Member</TableHeaderCell>
+                <TableHeaderCell scope="col" className="whitespace-nowrap">No. HP / Whatsapp</TableHeaderCell>
                 <TableHeaderCell scope="col" className="whitespace-nowrap">Email</TableHeaderCell>
                 <TableHeaderCell scope="col" className="whitespace-nowrap">Bergabung</TableHeaderCell>
                 <TableHeaderCell scope="col" className="text-center whitespace-nowrap">Total Order</TableHeaderCell>
@@ -278,6 +280,15 @@ export function MemberManagement() {
                         <Avatar name={member.name} photo={member.avatarUrl} size="small" />
                         <span className="text-xs font-medium text-slate-900 dark:text-slate-100">{member.name}</span>
                       </div>
+                    </TableCell>
+
+                    {/* No. HP / Whatsapp */}
+                    <TableCell className="text-xs font-normal text-slate-500 dark:text-slate-400 whitespace-nowrap">
+                      {member.phone ? (
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{member.phone}</span>
+                      ) : (
+                        <span className="text-slate-400 dark:text-slate-600">-</span>
+                      )}
                     </TableCell>
 
                     {/* Email */}

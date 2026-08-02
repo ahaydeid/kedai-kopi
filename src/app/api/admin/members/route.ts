@@ -4,6 +4,7 @@ import { createAdminClient } from '@/services/supabase/adminClient'
 export interface MemberData {
   id: string
   name: string
+  phone: string | null
   email: string
   avatarUrl: string | null
   joinedAt: string
@@ -88,6 +89,7 @@ export async function GET(request: NextRequest) {
       allMembers = customerUsers.map((u) => ({
         id: u.id,
         name: u.user_metadata?.full_name || u.email?.split('@')[0] || 'Pelanggan',
+        phone: u.user_metadata?.phone || u.user_metadata?.phone_number || u.phone || null,
         email: u.email || '',
         avatarUrl: u.user_metadata?.avatar_url || u.user_metadata?.picture || null,
         joinedAt: u.created_at,
@@ -107,7 +109,10 @@ export async function GET(request: NextRequest) {
     if (search) {
       const q = search.toLowerCase()
       filtered = allMembers.filter(
-        (m) => m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q)
+        (m) =>
+          m.name.toLowerCase().includes(q) ||
+          m.email.toLowerCase().includes(q) ||
+          (m.phone && m.phone.toLowerCase().includes(q))
       )
     }
 

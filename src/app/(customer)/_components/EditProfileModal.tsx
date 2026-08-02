@@ -82,7 +82,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       isOpen={isOpen}
       onClose={onClose}
       size="md"
-      title="Edit Profil Pelanggan"
+      title="Edit Profil"
       bodyClassName="p-4"
     >
       <form onSubmit={handleSubmit} className="space-y-4">
@@ -115,9 +115,6 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             placeholder="Contoh: 081234567890"
             className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#3D2514] dark:focus:ring-amber-500/50"
           />
-          <p className="text-[11px] text-slate-400">
-            Nomor HP digunakan kasir/barista saat mengonfirmasi pesanan kamu.
-          </p>
         </div>
 
         {/* Tombol Action */}
