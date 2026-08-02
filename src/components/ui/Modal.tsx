@@ -63,7 +63,7 @@ export function Modal({
 
   const isFullscreen = variant === "fullscreen";
   const isFullSize = size === "full";
-  const overlayClasses = `fixed inset-0 z-[70] bg-black/30 ${overlayClassName}`;
+  const overlayClasses = `fixed inset-0 z-[70] bg-black/40 backdrop-blur-[1px] animate-modal-backdrop ${overlayClassName}`;
   const containerClasses = isFullscreen
     ? "fixed inset-0 z-[71]"
     : isFullSize
@@ -86,10 +86,10 @@ export function Modal({
 
   const hasMaxWidth = panelClassName.includes("max-w-");
   const panelClasses = isFullscreen
-    ? `fixed inset-y-0 left-1/2 z-[71] flex w-full max-w-[430px] -translate-x-1/2 flex-col bg-white dark:bg-zinc-950 border-x border-zinc-100 dark:border-zinc-800/80 shadow-xl ${panelClassName}`
+    ? `fixed inset-y-0 left-1/2 z-[71] flex w-full max-w-[430px] -translate-x-1/2 flex-col bg-white dark:bg-zinc-950 border-x border-zinc-100 dark:border-zinc-800/80 shadow-xl animate-modal-zoom ${panelClassName}`
     : isFullSize
-    ? `flex w-full h-screen max-h-screen flex-col bg-white dark:bg-zinc-950 shadow-xl rounded-none ${panelClassName}`
-    : `flex w-full ${hasMaxWidth ? "" : sizeClasses[size]} flex-col rounded bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800/80 shadow-xl max-h-[calc(100vh-3rem)] ${panelClassName}`;
+    ? `flex w-full h-screen max-h-screen flex-col bg-white dark:bg-zinc-950 shadow-xl rounded-none animate-modal-zoom ${panelClassName}`
+    : `flex w-full ${hasMaxWidth ? "" : sizeClasses[size]} flex-col rounded bg-white dark:bg-zinc-950 border border-zinc-100 dark:border-zinc-800/80 shadow-xl max-h-[calc(100vh-3rem)] animate-modal-zoom ${panelClassName}`;
 
   return (
     <div aria-modal="true" role="dialog" className="lms-modal-wrapper">
