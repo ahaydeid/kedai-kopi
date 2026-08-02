@@ -61,7 +61,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
               title="Cetak Struk"
             >
               <FiPrinter className="w-3 h-3" />
-              <span>Print</span>
+              <span>Cetak</span>
             </button>
 
             <button
@@ -156,7 +156,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           className="w-full py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
         >
           <FiPrinter className="w-3.5 h-3.5" />
-          <span>Print Struk</span>
+          <span>Cetak Struk</span>
         </button>
       </div>
     </div>

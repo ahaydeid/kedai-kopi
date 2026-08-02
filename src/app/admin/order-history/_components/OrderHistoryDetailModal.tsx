@@ -118,8 +118,9 @@ export function OrderHistoryDetailModal({
         {/* Footer Actions */}
         <div className="border-t border-slate-100 dark:border-slate-800 pt-4 flex items-center justify-between gap-3">
           <Button
-            variant="secondary"
+            variant="primary"
             size="sm"
+            className='bg-sky-500!'
             onClick={() => {
               if (onPrint) {
                 onPrint(order)
