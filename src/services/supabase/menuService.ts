@@ -6,13 +6,41 @@ export type CreateMenuInput = Omit<DatabaseMenu, 'id' | 'created_at'>
 
 let menuCache: { data: DatabaseMenu[]; timestamp: number } | null = null
 const CACHE_TTL_MS = 30 * 1000 // 30 Detik Memory Cache TTL
+const LOCAL_STORAGE_MENU_KEY = 'customer_menu_cache_v1'
+
+export function getCachedMenuItemsSync(): DatabaseMenu[] {
+  if (menuCache && menuCache.data.length > 0) return menuCache.data
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_MENU_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        menuCache = { data: parsed, timestamp: Date.now() }
+        return parsed
+      }
+    } catch {}
+  }
+  return []
+}
 
 export function clearMenuCache() {
   menuCache = null
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_MENU_KEY)
+    } catch {}
+  }
 }
 
 export function hasMenuCache(): boolean {
-  return Boolean(menuCache && Date.now() - menuCache.timestamp < CACHE_TTL_MS)
+  if (menuCache && menuCache.data.length > 0) return true
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_MENU_KEY)
+      if (saved && JSON.parse(saved).length > 0) return true
+    } catch {}
+  }
+  return false
 }
 
 export async function getMenuItems(forceRefresh = false): Promise<DatabaseMenu[]> {
@@ -30,11 +58,16 @@ export async function getMenuItems(forceRefresh = false): Promise<DatabaseMenu[]
 
   if (error) {
     console.error('Error fetching menu items:', error)
-    return menuCache ? menuCache.data : []
+    return getCachedMenuItemsSync()
   }
 
   const result = data as DatabaseMenu[]
   menuCache = { data: result, timestamp: now }
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_MENU_KEY, JSON.stringify(result))
+    } catch {}
+  }
   return result
 }
 

@@ -9,7 +9,7 @@ import { MenuItem, CartItem } from '@/types/customer'
 import { FiChevronUp, FiChevronRight, FiChevronDown, FiSearch, FiX, FiArrowUpRight } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 import { playSound, playSwalSound } from '@/utils/sound'
-import { getMenuItems, hasMenuCache, subscribeToMenu } from '@/services/supabase/menuService'
+import { getMenuItems, hasMenuCache, subscribeToMenu, getCachedMenuItemsSync } from '@/services/supabase/menuService'
 import { createOrder } from '@/services/supabase/orderService'
 import { getCurrentUser } from '@/services/supabase/authService'
 import { createClient } from '@/services/supabase/client'
@@ -34,8 +34,11 @@ function mapDatabaseMenuToCustomerMenuItem(item: DatabaseMenu): MenuItem {
 
 export default function CustomerMenuPage() {
   const router = useRouter()
-  const [menuList, setMenuList] = useState<MenuItem[]>([])
-  const [loading, setLoading] = useState(!hasMenuCache())
+  const [menuList, setMenuList] = useState<MenuItem[]>(() => {
+    const cached = getCachedMenuItemsSync()
+    return cached.map(mapDatabaseMenuToCustomerMenuItem)
+  })
+  const [loading, setLoading] = useState<boolean>(() => !hasMenuCache() && menuList.length === 0)
   const [selectedType, setSelectedType] = useState<'semua' | 'minuman' | 'makanan'>('semua')
   const [selectedSubCategory, setSelectedSubCategory] = useState<string>('Semua')
   const [searchQuery, setSearchQuery] = useState<string>('')
@@ -63,16 +66,18 @@ export default function CustomerMenuPage() {
   }, [])
 
   const fetchMenu = useCallback(async (isSilent = false) => {
-    if (!isSilent && !hasMenuCache()) {
+    const hasData = hasMenuCache() || menuList.length > 0
+    if (!isSilent && !hasData) {
       setLoading(true)
     }
-    const dbData = await getMenuItems()
+    const dbData = await getMenuItems(true)
     setMenuList(dbData.map(mapDatabaseMenuToCustomerMenuItem))
     setLoading(false)
-  }, [])
+  }, [menuList.length])
 
   useEffect(() => {
-    fetchMenu()
+    const hasData = hasMenuCache() || menuList.length > 0
+    fetchMenu(hasData)
 
     const unsubscribe = subscribeToMenu(() => {
       fetchMenu(true)
@@ -81,7 +86,7 @@ export default function CustomerMenuPage() {
     return () => {
       unsubscribe()
     }
-  }, [fetchMenu])
+  }, [fetchMenu, menuList.length])
 
   // Tutup custom dropdown saat klik di luar
   useEffect(() => {
