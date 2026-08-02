@@ -127,7 +127,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
     { type: "item", id: "beranda", label: "Dashboard", href: "/admin", icon: HiOutlineHome },
     { type: "header", label: "Operasional" },
     { type: "item", id: "orders", label: "Pesanan", href: "/admin/orders", icon: HiOutlineClipboardDocumentList },
-    { type: "item", id: "order-history", label: "Riwayat Pesanan", href: "/admin/order-history", icon: HiOutlineClock },
+    { type: "item", id: "order-history", label: "Riwayat", href: "/admin/order-history", icon: HiOutlineClock },
     { type: "header", label: "Master Data" },
     { type: "item", id: "menu", label: "Menu", href: "/admin/menu", icon: FiCoffee },
     { type: "item", id: "meja", label: "Meja", href: "/admin/meja", icon: HiOutlineRectangleGroup },
