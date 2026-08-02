@@ -1,3 +1,132 @@
+-- Migration: 20260725000001_initial_schema.sql
+-- Description: Initial schema setup for Kedai Kopi (Menu, Orders, Order Items, Indexes, and Realtime)
+
+-- 1. Table Menu
+CREATE TABLE IF NOT EXISTS public.menu (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    main_category TEXT NOT NULL,
+    sub_category TEXT NOT NULL,
+    price NUMERIC NOT NULL,
+    points INTEGER DEFAULT 0,
+    description TEXT,
+    images TEXT[] DEFAULT ARRAY[]::TEXT[],
+    is_available BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Table Orders
+CREATE TABLE IF NOT EXISTS public.orders (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_number TEXT NOT NULL UNIQUE,
+    customer_name TEXT NOT NULL,
+    total_amount NUMERIC NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('Menunggu', 'Diproses', 'Selesai')),
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Table Order Items
+CREATE TABLE IF NOT EXISTS public.order_items (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
+    menu_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    price NUMERIC NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Indexes (Free Tier Performance Optimization)
+CREATE INDEX IF NOT EXISTS idx_menu_is_available ON public.menu(is_available);
+CREATE INDEX IF NOT EXISTS idx_menu_main_category ON public.menu(main_category);
+CREATE INDEX IF NOT EXISTS idx_menu_sub_category ON public.menu(sub_category);
+CREATE INDEX IF NOT EXISTS idx_menu_created_at ON public.menu(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_orders_status ON public.orders(status);
+CREATE INDEX IF NOT EXISTS idx_orders_created_at ON public.orders(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON public.order_items(order_id);
+
+-- 5. Realtime Publication
+ALTER PUBLICATION supabase_realtime ADD TABLE public.orders;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.order_items;
+-- Migration: 20260725000002_barista_pins.sql
+-- Description: Tabel PIN 6-digit Barista Kedai Kopi
+
+CREATE TABLE IF NOT EXISTS public.barista_pins (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    pin_code VARCHAR(6) NOT NULL UNIQUE,
+    name TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert PIN default
+INSERT INTO public.barista_pins (pin_code, name)
+VALUES ('123456', 'Barista Utama')
+ON CONFLICT (pin_code) DO NOTHING;
+-- Migration: 20260725000003_staff_roles.sql
+-- Description: Extend barista_pins menjadi tabel staff generik (barista + admin), lalu rename ke staff
+
+-- Tambah kolom role (barista/admin)
+ALTER TABLE public.barista_pins
+  ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'barista'
+    CHECK (role IN ('barista', 'admin')),
+  ADD COLUMN IF NOT EXISTS email TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS password TEXT;
+
+-- Buat pin_code nullable (admin tidak pakai pin)
+ALTER TABLE public.barista_pins
+  ALTER COLUMN pin_code DROP NOT NULL;
+
+-- Hapus unique constraint lama pin_code (akan conflict jika NULL multiple)
+ALTER TABLE public.barista_pins
+  DROP CONSTRAINT IF EXISTS barista_pins_pin_code_key;
+
+-- Buat unique constraint hanya untuk non-null pin_code
+CREATE UNIQUE INDEX IF NOT EXISTS idx_barista_pins_pin_code_unique
+  ON public.barista_pins (pin_code)
+  WHERE pin_code IS NOT NULL;
+
+-- Unique index untuk email admin
+CREATE UNIQUE INDEX IF NOT EXISTS idx_staff_email_unique
+  ON public.barista_pins (email)
+  WHERE email IS NOT NULL;
+
+-- Rename tabel: barista_pins → staff
+ALTER TABLE public.barista_pins RENAME TO staff;
+-- Migration: 20260725000004_insert_admin.sql
+-- Description: Insert akun admin ke tabel barista_pins (role=admin)
+-- Password di bawah adalah SHA-256 dari password yang ditetapkan admin
+-- Untuk generate ulang hash: node scripts/hash-admin-password.mjs
+
+INSERT INTO public.staff (role, email, password, name, pin_code, is_active)
+VALUES (
+  'admin',
+  'admin@kedaikopi.ahadi.my.id',
+  'ef797c8118f02dfb649607dd5d3f8c7623048c9c063d532cc95c5ed7a898a64f',
+  'Admin Kedai Kopi',
+  NULL,
+  TRUE
+)
+ON CONFLICT DO NOTHING;
+-- Migration: 20260725000005_add_dibatalkan_status.sql
+-- Description: Tambah status 'Dibatalkan' pada tabel orders
+
+-- Hapus CHECK constraint lama lalu buat yang baru dengan 'Dibatalkan'
+ALTER TABLE public.orders DROP CONSTRAINT IF EXISTS orders_status_check;
+
+ALTER TABLE public.orders
+  ADD CONSTRAINT orders_status_check
+  CHECK (status IN ('Menunggu', 'Diproses', 'Selesai', 'Dibatalkan'));
+-- Migration: 20260725000006_order_customer_avatar.sql
+-- Description: Tambah kolom customer_avatar_url pada tabel orders untuk menyimpan foto profil pelanggan yang login
+
+ALTER TABLE public.orders
+  ADD COLUMN IF NOT EXISTS customer_avatar_url TEXT;
+-- Migration: 20260725000007_clear_test_data.sql
+-- Description: Membersihkan semua data transaksi/pesanan hasil pengujian (testing)
+
+TRUNCATE TABLE public.order_items CASCADE;
+TRUNCATE TABLE public.orders CASCADE;
 -- Migration: 20260725000008_seed_real_menu.sql
 -- Description: Menghapus menu lama dan memasukkan 75 item menu resmi Kedai Kopi
 
@@ -100,3 +229,51 @@ INSERT INTO public.menu (name, main_category, sub_category, price, points, descr
 ('Lemon Tea', 'Minuman', 'Non-Coffee & Tea', 6000, 6, 'Teh lemon dingin rasa manis asam segar', ARRAY['/img/kedai-kopi.jpeg'], true),
 ('Ice Tea', 'Minuman', 'Non-Coffee & Tea', 5000, 5, 'Es teh manis segar pelepas dahaga klasik', ARRAY['/img/kedai-kopi.jpeg'], true),
 ('Mineral', 'Minuman', 'Non-Coffee & Tea', 3000, 3, 'Air mineral kemasan dingin/biasa', ARRAY['/img/kedai-kopi.jpeg'], true);
+-- Migration: 20260725000009_add_updated_at_to_menu.sql
+-- Description: Tambahkan kolom updated_at pada tabel menu dan trigger update otomatis
+
+ALTER TABLE public.menu
+ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
+-- Set updated_at sama dengan created_at untuk data yang sudah ada
+UPDATE public.menu
+SET updated_at = created_at
+WHERE updated_at IS NULL;
+
+-- Trigger untuk update updated_at otomatis saat ada perubahan data
+CREATE OR REPLACE FUNCTION update_menu_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+DROP TRIGGER IF EXISTS update_menu_updated_at ON public.menu;
+
+CREATE TRIGGER update_menu_updated_at
+    BEFORE UPDATE ON public.menu
+    FOR EACH ROW
+    EXECUTE FUNCTION update_menu_updated_at_column();
+-- Migration: Add claimed_points column to orders table for point redemption tracking & refund logic
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS claimed_points INT DEFAULT 0;
+-- Migration: Add composite index on orders table for fast status & created_at filtering
+CREATE INDEX IF NOT EXISTS idx_orders_status_created_at 
+ON public.orders (status, created_at DESC);
+-- Migration: 20260725000013_sync_member_points_and_user_id.sql
+-- Description: Sync user_id pada orders, points pada order_items, dan buat tabel member_points
+
+-- 1. Tambahkan user_id pada tabel orders
+ALTER TABLE public.orders
+  ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id);
+
+-- 2. Tambahkan points pada tabel order_items
+ALTER TABLE public.order_items
+  ADD COLUMN IF NOT EXISTS points INTEGER NOT NULL DEFAULT 0;
+
+-- 3. Buat tabel member_points
+CREATE TABLE IF NOT EXISTS public.member_points (
+  user_id UUID PRIMARY KEY REFERENCES auth.users(id),
+  points INTEGER NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);

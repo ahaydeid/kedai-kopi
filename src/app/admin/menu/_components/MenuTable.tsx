@@ -76,7 +76,7 @@ export function MenuTable({
                 <div className="flex items-center gap-3">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={item.imageUrl || (item.images && item.images.length > 0 ? item.images[0] : '/img/kedai-kopi.webp')}
+                    src={item.imageUrl || (item.images && item.images.length > 0 ? item.images[0] : '/img/kedai-kopi.jpeg')}
                     alt={item.name}
                     className="h-9 w-9 rounded-lg object-cover shrink-0"
                   />

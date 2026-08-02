@@ -23,7 +23,7 @@ export const CustomerMenuCard: React.FC<CustomerMenuCardProps> = ({
   formatRupiah,
 }) => {
   const hasDiscount = Boolean(item.originalPrice && item.originalPrice > item.price)
-  const displayImage = item.image && item.image.trim() !== '' ? item.image : '/img/kedai-kopi.webp'
+  const displayImage = item.image && item.image.trim() !== '' ? item.image : '/img/kedai-kopi.jpeg'
 
   return (
     <div

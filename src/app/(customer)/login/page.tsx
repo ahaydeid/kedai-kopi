@@ -33,9 +33,9 @@ export default function CustomerLoginPage() {
         
         {/* Header Logo Kedai Kopi */}
         <div className="flex flex-col items-center justify-center mb-8">
-          <div className="relative w-24 h-24 mb-3 rounded-full overflow-hidden shadow-md border-2 border-amber-500/20">
+          <div className="relative w-24 h-24 mb-3 rounded-full overflow-hidden">
             <Image
-              src="/img/logo-kedaikopi.webp"
+              src="/img/logo-login.webp"
               alt="Logo Kedai Kopi"
               fill
               className="object-cover"

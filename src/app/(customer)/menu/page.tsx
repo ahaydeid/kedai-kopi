@@ -17,7 +17,7 @@ import { CheckCircle } from '@/components/ui/CheckCircle'
 import { DatabaseMenu } from '@/types/database'
 
 function mapDatabaseMenuToCustomerMenuItem(item: DatabaseMenu): MenuItem {
-  const images = item.images && item.images.length > 0 ? item.images : ['/img/kedai-kopi.webp']
+  const images = item.images && item.images.length > 0 ? item.images : ['/img/kedai-kopi.jpeg']
   return {
     id: item.id,
     name: item.name,

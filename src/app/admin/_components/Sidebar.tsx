@@ -202,7 +202,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
 
           <h1 className={`text-xl font-bold leading-none truncate transition-all duration-300 ${isCollapsed ? "opacity-0 w-0 pointer-events-none" : "opacity-100 w-auto"}`}>
             <span className={config.sidebarBrandTextClass}>
-              Kedai Kopi <span className="text-white/60 dark:text-zinc-500">Admin</span>
+              Kedai <span className="text-white/60 dark:text-zinc-500">Admin</span>
             </span>
           </h1>
         </div>

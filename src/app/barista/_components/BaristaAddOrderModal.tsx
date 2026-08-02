@@ -23,7 +23,7 @@ function mapDatabaseMenuToCustomerMenuItem(item: DatabaseMenu): MenuItem {
     name: item.name,
     category: item.sub_category,
     price: Number(item.price),
-    image: item.images?.[0] || '/img/kedai-kopi.webp',
+    image: item.images?.[0] || '/img/kedai-kopi.jpeg',
     images: item.images || [],
     description: item.description || '',
     isAvailable: item.is_available,
