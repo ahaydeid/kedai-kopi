@@ -3,7 +3,9 @@
 import React, { useState } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import { formatOrderIdDisplay } from '@/utils/orderId'
-import { FiChevronDown, FiChevronUp } from 'react-icons/fi'
+import { FiChevronDown, FiChevronUp, FiPrinter } from 'react-icons/fi'
+import { playSwalSound } from '@/utils/sound'
+import Swal from 'sweetalert2'
 import { OrderItem } from './OrderCard'
 
 interface CompletedOrderCardProps {
@@ -22,13 +24,25 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
     return acc + (match ? parseInt(match[1]) : 1)
   }, 0)
 
+  const handlePrintClick = (e?: React.MouseEvent) => {
+    if (e) e.stopPropagation()
+    playSwalSound('confirm')
+    Swal.fire({
+      title: 'Mencetak Struk',
+      text: `Mencetak struk pesanan #${order.orderNumber}...`,
+      icon: 'info',
+      confirmButtonText: 'Mengerti',
+      confirmButtonColor: '#3b82f6',
+    })
+  }
+
   if (!isExpanded) {
     return (
       <div
         onClick={() => setIsExpanded(true)}
         className="bg-white dark:bg-slate-900 rounded p-3 flex flex-col gap-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
       >
-        {/* Row 1: ID Pesanan & Waktu di Kiri, Total Rp & Chevron di Kanan */}
+        {/* Row 1: ID Pesanan & Waktu di Kiri, Tombol Print & Chevron di Kanan */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
@@ -39,10 +53,17 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
             </span>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
-              {formatRupiah(order.totalAmount)}
-            </span>
+          <div className="flex items-center gap-1 shrink-0">
+            <button
+              type="button"
+              onClick={handlePrintClick}
+              className="px-2 py-0.5 text-[11px] font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded flex items-center gap-1 transition-colors"
+              title="Cetak Struk"
+            >
+              <FiPrinter className="w-3 h-3" />
+              <span>Print</span>
+            </button>
+
             <button
               type="button"
               onClick={(e) => {
@@ -67,7 +88,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
   return (
     <div className="bg-white dark:bg-slate-900 rounded p-3 space-y-3 flex flex-col justify-between transition-colors">
       <div className="space-y-2">
-        {/* Header Card Expanded Mode */}
+        {/* Header Card Expanded Mode (Tanpa Tombol Print di Atas) */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
@@ -120,12 +141,23 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
         </div>
       </div>
 
-      {/* Footer Card: Total Rp */}
-      <div className="border-t border-slate-100 dark:border-slate-800 pt-2 flex items-center justify-between">
-        <span className="text-[10px] text-slate-400">Total</span>
-        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 text-right">
-          {formatRupiah(order.totalAmount)}
-        </span>
+      {/* Footer Card: Total Rp & Tombol Print di Bawah Angka Total */}
+      <div className="border-t border-slate-100 dark:border-slate-800 pt-2 space-y-2">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-slate-400">Total</span>
+          <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 text-right">
+            {formatRupiah(order.totalAmount)}
+          </span>
+        </div>
+
+        <button
+          type="button"
+          onClick={handlePrintClick}
+          className="w-full py-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+        >
+          <FiPrinter className="w-3.5 h-3.5" />
+          <span>Print Struk</span>
+        </button>
       </div>
     </div>
   )
