@@ -69,9 +69,14 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
       <div className="space-y-2">
         {/* Header Card Expanded Mode */}
         <div className="flex items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-800 pb-2">
-          <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
-            {formatOrderIdDisplay(order.orderNumber)}
-          </span>
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
+            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
+              {formatOrderIdDisplay(order.orderNumber)}
+            </span>
+            <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+              • {order.dateTime}
+            </span>
+          </div>
 
           <button
             type="button"
@@ -81,11 +86,6 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
             <FiChevronUp className="w-4 h-4" />
           </button>
         </div>
-
-        {/* Waktu */}
-        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-          {order.dateTime}
-        </p>
 
         {/* Detail Pelanggan */}
         <div className="text-xs text-slate-700 dark:text-slate-300 pt-1">
