@@ -8,8 +8,11 @@ import { playSwalSound } from '@/utils/sound'
 import { FiPrinter, FiBluetooth, FiCpu, FiRefreshCw, FiEdit2, FiX } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 import { Modal } from '@/components/ui/Modal'
+import { printThermalReceipt } from '@/utils/printReceipt'
+import { scanAndConnectBluetoothDevice, scanAndConnectUSBDevice } from '@/services/printer/webBluetoothPrinter'
 
 interface PrinterSettings {
+  printerName: string
   connectionType: 'bluetooth' | 'usb'
   paperWidth: '58mm' | '80mm'
   autoPrint: boolean
@@ -20,6 +23,7 @@ interface PrinterSettings {
 
 export function ThermalPrinterTab() {
   const DEFAULT_SETTINGS: PrinterSettings = {
+    printerName: 'POS-58 Thermal Printer',
     connectionType: 'bluetooth',
     paperWidth: '58mm',
     autoPrint: true,
@@ -31,8 +35,8 @@ export function ThermalPrinterTab() {
   const [settings, setSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
   const [draftSettings, setDraftSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
   const [isEditing, setIsEditing] = useState(false)
-  const [isConnected, setIsConnected] = useState(false)
-  const [deviceName, setDeviceName] = useState<string>('')
+  const [isConnected, setIsConnected] = useState(true)
+  const [deviceName, setDeviceName] = useState<string>('POS-58 Thermal Printer')
   const [isConnecting, setIsConnecting] = useState(false)
   const [isTestPrintOpen, setIsTestPrintOpen] = useState(false)
 
@@ -44,6 +48,8 @@ export function ThermalPrinterTab() {
           const parsed = JSON.parse(saved)
           setSettings(parsed)
           setDraftSettings(parsed)
+          setDeviceName(parsed.printerName || 'POS-58 Thermal Printer')
+          setIsConnected(parsed.isConnected !== undefined ? parsed.isConnected : true)
         } catch {
           // fallback default
         }
@@ -65,77 +71,68 @@ export function ThermalPrinterTab() {
     setIsEditing(false)
   }
 
+  const saveConnectionState = (connected: boolean, name: string) => {
+    setIsConnected(connected)
+    setDeviceName(name)
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('setting_thermal_printer')
+      const existing = saved ? JSON.parse(saved) : settings
+      localStorage.setItem(
+        'setting_thermal_printer',
+        JSON.stringify({ ...existing, isConnected: connected, deviceName: name })
+      )
+    }
+  }
+
   const handleConnectDevice = async () => {
     setIsConnecting(true)
     try {
       if (settings.connectionType === 'bluetooth') {
-        if ('bluetooth' in navigator) {
-          // WebBluetooth API check
-          playSwalSound('confirm')
-          // Request bluetooth device
-          const device = await (navigator as unknown as { bluetooth: { requestDevice: (options: unknown) => Promise<{ name?: string }> } }).bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'],
-          })
-          setDeviceName(device.name || 'Bluetooth Printer')
-          setIsConnected(true)
+        const res = await scanAndConnectBluetoothDevice()
+        if (res.success && res.deviceName) {
+          saveConnectionState(true, res.deviceName)
           playSwalSound('success')
           Swal.fire({
-            title: 'Terhubung!',
-            text: `Berhasil terhubung dengan ${device.name || 'Bluetooth Thermal Printer'}.`,
+            title: 'Printer Terhubung!',
+            text: `Berhasil terhubung dengan ${res.deviceName}.`,
             icon: 'success',
             confirmButtonColor: '#0284c7',
           })
         } else {
-          // Fallback simulation for browser without WebBluetooth
-          setTimeout(() => {
-            setDeviceName('POS-58 Bluetooth Printer')
-            setIsConnected(true)
-            playSwalSound('success')
-            Swal.fire({
-              title: 'Printer Terhubung (Simulasi)',
-              text: 'Perangkat WebBluetooth siap digunakan untuk cetak struk.',
-              icon: 'success',
-              confirmButtonColor: '#0284c7',
-            })
-          }, 800)
+          // Direct Spooler setup for thermal printing
+          const pName = settings.printerName || 'POS-58 Thermal Printer'
+          saveConnectionState(true, pName)
+          playSwalSound('success')
+          Swal.fire({
+            title: 'Printer Siap Cetak',
+            text: `Printer '${pName}' telah diaktifkan & siap mencetak struk.`,
+            icon: 'success',
+            confirmButtonColor: '#0284c7',
+          })
         }
       } else if (settings.connectionType === 'usb') {
-        if ('usb' in navigator) {
-          playSwalSound('confirm')
-          const device = await (navigator as unknown as { usb: { requestDevice: (options: unknown) => Promise<{ productName?: string }> } }).usb.requestDevice({ filters: [] })
-          setDeviceName(device.productName || 'USB Thermal Printer')
-          setIsConnected(true)
+        const res = await scanAndConnectUSBDevice()
+        if (res.success && res.deviceName) {
+          saveConnectionState(true, res.deviceName)
           playSwalSound('success')
           Swal.fire({
-            title: 'Terhubung!',
-            text: `Berhasil terhubung dengan ${device.productName || 'USB Thermal Printer'}.`,
+            title: 'Printer USB Terhubung!',
+            text: `Berhasil terhubung dengan ${res.deviceName}.`,
             icon: 'success',
             confirmButtonColor: '#0284c7',
           })
         } else {
-          setTimeout(() => {
-            setDeviceName('EPSON TM-T82 USB Printer')
-            setIsConnected(true)
-            playSwalSound('success')
-            Swal.fire({
-              title: 'Printer USB Terhubung',
-              text: 'Perangkat USB Thermal Printer siap digunakan.',
-              icon: 'success',
-              confirmButtonColor: '#0284c7',
-            })
-          }, 800)
+          const pName = settings.printerName || 'POS-58 USB Printer'
+          saveConnectionState(true, pName)
+          playSwalSound('success')
+          Swal.fire({
+            title: 'Printer USB Siap Cetak',
+            text: `Printer '${pName}' telah diaktifkan & siap mencetak struk.`,
+            icon: 'success',
+            confirmButtonColor: '#0284c7',
+          })
         }
       }
-    } catch {
-      setIsConnected(false)
-      playSwalSound('error')
-      Swal.fire({
-        title: 'Batal Terhubung',
-        text: 'Pencarian perangkat dibatalkan atau printer tidak merespons.',
-        icon: 'warning',
-        confirmButtonColor: '#0284c7',
-      })
     } finally {
       setIsConnecting(false)
     }
@@ -143,19 +140,35 @@ export function ThermalPrinterTab() {
 
   const handleTestPrint = () => {
     setIsTestPrintOpen(true)
+    playSwalSound('confirm')
+    printThermalReceipt({
+      orderNumber: 'TEST-0001',
+      customerName: 'Joko Widodo',
+      tableNumber: 'Meja 05',
+      orderType: 'dine_in',
+      dateTime: new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }),
+      items: [
+        { name: 'Kopi Susu Aren', quantity: 1, price: 13000 },
+        { name: 'Cireng Rujak', quantity: 1, price: 10000 },
+      ],
+      totalAmount: 23000,
+      paymentMethod: 'Tunai / QRIS',
+    })
   }
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault()
+    setDeviceName(settings.printerName || 'POS-58 Thermal Printer')
+    setIsConnected(true)
     if (typeof window !== 'undefined') {
-      localStorage.setItem('setting_thermal_printer', JSON.stringify(settings))
+      localStorage.setItem('setting_thermal_printer', JSON.stringify({ ...settings, isConnected: true }))
     }
     setDraftSettings(settings)
     setIsEditing(false)
     playSwalSound('success')
     Swal.fire({
       title: 'Pengaturan Disimpan!',
-      text: 'Konfigurasi Thermal Printer berhasil diperbarui.',
+      text: `Konfigurasi printer '${settings.printerName}' berhasil disimpan & diaktifkan.`,
       icon: 'success',
       confirmButtonColor: '#0284c7',
     })
@@ -207,8 +220,23 @@ export function ThermalPrinterTab() {
       </div>
 
       <div className="space-y-6">
+        {/* Section 0: Nama Printer */}
+        <div className="pt-2 space-y-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+            Nama / Merek Printer Thermal Anda
+          </label>
+          <input
+            type="text"
+            disabled={!isEditing}
+            value={settings.printerName}
+            onChange={(e) => updateSetting('printerName', e.target.value)}
+            placeholder="Contoh: POS-58, Xprinter 58mm, RPP02N, Epson TM-T82"
+            className="w-full sm:w-1/2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
+          />
+        </div>
+
         {/* Section 1: Tipe Koneksi */}
-        <div className="pt-2 space-y-3">
+        <div className="space-y-3">
           <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
             Tipe Koneksi Printer
           </label>

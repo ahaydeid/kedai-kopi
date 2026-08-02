@@ -122,16 +122,14 @@ export function BaristaOrderCard({
 
       {/* Tombol Aksi Barista */}
       <div className="pt-3.5 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800 mt-3">
-        {order.status === 'Selesai' && (
-          <button
-            type="button"
-            onClick={() => onPrintStruk(order)}
-            className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer ml-auto"
-            title="Cetak Struk Dapur"
-          >
-            <FiPrinter className="h-4 w-4" />
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={() => onPrintStruk(order)}
+          className="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer mr-auto"
+          title="Cetak Struk Thermal"
+        >
+          <FiPrinter className="h-4 w-4" />
+        </button>
 
         {order.status === 'Menunggu' && (
           <button

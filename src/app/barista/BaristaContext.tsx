@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react'
 import { BaristaOrder, BaristaOrderItem } from './_components/BaristaOrderCard'
 import { playSound, playSwalSound } from '@/utils/sound'
+import { printThermalReceipt } from '@/utils/printReceipt'
 import Swal from 'sweetalert2'
 import {
   getOrders,
@@ -104,14 +105,30 @@ export function BaristaProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const handlePrintStruk = () => {
+  const handlePrintStruk = (order: BaristaOrder) => {
     playSwalSound('confirm')
-    Swal.fire({
-      title: 'Fitur Mendatang',
-      text: 'Fitur cetak struk akan segera hadir pada pembaruan berikutnya!',
-      icon: 'info',
-      confirmButtonText: 'Mengerti',
-      confirmButtonColor: '#3b82f6',
+    printThermalReceipt({
+      orderNumber: order.orderNumber,
+      customerName: order.customerName,
+      dateTime: order.dateTime,
+      items: order.items.map((item) => {
+        // Extract quantity from name string like "2x Kopi Susu" if present
+        const match = item.name.match(/^(\d+)x\s+(.+)$/)
+        if (match) {
+          const qty = parseInt(match[1], 10)
+          return {
+            name: match[2],
+            quantity: qty,
+            price: Math.floor(item.price / qty),
+          }
+        }
+        return {
+          name: item.name,
+          quantity: 1,
+          price: item.price,
+        }
+      }),
+      totalAmount: order.totalAmount,
     })
   }
 

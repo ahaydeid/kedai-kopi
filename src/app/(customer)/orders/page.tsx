@@ -310,8 +310,8 @@ export default function CustomerOrdersPage() {
               <div className="h-16 w-16 rounded-full bg-amber-50 dark:bg-slate-800 text-[#3D2514] dark:text-amber-200 flex items-center justify-center shrink-0">
                 <HiOutlineClipboardDocumentList className="h-8 w-8" />
               </div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
-                Belum Ada Pesanan Aktif
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
+                Belum Ada Pesanan
               </h2>
               <div className="pt-2">
                 <Link

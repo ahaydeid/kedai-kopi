@@ -138,7 +138,7 @@ export function OrdersManagement() {
 
             {completedOrders.length === 0 ? (
               <div className="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900/40 rounded-lg border border-slate-200/80 dark:border-slate-800">
-                Belum ada pesanan selesai.
+                Belum ada pesanan.
               </div>
             ) : (
               <div className="space-y-4 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-1.5 scrollbar-thin">

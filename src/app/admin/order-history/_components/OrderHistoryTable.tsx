@@ -8,6 +8,7 @@ import { ActionButton } from '@/components/ui/ActionButton'
 import Avatar from '@/components/ui/Avatar'
 import Badge from '@/components/ui/Badge'
 import { formatOrderIdDisplay } from '@/utils/orderId'
+import { printThermalReceipt } from '@/utils/printReceipt'
 import { Table, TableHead, TableBody, TableRow, TableHeaderCell, TableCell } from '@/components/ui/Table'
 
 export interface OrderHistoryItem {
@@ -18,6 +19,7 @@ export interface OrderHistoryItem {
   dateTime: string
   itemsSummary: string
   items?: { name: string; price: number }[]
+  rawOrderItems?: any[]
   totalAmount: number
   status: 'selesai' | 'dibatalkan'
   createdVia?: 'Pelanggan' | 'Barista'
@@ -50,14 +52,33 @@ export function OrderHistoryTable({
   const endIndex = Math.min(startIndex + items.length, effectiveTotal)
   const paginatedItems = items
 
-  const handlePrintClick = () => {
+  const handlePrintClick = (item: OrderHistoryItem) => {
     playSwalSound('confirm')
-    Swal.fire({
-      title: 'Fitur Mendatang',
-      text: 'Fitur cetak struk akan segera hadir pada pembaruan berikutnya!',
-      icon: 'info',
-      confirmButtonText: 'Mengerti',
-      confirmButtonColor: '#3b82f6',
+    const rawList = item.rawOrderItems || item.items || []
+    const parsedItems = rawList.map((i: any) => {
+      const name = i.menu_name || i.name || 'Produk'
+      const match = name.match(/^(\d+)x\s+(.+)$/)
+      if (match) {
+        const qty = parseInt(match[1], 10)
+        return {
+          name: match[2],
+          quantity: qty,
+          price: Math.floor(Number(i.price || 0) / qty),
+        }
+      }
+      return {
+        name,
+        quantity: i.quantity || 1,
+        price: Number(i.price || 0),
+      }
+    })
+
+    printThermalReceipt({
+      orderNumber: item.orderNumber,
+      customerName: item.customerName,
+      dateTime: item.dateTime,
+      items: parsedItems.length > 0 ? parsedItems : [{ name: item.itemsSummary, quantity: 1, price: item.totalAmount }],
+      totalAmount: item.totalAmount,
     })
   }
 
@@ -138,7 +159,7 @@ export function OrderHistoryTable({
 
                   <ActionButton
                     variant="edit"
-                    onClick={() => handlePrintClick()}
+                    onClick={() => handlePrintClick(item)}
                     title="Cetak Struk"
                   >
                     <FiPrinter className="h-4 w-4 text-white" />

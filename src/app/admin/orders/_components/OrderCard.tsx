@@ -3,6 +3,9 @@
 import React from 'react'
 import Avatar from '@/components/ui/Avatar'
 import { formatOrderIdDisplay } from '@/utils/orderId'
+import { FiPrinter } from 'react-icons/fi'
+import { printThermalReceipt } from '@/utils/printReceipt'
+import { playSwalSound } from '@/utils/sound'
 
 export interface OrderCartItem {
   name: string
@@ -99,10 +102,47 @@ export function OrderCard({ order }: OrderCardProps) {
 
       {/* Footer Card */}
       <div className="border-t border-slate-100 dark:border-slate-800 pt-3 flex items-center justify-between">
-        <span className="text-[10px] text-slate-400">Total</span>
-        <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 text-right">
-          {formatRupiah(order.totalAmount)}
-        </span>
+        <button
+          type="button"
+          onClick={() => {
+            playSwalSound('confirm')
+            printThermalReceipt({
+              orderNumber: order.orderNumber,
+              customerName: order.customerName,
+              tableNumber: order.orderType === 'takeaway' || !order.tableNumber ? 'Takeaway' : `Meja #${order.tableNumber}`,
+              orderType: order.orderType,
+              dateTime: order.dateTime,
+              items: order.items.map((item) => {
+                const match = item.name.match(/^(\d+)x\s+(.+)$/)
+                if (match) {
+                  const qty = parseInt(match[1], 10)
+                  return {
+                    name: match[2],
+                    quantity: qty,
+                    price: Math.floor(item.price / qty),
+                  }
+                }
+                return {
+                  name: item.name,
+                  quantity: 1,
+                  price: item.price,
+                }
+              }),
+              totalAmount: order.totalAmount,
+            })
+          }}
+          className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
+          title="Cetak Struk Thermal"
+        >
+          <FiPrinter className="w-3.5 h-3.5" />
+          <span>Cetak Struk</span>
+        </button>
+        <div className="text-right">
+          <span className="text-[10px] text-slate-400 block">Total</span>
+          <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
+            {formatRupiah(order.totalAmount)}
+          </span>
+        </div>
       </div>
     </div>
   )

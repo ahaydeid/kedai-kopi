@@ -301,7 +301,7 @@ export default function CustomerHistoryPage() {
               <div className="h-16 w-16 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 flex items-center justify-center shrink-0">
                 <FiClock className="h-8 w-8" />
               </div>
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100">
+              <h2 className="text-base font-semibold text-slate-900 dark:text-slate-100">
                 Belum Ada Riwayat Transaksi
               </h2>
               <div className="pt-2">
