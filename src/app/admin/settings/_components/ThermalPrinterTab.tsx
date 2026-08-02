@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/Button'
 import { CheckCircle } from '@/components/ui/CheckCircle'
 import { CrossCircle } from '@/components/ui/CrossCircle'
@@ -39,14 +39,48 @@ export function ThermalPrinterTab() {
   const [settings, setSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
   const [draftSettings, setDraftSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
   const [isEditing, setIsEditing] = useState(false)
-  const [isConnected, setIsConnected] = useState(true)
+  const [isConnected, setIsConnected] = useState<boolean>(false)
   const [deviceName, setDeviceName] = useState<string>('RPP02N Thermal Printer')
   const [isConnecting, setIsConnecting] = useState(false)
   const [isTestPrintOpen, setIsTestPrintOpen] = useState(false)
 
+  const checkLivePrinterStatus = useCallback(async (customUrl?: string) => {
+    setIsConnecting(true)
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 2000)
+      const targetUrl = customUrl || settings.bridgeUrl || 'http://127.0.0.1:5000'
+
+      const res = await fetch(`${targetUrl}/api/status`, {
+        method: 'GET',
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+
+      if (res.ok) {
+        const data = await res.json()
+        if (data.ready || data.status === 'online') {
+          setIsConnected(true)
+          if (data.printer) {
+            setDeviceName(data.printer)
+          }
+          return true
+        }
+      }
+      setIsConnected(false)
+      return false
+    } catch {
+      setIsConnected(false)
+      return false
+    } finally {
+      setIsConnecting(false)
+    }
+  }, [settings.bridgeUrl])
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('setting_thermal_printer')
+      let activeUrl = 'http://127.0.0.1:5000'
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
@@ -55,13 +89,14 @@ export function ThermalPrinterTab() {
           setSettings(merged)
           setDraftSettings(merged)
           setDeviceName(pName)
-          setIsConnected(parsed.isConnected !== undefined ? parsed.isConnected : true)
+          if (merged.bridgeUrl) activeUrl = merged.bridgeUrl
         } catch {
           // fallback default
         }
       }
+      checkLivePrinterStatus(activeUrl)
     }
-  }, [])
+  }, [checkLivePrinterStatus])
 
   const updateSetting = <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
@@ -77,70 +112,24 @@ export function ThermalPrinterTab() {
     setIsEditing(false)
   }
 
-  const saveConnectionState = (connected: boolean, name: string) => {
-    setIsConnected(connected)
-    setDeviceName(name)
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('setting_thermal_printer')
-      const existing = saved ? JSON.parse(saved) : settings
-      localStorage.setItem(
-        'setting_thermal_printer',
-        JSON.stringify({ ...existing, isConnected: connected, deviceName: name })
-      )
-    }
-  }
-
   const handleConnectDevice = async () => {
-    setIsConnecting(true)
-    try {
-      if (settings.connectionType === 'bluetooth') {
-        const res = await scanAndConnectBluetoothDevice()
-        if (res.success && res.deviceName) {
-          saveConnectionState(true, res.deviceName)
-          playSwalSound('success')
-          Swal.fire({
-            title: 'Printer Terhubung!',
-            text: `Berhasil terhubung dengan ${res.deviceName}.`,
-            icon: 'success',
-            confirmButtonColor: '#0284c7',
-          })
-        } else {
-          // Direct Spooler setup for thermal printing
-          const pName = settings.printerName || 'POS-58 Thermal Printer'
-          saveConnectionState(true, pName)
-          playSwalSound('success')
-          Swal.fire({
-            title: 'Printer Siap Cetak',
-            text: `Printer '${pName}' telah diaktifkan & siap mencetak struk.`,
-            icon: 'success',
-            confirmButtonColor: '#0284c7',
-          })
-        }
-      } else if (settings.connectionType === 'usb') {
-        const res = await scanAndConnectUSBDevice()
-        if (res.success && res.deviceName) {
-          saveConnectionState(true, res.deviceName)
-          playSwalSound('success')
-          Swal.fire({
-            title: 'Printer USB Terhubung!',
-            text: `Berhasil terhubung dengan ${res.deviceName}.`,
-            icon: 'success',
-            confirmButtonColor: '#0284c7',
-          })
-        } else {
-          const pName = settings.printerName || 'POS-58 USB Printer'
-          saveConnectionState(true, pName)
-          playSwalSound('success')
-          Swal.fire({
-            title: 'Printer USB Siap Cetak',
-            text: `Printer '${pName}' telah diaktifkan & siap mencetak struk.`,
-            icon: 'success',
-            confirmButtonColor: '#0284c7',
-          })
-        }
-      }
-    } finally {
-      setIsConnecting(false)
+    const isOnline = await checkLivePrinterStatus()
+    if (isOnline) {
+      playSwalSound('success')
+      Swal.fire({
+        title: 'Printer Terhubung!',
+        text: `Local Print Bridge & printer '${settings.printerName}' siap digunakan.`,
+        icon: 'success',
+        confirmButtonColor: '#0284c7',
+      })
+    } else {
+      playSwalSound('error')
+      Swal.fire({
+        title: 'Gagal Menghubungkan',
+        text: `Local Print Bridge (${settings.bridgeUrl || 'http://127.0.0.1:5000'}) tidak merespons atau Bluetooth printer terputus pada perangkat ini.`,
+        icon: 'warning',
+        confirmButtonColor: '#0284c7',
+      })
     }
   }
 
