@@ -3,8 +3,6 @@
 import React from 'react'
 import { Modal } from '@/components/ui/Modal'
 import {
-  FiGlobe,
-  FiMail,
   FiInstagram,
   FiShoppingBag,
   FiArrowUpRight,
@@ -25,22 +23,10 @@ interface SocialLink {
 
 const SOCIAL_LINKS: SocialLink[] = [
   {
-    title: 'E-commerce Official',
-    subtitle: 'kedaikopi.ahadi.my.id',
-    url: 'https://kedaikopi.ahadi.my.id',
-    icon: <FiGlobe className="h-5 w-5 text-slate-700 dark:text-slate-200" />,
-  },
-  {
     title: 'WhatsApp',
     subtitle: 'wa.me/6281234567890',
     url: 'https://wa.me/6281234567890',
     icon: <FaWhatsapp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />,
-  },
-  {
-    title: 'Email',
-    subtitle: 'kedaikopi.official@gmail.com',
-    url: 'mailto:kedaikopi.official@gmail.com',
-    icon: <FiMail className="h-5 w-5 text-slate-700 dark:text-slate-200" />,
   },
   {
     title: 'Instagram',
@@ -55,10 +41,10 @@ const SOCIAL_LINKS: SocialLink[] = [
     icon: <FaTiktok className="h-5 w-5 text-slate-900 dark:text-slate-100" />,
   },
   {
-    title: 'Shopee Official',
-    subtitle: 'shopee.co.id/kedaikopi.official',
-    url: 'https://shopee.co.id/kedaikopi.official',
-    icon: <FiShoppingBag className="h-5 w-5 text-amber-600 dark:text-amber-400" />,
+    title: 'ShopeeFood',
+    subtitle: 'shopeefood/kedaikopi.official',
+    url: 'https://shopee.co.id/universal-link/now-food/shop/kedaikopi',
+    icon: <FiShoppingBag className="h-5 w-5 text-orange-600 dark:text-orange-400" />,
   },
 ]
 
@@ -71,7 +57,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
       title="Informasi & Kontak Kedai"
       bodyClassName="p-0"
     >
-      <div className="relative w-full overflow-hidden p-4 min-h-[420px] flex flex-col justify-center bg-slate-50/70 dark:bg-slate-950/70">
+      <div className="relative w-full overflow-hidden p-4 min-h-[340px] flex flex-col justify-center bg-slate-50/70 dark:bg-slate-950/70">
         {/* Background Logo Kedai Watermark Artistik */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.06] dark:opacity-[0.08]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
