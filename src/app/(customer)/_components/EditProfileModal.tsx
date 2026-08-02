@@ -118,7 +118,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             <span>Nomor HP / WhatsApp</span>
           </label>
           <div className="flex items-center">
-            <span className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-800 rounded-l-xl text-xs font-bold text-slate-600 dark:text-slate-300 select-none shrink-0">
+            <span className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-800 rounded-l-xl text-xs font-medium text-slate-600 dark:text-slate-300 select-none shrink-0">
               +62
             </span>
             <input

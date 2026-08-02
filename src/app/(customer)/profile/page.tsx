@@ -168,14 +168,14 @@ export default function CustomerProfilePage() {
                     {userName}
                   </h1>
                 </div>
-                <p className="text-xs text-slate-400 font-medium truncate">
-                  {userEmail}
-                </p>
                 {userPhone && (
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5">
+                  <p className="text-xs text-slate-700 dark:text-slate-200 font-medium truncate">
                     {userPhone}
                   </p>
                 )}
+                <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
+                  {userEmail}
+                </p>
               </div>
             </div>
 
