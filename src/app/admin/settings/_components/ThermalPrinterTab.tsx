@@ -158,6 +158,13 @@ export function ThermalPrinterTab() {
     })
   }
 
+  const handleTestRawBtAndroid = () => {
+    const rawText = "KEDAI KOPI\n--------------------------------\nTgl : 3 Agu 2026 00:56 WIB\nID  : ORD-TEST-RAWBT\nNama: Tes Android HP\nMeja: Meja #05\n--------------------------------\nKopi Susu Aren       Rp 13.000\nCireng Rujak         Rp 10.000\n--------------------------------\nTOTAL                Rp 23.000\n--------------------------------\nTerima Kasih!\n\n\n\n"
+    const encodedText = encodeURIComponent(rawText)
+    const intentUrl = `intent:#Intent;scheme=rawbt;package=ru.a404.rawbtprinter;S.txt=${encodedText};end;`
+    window.location.href = intentUrl
+  }
+
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (typeof window !== 'undefined') {
@@ -383,16 +390,29 @@ export function ThermalPrinterTab() {
 
       {/* Buttons: Test Print & Dynamic Actions (Edit vs Batal + Simpan) */}
       <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/65 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          size="sm"
-          onClick={handleTestPrint}
-          className="w-full sm:w-auto flex items-center justify-center gap-2"
-        >
-          <FiPrinter className="w-4 h-4" />
-          <span>Uji Coba Cetak Struk</span>
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleTestPrint}
+            className="w-full sm:w-auto flex items-center justify-center gap-2"
+          >
+            <FiPrinter className="w-4 h-4" />
+            <span>Uji Coba PC</span>
+          </Button>
+
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={handleTestRawBtAndroid}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 border-emerald-300 text-emerald-700 dark:text-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+          >
+            <FiPrinter className="w-4 h-4" />
+            <span>Tes RawBT (Android HP)</span>
+          </Button>
+        </div>
 
         {!isEditing ? (
           <Button
