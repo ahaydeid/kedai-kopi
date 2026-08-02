@@ -322,7 +322,7 @@ export default function CustomerProfilePage() {
           className="inline-flex items-center justify-center gap-1.5 p-2 text-rose-600 dark:text-rose-400 font-normal text-xs hover:underline cursor-pointer transition-colors"
         >
           <FiLogOut className="h-4 w-4" />
-          <span>Keluar Akun</span>
+          <span>Keluar</span>
         </button>
       </div>
     </div>
