@@ -13,22 +13,26 @@ import { scanAndConnectBluetoothDevice, scanAndConnectUSBDevice } from '@/servic
 
 interface PrinterSettings {
   printerName: string
+  bridgeUrl: string
   connectionType: 'bluetooth' | 'usb'
   paperWidth: '58mm' | '80mm'
   autoPrint: boolean
   printCopies: number
   headerText: string
+  addressText: string
   footerText: string
 }
 
 export function ThermalPrinterTab() {
   const DEFAULT_SETTINGS: PrinterSettings = {
-    printerName: 'POS-58 Thermal Printer',
+    printerName: 'RPP02N Thermal Printer',
+    bridgeUrl: 'http://127.0.0.1:5000',
     connectionType: 'bluetooth',
     paperWidth: '58mm',
     autoPrint: true,
     printCopies: 1,
     headerText: 'Kedai Kopi',
+    addressText: 'Balaraja, Tangerang',
     footerText: 'Terima kasih atas kunjungan Anda!',
   }
 
@@ -36,7 +40,7 @@ export function ThermalPrinterTab() {
   const [draftSettings, setDraftSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
   const [isEditing, setIsEditing] = useState(false)
   const [isConnected, setIsConnected] = useState(true)
-  const [deviceName, setDeviceName] = useState<string>('POS-58 Thermal Printer')
+  const [deviceName, setDeviceName] = useState<string>('RPP02N Thermal Printer')
   const [isConnecting, setIsConnecting] = useState(false)
   const [isTestPrintOpen, setIsTestPrintOpen] = useState(false)
 
@@ -46,9 +50,11 @@ export function ThermalPrinterTab() {
       if (saved) {
         try {
           const parsed = JSON.parse(saved)
-          setSettings(parsed)
-          setDraftSettings(parsed)
-          setDeviceName(parsed.printerName || 'POS-58 Thermal Printer')
+          const pName = parsed.printerName || (parsed.deviceName && parsed.deviceName !== 'POS-58 Thermal Printer' ? parsed.deviceName : 'RPP02N Thermal Printer')
+          const merged = { ...DEFAULT_SETTINGS, ...parsed, printerName: pName }
+          setSettings(merged)
+          setDraftSettings(merged)
+          setDeviceName(pName)
           setIsConnected(parsed.isConnected !== undefined ? parsed.isConnected : true)
         } catch {
           // fallback default
@@ -189,7 +195,7 @@ export function ThermalPrinterTab() {
             </h3>
             {isConnected ? (
               <div className="flex items-center gap-2 mt-0.5 text-xs font-normal">
-                <span className="text-zinc-700 dark:text-zinc-300">{deviceName}</span>
+                <span className="text-zinc-700 dark:text-zinc-300 font-medium">{settings.printerName || deviceName}</span>
                 <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                   <CheckCircle size="sm" />
                   <span>Terhubung</span>
@@ -220,23 +226,8 @@ export function ThermalPrinterTab() {
       </div>
 
       <div className="space-y-6">
-        {/* Section 0: Nama Printer */}
-        <div className="pt-2 space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
-            Nama / Merek Printer Thermal Anda
-          </label>
-          <input
-            type="text"
-            disabled={!isEditing}
-            value={settings.printerName}
-            onChange={(e) => updateSetting('printerName', e.target.value)}
-            placeholder="Contoh: POS-58, Xprinter 58mm, RPP02N, Epson TM-T82"
-            className="w-full sm:w-1/2 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3.5 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
-          />
-        </div>
-
         {/* Section 1: Tipe Koneksi */}
-        <div className="space-y-3">
+        <div className="pt-2 space-y-3">
           <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
             Tipe Koneksi Printer
           </label>
@@ -337,24 +328,55 @@ export function ThermalPrinterTab() {
           </label>
           <div className="space-y-3">
             <div className="w-full sm:w-1/2">
-              <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                Teks Header (Nama Kedai)
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Nama Kedai
+                </label>
+                <span className="text-[10px] text-zinc-400 font-mono">
+                  {settings.headerText?.length || 0}/32
+                </span>
+              </div>
               <input
                 type="text"
                 disabled={!isEditing}
+                maxLength={32}
                 value={settings.headerText}
                 onChange={(e) => updateSetting('headerText', e.target.value)}
                 className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
               />
             </div>
             <div className="w-full sm:w-1/2">
-              <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                Teks Footer (Pesan Terima Kasih)
-              </label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Alamat
+                </label>
+                <span className="text-[10px] text-zinc-400 font-mono">
+                  {settings.addressText?.length || 0}/32
+                </span>
+              </div>
               <input
                 type="text"
                 disabled={!isEditing}
+                maxLength={32}
+                value={settings.addressText}
+                onChange={(e) => updateSetting('addressText', e.target.value)}
+                placeholder="Contoh: Balaraja, Tangerang"
+                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
+              />
+            </div>
+            <div className="w-full sm:w-1/2">
+              <div className="flex justify-between items-center mb-1">
+                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400">
+                  Teks Footer
+                </label>
+                <span className="text-[10px] text-zinc-400 font-mono">
+                  {settings.footerText?.length || 0}/32
+                </span>
+              </div>
+              <input
+                type="text"
+                disabled={!isEditing}
+                maxLength={32}
                 value={settings.footerText}
                 onChange={(e) => updateSetting('footerText', e.target.value)}
                 className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
@@ -427,7 +449,7 @@ export function ThermalPrinterTab() {
         >
           {/* Header */}
           <p className="text-center font-bold uppercase text-sm">{settings.headerText}</p>
-          <p className="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
+          {settings.addressText && <p className="text-center text-[10px] text-zinc-500">{settings.addressText}</p>}
 
           <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
 

@@ -16,6 +16,8 @@ export interface OrderHistoryItem {
   orderNumber: string
   customerName: string
   customerAvatarUrl?: string | null
+  tableNumber?: string | null
+  orderType?: string
   dateTime: string
   itemsSummary: string
   items?: { name: string; price: number }[]
@@ -76,6 +78,8 @@ export function OrderHistoryTable({
     printThermalReceipt({
       orderNumber: item.orderNumber,
       customerName: item.customerName,
+      tableNumber: item.orderType === 'takeaway' || !item.tableNumber ? 'Takeaway' : `Meja #${item.tableNumber}`,
+      orderType: item.orderType || (item.tableNumber ? 'dine_in' : 'takeaway'),
       dateTime: item.dateTime,
       items: parsedItems.length > 0 ? parsedItems : [{ name: item.itemsSummary, quantity: 1, price: item.totalAmount }],
       totalAmount: item.totalAmount,

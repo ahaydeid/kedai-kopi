@@ -1,0 +1,17 @@
+{
+  "name": "rpp02n-print-bridge",
+  "version": "1.0.0",
+  "description": "Local Print Bridge Service for RPP02N Thermal Printer on Linux /dev/rfcomm0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "escpos",
+    "thermal-printer",
+    "rpp02n",
+    "pos-bridge"
+  ],
+  "author": "Kedai Kopi Team",
+  "license": "MIT"
+}

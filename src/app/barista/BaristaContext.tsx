@@ -45,6 +45,8 @@ function mapFetchedOrderToBaristaOrder(item: FetchedOrderWithItems): BaristaOrde
     id: item.id,
     orderNumber: item.order_number,
     customerName: item.customer_name,
+    tableNumber: item.table_number ? String(item.table_number) : null,
+    orderType: item.order_type || (item.table_number ? 'dine_in' : 'takeaway'),
     dateTime: formatOrderDateTime(item.created_at),
     items: item.order_items.map((i) => ({
       name: `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.menu_name}`,
@@ -110,6 +112,8 @@ export function BaristaProvider({ children }: { children: React.ReactNode }) {
     printThermalReceipt({
       orderNumber: order.orderNumber,
       customerName: order.customerName,
+      tableNumber: order.orderType === 'takeaway' || !order.tableNumber ? 'Takeaway' : `Meja #${order.tableNumber}`,
+      orderType: order.orderType || (order.tableNumber ? 'dine_in' : 'takeaway'),
       dateTime: order.dateTime,
       items: order.items.map((item) => {
         // Extract quantity from name string like "2x Kopi Susu" if present

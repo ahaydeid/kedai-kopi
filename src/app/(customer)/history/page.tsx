@@ -241,7 +241,7 @@ export default function CustomerHistoryPage() {
 
                     {/* Customer Name */}
                     <div className="px-3.5 pt-2 text-[11px] text-slate-500">
-                      Atas nama: <span className="font-semibold text-slate-700 dark:text-slate-300">{order.customerName}</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-300">{order.customerName}</span>
                     </div>
 
                     {/* Item List */}
