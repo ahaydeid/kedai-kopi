@@ -41,6 +41,8 @@ function mapFetchedToOrderHistoryItem(item: FetchedOrderWithItems): OrderHistory
     itemsSummary: itemsSummary || 'Pesanan',
     items: itemsList,
     totalAmount: Number(item.total_amount),
+    discountAmount: Number(item.claimed_points || 0),
+    claimedPoints: Number(item.claimed_points || 0),
     status: item.status === 'Selesai' ? 'selesai' : 'dibatalkan',
     createdVia: 'Pelanggan',
   }

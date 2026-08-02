@@ -23,6 +23,8 @@ export interface OrderHistoryItem {
   items?: { name: string; price: number }[]
   rawOrderItems?: any[]
   totalAmount: number
+  discountAmount?: number
+  claimedPoints?: number
   status: 'selesai' | 'dibatalkan'
   createdVia?: 'Pelanggan' | 'Barista'
 }

@@ -42,6 +42,8 @@ function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | nu
       price: Number(i.price) * i.quantity,
     })),
     totalAmount: Number(item.total_amount),
+    discountAmount: Number(item.claimed_points || 0),
+    claimedPoints: Number(item.claimed_points || 0),
     status: item.status as 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan',
     orderType: item.order_type,
     tableNumber: item.table_number,

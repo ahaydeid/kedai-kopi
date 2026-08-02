@@ -107,9 +107,23 @@ export function OrderHistoryDetailModal({
           })}
         </div>
 
+        {/* Subtotal & Potongan Harga jika ada */}
+        {(order.discountAmount || order.claimedPoints || 0) > 0 && (
+          <div className="space-y-1.5 border-b border-slate-100 dark:border-slate-800 pb-3 text-xs">
+            <div className="flex items-center justify-between text-slate-500">
+              <span>Subtotal</span>
+              <span>{formatRupiah(order.totalAmount + (order.discountAmount || order.claimedPoints || 0))}</span>
+            </div>
+            <div className="flex items-center justify-between text-rose-500 font-medium">
+              <span>Potongan Harga (Poin Member)</span>
+              <span>-{formatRupiah(order.discountAmount || order.claimedPoints || 0)}</span>
+            </div>
+          </div>
+        )}
+
         {/* Total Bayar */}
         <div className="flex items-center justify-between pt-1 pb-1">
-          <span className="text-xs text-slate-400 font-normal">Total</span>
+          <span className="text-xs text-slate-500 font-medium">Total</span>
           <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
             {formatRupiah(order.totalAmount)}
           </span>
