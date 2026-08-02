@@ -90,9 +90,9 @@ export function OrdersManagement() {
       {loading ? (
         <div className="p-8 text-center text-sm text-slate-500">Memuat data pesanan...</div>
       ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-          {/* Section 1: Pesanan Aktif (2 Kolom di Desktop) dengan Garis Pemisah Vertikal */}
-          <div className="lg:col-span-2 space-y-4 lg:pr-6 lg:border-r border-slate-200/80 dark:border-slate-800">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
+          {/* Section 1: Pesanan Aktif (2 Kolom di Desktop) dengan Garis Pemisah Vertikal Full Height */}
+          <div className="lg:col-span-2 space-y-4 lg:pr-6 lg:border-r border-slate-200/80 dark:border-slate-800 lg:min-h-[calc(100vh-160px)]">
             <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <span>Pesanan Aktif</span>
@@ -103,7 +103,7 @@ export function OrdersManagement() {
             </div>
 
             {activeOrders.length === 0 ? (
-              <div className="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900/40 rounded-lg border border-slate-200/80 dark:border-slate-800">
+              <div className="p-8 text-center text-sm text-slate-400 bg-white dark:bg-slate-900/40 rounded-lg">
                 Tidak ada pesanan aktif saat ini.
               </div>
             ) : (
