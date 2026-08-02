@@ -99,7 +99,7 @@ export function OrderHistoryTable({
               </TableCell>
 
               {/* Pelanggan */}
-              <TableCell className="text-xs font-medium text-slate-700 dark:text-slate-300 whitespace-nowrap">
+              <TableCell className="text-xs font-normal text-slate-700 dark:text-slate-300 whitespace-nowrap">
                 <div className="flex items-center gap-2">
                   <Avatar name={item.customerName} photo={item.customerAvatarUrl} size="small" />
                   <span>{item.customerName}</span>
