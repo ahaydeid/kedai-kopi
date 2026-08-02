@@ -312,6 +312,8 @@ export default function CustomerMenuPage() {
           items: orderItems,
           totalAmount: finalCartPrice,
           claimedPoints: isClaimed ? claimedDiscountAmount : 0,
+          orderType: orderType,
+          tableNumber: orderType === 'dine_in' ? tableNumber : null,
         })
 
         // Simpan timestamp pemesanan untuk pelanggan anonim

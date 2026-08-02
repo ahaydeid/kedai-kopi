@@ -32,6 +32,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
     const tanggal = now.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' })
     const waktu = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
     const namaPelanggan = (order.customerName || 'Pelanggan').slice(0, 24)
+    const labelMeja = order.orderType === 'takeaway' || !order.tableNumber ? 'TAKEAWAY' : `MEJA #${order.tableNumber}`
     const itemsHtml = order.items
       .map((item) => {
         const rupiah = formatRupiah(item.price)
@@ -50,7 +51,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           <p>Tgl&nbsp;: ${tanggal} ${waktu} WIB</p>
           <p>No&nbsp;&nbsp;: ${order.orderNumber}</p>
           <p>Nama: ${namaPelanggan}</p>
-          <p>Meja: 05</p>
+          <p>Meja: ${labelMeja}</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
           ${itemsHtml}
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
@@ -63,6 +64,8 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
       confirmButtonColor: '#0284c7',
     })
   }
+
+  const tableLabelDisplay = order.orderType === 'takeaway' || !order.tableNumber ? 'Takeaway' : `Meja #${order.tableNumber}`
 
   if (!isExpanded) {
     return (
@@ -107,7 +110,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
 
         {/* Row 2: Nama Pelanggan & Jumlah Item & Nomor Meja */}
         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-          {order.customerName} • Meja #05 • {totalItemsCount} item
+          {order.customerName} • {tableLabelDisplay} • {totalItemsCount} item
         </p>
       </div>
     )

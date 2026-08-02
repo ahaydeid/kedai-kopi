@@ -15,6 +15,8 @@ export interface CreateOrderInput {
   items: OrderItemInput[]
   totalAmount: number
   claimedPoints?: number
+  orderType?: 'dine_in' | 'takeaway'
+  tableNumber?: string | null
 }
 
 export interface FetchedOrderWithItems {
@@ -25,6 +27,8 @@ export interface FetchedOrderWithItems {
   user_id: string | null
   total_amount: number
   claimed_points?: number
+  order_type?: 'dine_in' | 'takeaway'
+  table_number?: string | null
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
   created_at: string
   order_items: {
@@ -62,6 +66,8 @@ export async function createOrder(input: CreateOrderInput): Promise<FetchedOrder
         user_id: input.userId ?? null,
         total_amount: input.totalAmount,
         claimed_points: input.claimedPoints ?? 0,
+        order_type: input.orderType ?? 'dine_in',
+        table_number: input.tableNumber ?? null,
         status: 'Menunggu',
       },
     ])

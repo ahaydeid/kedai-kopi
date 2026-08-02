@@ -15,6 +15,23 @@ export default function SettingsPage() {
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  // Inisialisasi tab aktif dari hash URL atau localStorage agar tidak ter-reset saat refresh
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.replace("#", "");
+      const savedTab = localStorage.getItem("settings_active_tab");
+      const validTabs = ["barista", "notifikasi", "printer"];
+
+      if (hash && validTabs.includes(hash)) {
+        setActiveTab(hash);
+        setShowMobileDetail(true);
+      } else if (savedTab && validTabs.includes(savedTab)) {
+        setActiveTab(savedTab);
+        setShowMobileDetail(true);
+      }
+    }
+  }, []);
+
   const showSuccessBanner = (title: string, text: string) => {
     playSwalSound("success");
     Swal.fire({
@@ -36,6 +53,10 @@ export default function SettingsPage() {
   const handleSelectTab = (tab: string) => {
     setActiveTab(tab);
     setShowMobileDetail(true);
+    if (typeof window !== "undefined") {
+      window.location.hash = tab;
+      localStorage.setItem("settings_active_tab", tab);
+    }
   };
 
   const trimToWord = (text: string, max: number) => {

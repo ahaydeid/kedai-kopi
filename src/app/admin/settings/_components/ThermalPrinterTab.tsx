@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { CheckCircle } from '@/components/ui/CheckCircle'
 import { CrossCircle } from '@/components/ui/CrossCircle'
 import { playSwalSound } from '@/utils/sound'
-import { FiPrinter, FiBluetooth, FiCpu, FiRefreshCw } from 'react-icons/fi'
+import { FiPrinter, FiBluetooth, FiCpu, FiRefreshCw, FiEdit2, FiX } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 import { Modal } from '@/components/ui/Modal'
 
@@ -28,27 +28,41 @@ export function ThermalPrinterTab() {
     footerText: 'Terima kasih atas kunjungan Anda!',
   }
 
-  const [settings, setSettings] = useState<PrinterSettings>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('setting_thermal_printer')
-      if (saved) {
-        try {
-          return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
-        } catch {
-          // fallback default
-        }
-      }
-    }
-    return DEFAULT_SETTINGS
-  })
-
+  const [settings, setSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
+  const [draftSettings, setDraftSettings] = useState<PrinterSettings>(DEFAULT_SETTINGS)
+  const [isEditing, setIsEditing] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
   const [deviceName, setDeviceName] = useState<string>('')
   const [isConnecting, setIsConnecting] = useState(false)
   const [isTestPrintOpen, setIsTestPrintOpen] = useState(false)
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('setting_thermal_printer')
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved)
+          setSettings(parsed)
+          setDraftSettings(parsed)
+        } catch {
+          // fallback default
+        }
+      }
+    }
+  }, [])
+
   const updateSetting = <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
+  }
+
+  const handleStartEdit = () => {
+    setDraftSettings(settings)
+    setIsEditing(true)
+  }
+
+  const handleCancelEdit = () => {
+    setSettings(draftSettings)
+    setIsEditing(false)
   }
 
   const handleConnectDevice = async () => {
@@ -128,7 +142,6 @@ export function ThermalPrinterTab() {
   }
 
   const handleTestPrint = () => {
-    playSwalSound('success')
     setIsTestPrintOpen(true)
   }
 
@@ -137,6 +150,8 @@ export function ThermalPrinterTab() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('setting_thermal_printer', JSON.stringify(settings))
     }
+    setDraftSettings(settings)
+    setIsEditing(false)
     playSwalSound('success')
     Swal.fire({
       title: 'Pengaturan Disimpan!',
@@ -200,12 +215,13 @@ export function ThermalPrinterTab() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
+              disabled={!isEditing}
               onClick={() => updateSetting('connectionType', 'bluetooth')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'bluetooth'
                   ? 'border-sky-500 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
-              }`}
+              } ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               <FiBluetooth className="w-5 h-5 shrink-0" />
               <div>
@@ -216,12 +232,13 @@ export function ThermalPrinterTab() {
 
             <button
               type="button"
+              disabled={!isEditing}
               onClick={() => updateSetting('connectionType', 'usb')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'usb'
                   ? 'border-sky-500 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
-              }`}
+              } ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
             >
               <FiCpu className="w-5 h-5 shrink-0" />
               <div>
@@ -242,23 +259,25 @@ export function ThermalPrinterTab() {
               <div className="flex items-center gap-3">
                 <button
                   type="button"
+                  disabled={!isEditing}
                   onClick={() => updateSetting('paperWidth', '58mm')}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '58mm'
                       ? 'border-sky-500 text-sky-600 dark:text-sky-300'
                       : 'border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
-                  }`}
+                  } ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   58 mm (Mini Thermal)
                 </button>
                 <button
                   type="button"
+                  disabled={!isEditing}
                   onClick={() => updateSetting('paperWidth', '80mm')}
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '80mm'
                       ? 'border-sky-500 text-sky-600 dark:text-sky-300'
                       : 'border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
-                  }`}
+                  } ${!isEditing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
                   80 mm (Lebar Kasir)
                 </button>
@@ -270,9 +289,10 @@ export function ThermalPrinterTab() {
                 Jumlah Salinan Cetak
               </label>
               <select
+                disabled={!isEditing}
                 value={settings.printCopies}
                 onChange={(e) => updateSetting('printCopies', Number(e.target.value))}
-                className="w-full rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
               >
                 <option value={1}>1 Lembar (Struk Pembeli)</option>
                 <option value={2}>2 Lembar (Pembeli + Barista Dapur)</option>
@@ -288,33 +308,35 @@ export function ThermalPrinterTab() {
             Teks Header & Footer Struk
           </label>
           <div className="space-y-3">
-            <div>
+            <div className="w-full sm:w-1/2">
               <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
                 Teks Header (Nama Kedai)
               </label>
               <input
                 type="text"
+                disabled={!isEditing}
                 value={settings.headerText}
                 onChange={(e) => updateSetting('headerText', e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
               />
             </div>
-            <div>
+            <div className="w-full sm:w-1/2">
               <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
                 Teks Footer (Pesan Terima Kasih)
               </label>
               <input
                 type="text"
+                disabled={!isEditing}
                 value={settings.footerText}
                 onChange={(e) => updateSetting('footerText', e.target.value)}
-                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100 disabled:opacity-70 disabled:bg-zinc-50 dark:disabled:bg-zinc-900 disabled:cursor-not-allowed"
               />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Buttons: Test Print & Save */}
+      {/* Buttons: Test Print & Dynamic Actions (Edit vs Batal + Simpan) */}
       <div className="pt-6 border-t border-zinc-100 dark:border-zinc-800/65 flex flex-col sm:flex-row items-center justify-between gap-3">
         <Button
           type="button"
@@ -327,14 +349,39 @@ export function ThermalPrinterTab() {
           <span>Uji Coba Cetak Struk</span>
         </Button>
 
-        <Button
-          type="submit"
-          variant="primary"
-          size="sm"
-          className="w-full sm:w-auto"
-        >
-          Simpan Perubahan
-        </Button>
+        {!isEditing ? (
+          <Button
+            type="button"
+            variant="primary"
+            size="sm"
+            onClick={handleStartEdit}
+            className="w-full sm:w-auto flex items-center justify-center gap-1.5"
+          >
+            <FiEdit2 className="w-3.5 h-3.5" />
+            <span>Edit</span>
+          </Button>
+        ) : (
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={handleCancelEdit}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5"
+            >
+              <FiX className="w-3.5 h-3.5" />
+              <span>Batal</span>
+            </Button>
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              className="flex-1 sm:flex-none"
+            >
+              Simpan Perubahan
+            </Button>
+          </div>
+        )}
       </div>
     </form>
 
@@ -342,13 +389,13 @@ export function ThermalPrinterTab() {
     <Modal
       isOpen={isTestPrintOpen}
       onClose={() => setIsTestPrintOpen(false)}
-      title="Preview Struk"
-      size="xs"
+      title="Preview Struk Thermal"
+      size="sm"
     >
-      <div className="p-5">
+      <div className="p-6">
         {/* Kertas struk dengan lebar terbatas seperti 58mm/80mm */}
-        <div className="mx-auto font-mono text-xs bg-white dark:bg-zinc-950 border border-dashed border-zinc-300 dark:border-zinc-700 rounded p-4 space-y-1 text-zinc-800 dark:text-zinc-200"
-          style={{ maxWidth: settings.paperWidth === '58mm' ? '220px' : '280px' }}
+        <div className="mx-auto font-mono text-xs sm:text-sm bg-white dark:bg-zinc-950 border border-dashed border-zinc-300 dark:border-zinc-700 rounded-xl p-5 space-y-2 text-zinc-800 dark:text-zinc-200 shadow-xs"
+          style={{ maxWidth: settings.paperWidth === '58mm' ? '300px' : '360px' }}
         >
           {/* Header */}
           <p className="text-center font-bold uppercase text-sm">{settings.headerText}</p>

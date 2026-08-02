@@ -19,6 +19,8 @@ export interface OrderItem {
   items: OrderCartItem[]
   totalAmount: number
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
+  orderType?: 'dine_in' | 'takeaway'
+  tableNumber?: string | null
 }
 
 interface OrderCardProps {
@@ -64,7 +66,9 @@ export function OrderCard({ order }: OrderCardProps) {
             <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{order.customerName}</span>
           </div>
           <span className="text-xs font-medium text-slate-400 shrink-0">
-            Meja #05
+            {order.orderType === 'takeaway' || !order.tableNumber
+              ? 'Takeaway'
+              : `Meja #${order.tableNumber}`}
           </span>
         </div>
 

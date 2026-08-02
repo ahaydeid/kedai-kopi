@@ -43,6 +43,8 @@ function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | nu
     })),
     totalAmount: Number(item.total_amount),
     status: item.status as 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan',
+    orderType: item.order_type,
+    tableNumber: item.table_number,
   }
 }
 
