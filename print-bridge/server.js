@@ -185,6 +185,9 @@ function isBluetoothPrinterHardwareReady() {
 
 // Create HTTP Server with CORS & Private Network Access (PNA) Headers
 const server = http.createServer((req, res) => {
+  const remoteIp = req.socket.remoteAddress || req.headers['x-forwarded-for'] || 'unknown'
+  console.log(`[${new Date().toLocaleTimeString('id-ID')}] Incoming ${req.method} ${req.url} from ${remoteIp}`)
+
   // CORS & PNA Headers for Cloud HTTPS -> Localhost HTTP calls
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
