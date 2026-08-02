@@ -28,6 +28,7 @@ interface MenuTableProps {
   currentPage: number
   pageSize: number
   onPageChange: (page: number) => void
+  isOnline?: boolean
 }
 
 export function MenuTable({
@@ -40,6 +41,7 @@ export function MenuTable({
   currentPage,
   pageSize,
   onPageChange,
+  isOnline = true,
 }: MenuTableProps) {
   const effectiveTotal = totalCount ?? items.length
   const totalPages = Math.ceil(effectiveTotal / pageSize) || 1
@@ -136,12 +138,13 @@ export function MenuTable({
 
                   <ActionButton
                     variant="edit"
+                    disabled={!isOnline}
                     onClick={() => {
                       if (onEdit) {
                         onEdit(item)
                       }
                     }}
-                    title="Edit Menu"
+                    title={isOnline ? 'Edit Menu' : 'Membutuhkan koneksi internet untuk mengedit menu'}
                   >
                     <FiEdit3 className="h-4 w-4 text-white" />
                   </ActionButton>

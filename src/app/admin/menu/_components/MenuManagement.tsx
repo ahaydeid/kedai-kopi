@@ -21,6 +21,7 @@ import {
 } from '@/services/supabase/menuService'
 import { DatabaseMenu } from '@/types/database'
 import { TableSkeleton } from '@/components/ui/TableSkeleton'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 // Client-side in-memory cache untuk instant 0ms render saat navigasi ulang
 let menuClientCache: {
@@ -44,6 +45,7 @@ function mapDatabaseMenuToMenuItem(item: DatabaseMenu): MenuItem {
 }
 
 export function MenuManagement() {
+  const isOnline = useNetworkStatus()
   const [subCategoriesList, setSubCategoriesList] = useState<string[]>([])
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('semua')
@@ -248,7 +250,14 @@ export function MenuManagement() {
             Kelola Menu
           </h1>
         </div>
-        <Button onClick={handleOpenAddModal} variant="primary" size="sm">
+        <Button
+          onClick={handleOpenAddModal}
+          disabled={!isOnline}
+          title={isOnline ? 'Tambah Menu' : 'Membutuhkan koneksi internet untuk menambah menu'}
+          variant="primary"
+          size="sm"
+          className="disabled:opacity-40 disabled:cursor-not-allowed"
+        >
           <FiPlus className="h-4 w-4" />
           <span>Tambah Menu</span>
         </Button>
@@ -280,6 +289,7 @@ export function MenuManagement() {
             currentPage={currentPage}
             pageSize={pageSize}
             onPageChange={setCurrentPage}
+            isOnline={isOnline}
           />
         </div>
       )}

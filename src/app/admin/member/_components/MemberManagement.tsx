@@ -56,7 +56,10 @@ function formatJoinedDate(isoString: string): string {
   return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}`
 }
 
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
+
 export function MemberManagement() {
+  const isOnline = useNetworkStatus()
   const [search, setSearch] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
@@ -435,8 +438,9 @@ export function MemberManagement() {
                       ) : (
                         <ActionButton
                           variant="edit"
+                          disabled={!isOnline}
                           onClick={() => handleStartEdit(member)}
-                          title="Edit Poin"
+                          title={isOnline ? 'Edit Poin' : 'Membutuhkan koneksi internet untuk mengedit poin'}
                         >
                           <FiEdit2 className="h-4 w-4 text-white" />
                         </ActionButton>

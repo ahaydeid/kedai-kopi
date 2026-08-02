@@ -17,11 +17,11 @@ export function ActionButton({
   let baseStyles = "";
   
   if (variant === 'edit') {
-    baseStyles = "w-9 h-9 rounded-lg flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white border-none transition-all cursor-pointer";
+    baseStyles = "w-9 h-9 rounded-lg flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white border-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
   } else if (variant === 'delete') {
-    baseStyles = "w-9 h-9 rounded-lg flex items-center justify-center bg-rose-500 hover:bg-rose-600 text-white border-none transition-all cursor-pointer";
+    baseStyles = "w-9 h-9 rounded-lg flex items-center justify-center bg-rose-500 hover:bg-rose-600 text-white border-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
   } else {
-    baseStyles = "w-9 h-9 rounded-lg flex items-center justify-center bg-slate-200 hover:bg-slate-300 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border-none transition-all cursor-pointer";
+    baseStyles = "w-9 h-9 rounded-lg flex items-center justify-center bg-slate-200 hover:bg-slate-300 text-slate-600 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 border-none transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none";
   }
 
   const combinedClassName = `${baseStyles} ${className}`;

@@ -12,6 +12,7 @@ import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
 
 import { getTables, getCachedTablesSync, createTable, updateTable, deleteTable, subscribeToTables, TableItem } from '@/services/supabase/tableService'
+import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 export interface TableData {
   id: string
@@ -22,6 +23,7 @@ export interface TableData {
 }
 
 export function TableManagement() {
+  const isOnline = useNetworkStatus()
   const [tables, setTables] = useState<TableData[]>(() => {
     const syncCache = getCachedTablesSync()
     if (syncCache.length > 0) {
@@ -317,10 +319,20 @@ export function TableManagement() {
                   </button>
 
                   <div className="flex items-center gap-1">
-                    <ActionButton title="Edit Meja" onClick={() => handleOpenEdit(t)}>
+                    <ActionButton
+                      title={isOnline ? 'Edit Meja' : 'Membutuhkan koneksi internet'}
+                      variant="edit"
+                      disabled={!isOnline}
+                      onClick={() => handleOpenEdit(t)}
+                    >
                       <FiEdit2 className="w-3 h-3" />
                     </ActionButton>
-                    <ActionButton title="Hapus Meja" variant="delete" onClick={() => handleDelete(t)}>
+                    <ActionButton
+                      title={isOnline ? 'Hapus Meja' : 'Membutuhkan koneksi internet'}
+                      variant="delete"
+                      disabled={!isOnline}
+                      onClick={() => handleDelete(t)}
+                    >
                       <FiTrash2 className="w-3 h-3" />
                     </ActionButton>
                   </div>
@@ -377,6 +389,7 @@ export function TableManagement() {
           currentPage={currentPage}
           pageSize={pageSize}
           onPageChange={setCurrentPage}
+          isOnline={isOnline}
         />
       )}
 

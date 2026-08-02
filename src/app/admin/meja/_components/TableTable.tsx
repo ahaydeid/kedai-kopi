@@ -17,6 +17,7 @@ interface TableTableProps {
   currentPage: number
   pageSize: number
   onPageChange: (page: number) => void
+  isOnline?: boolean
 }
 
 export function TableTable({
@@ -28,6 +29,7 @@ export function TableTable({
   currentPage,
   pageSize,
   onPageChange,
+  isOnline = true,
 }: TableTableProps) {
   const effectiveTotal = totalCount ?? items.length
   const totalPages = Math.ceil(effectiveTotal / pageSize) || 1
@@ -111,10 +113,10 @@ export function TableTable({
                 {/* Aksi */}
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1.5">
-                    <ActionButton title="Edit Meja" onClick={() => onEdit(item)}>
+                    <ActionButton title="Edit Meja" variant="edit" disabled={!isOnline} onClick={() => onEdit(item)}>
                       <FiEdit2 className="w-3.5 h-3.5" />
                     </ActionButton>
-                    <ActionButton title="Hapus Meja" variant="delete" onClick={() => onDelete(item)}>
+                    <ActionButton title="Hapus Meja" variant="delete" disabled={!isOnline} onClick={() => onDelete(item)}>
                       <FiTrash2 className="w-3.5 h-3.5" />
                     </ActionButton>
                   </div>
