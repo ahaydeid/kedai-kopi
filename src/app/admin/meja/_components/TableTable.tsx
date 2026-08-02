@@ -39,13 +39,13 @@ export function TableTable({
   const renderBadge = (status: TableData['status']) => {
     switch (status) {
       case 'Tersedia':
-        return <Badge variant="success">Tersedia</Badge>
+        return <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">Tersedia</span>
       case 'Penuh':
-        return <Badge variant="warning">Penuh</Badge>
+        return <span className="text-xs font-normal text-amber-600 dark:text-amber-400">Penuh</span>
       case 'Dipesan':
-        return <Badge variant="info">Dipesan</Badge>
+        return <span className="text-xs font-normal text-sky-600 dark:text-sky-400">Dipesan</span>
       case 'Tidak tersedia':
-        return <Badge variant="destructive">Tidak tersedia</Badge>
+        return <span className="text-xs font-normal text-rose-600 dark:text-rose-400">Tidak tersedia</span>
     }
   }
 

@@ -262,13 +262,13 @@ export function TableManagement() {
                     <span className="font-normal text-xs text-slate-400">#</span>{t.number}
                   </span>
                   {t.status === 'Tersedia' ? (
-                    <Badge variant="success">Tersedia</Badge>
+                    <span className="text-xs font-normal text-emerald-600 dark:text-emerald-400">Tersedia</span>
                   ) : t.status === 'Penuh' ? (
-                    <Badge variant="warning">Penuh</Badge>
+                    <span className="text-xs font-normal text-amber-600 dark:text-amber-400">Penuh</span>
                   ) : t.status === 'Dipesan' ? (
-                    <Badge variant="info">Dipesan</Badge>
+                    <span className="text-xs font-normal text-sky-600 dark:text-sky-400">Dipesan</span>
                   ) : (
-                    <Badge variant="destructive">Tidak tersedia</Badge>
+                    <span className="text-xs font-normal text-rose-600 dark:text-rose-400">Tidak tersedia</span>
                   )}
                 </div>
 
