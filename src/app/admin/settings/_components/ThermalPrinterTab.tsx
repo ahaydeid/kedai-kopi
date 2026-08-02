@@ -275,7 +275,7 @@ export function ThermalPrinterTab() {
                 <button
                   type="button"
                   onClick={() => updateSetting('paperWidth', '58mm')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all ${
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '58mm'
                       ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300'
                       : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
@@ -286,7 +286,7 @@ export function ThermalPrinterTab() {
                 <button
                   type="button"
                   onClick={() => updateSetting('paperWidth', '80mm')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all ${
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '80mm'
                       ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300'
                       : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
