@@ -155,9 +155,9 @@ export default function CustomerProfilePage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-3.5rem)] overflow-hidden bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans selection:bg-[#3D2514] selection:text-white relative">
+    <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans selection:bg-[#3D2514] selection:text-white">
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-md mx-auto p-4 space-y-3 overflow-hidden">
+      <main className="flex-1 w-full max-w-md mx-auto space-y-4 pb-20">
         {/* Header User Info & Poin Saya */}
         <section className="bg-white dark:bg-slate-900 p-4 rounded border-none space-y-3.5">
           <div className="flex items-center justify-between gap-3">
@@ -255,10 +255,22 @@ export default function CustomerProfilePage() {
         </section>
 
         {/* Email Pelanggan Rata Tengah di Bawah Section Menu */}
-        <div className="text-center pt-0.5 px-4">
+        <div className="text-center pt-1">
           <p className="text-[11px] font-normal text-slate-400 dark:text-slate-500 truncate">
             {userEmail}
           </p>
+        </div>
+
+        {/* Tombol Keluar Akun */}
+        <div className="pt-2 flex justify-center">
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="inline-flex items-center justify-center gap-1.5 p-2 text-rose-600 dark:text-rose-400 font-normal text-xs hover:underline cursor-pointer transition-colors"
+          >
+            <FiLogOut className="h-4 w-4" />
+            <span>Keluar Akun</span>
+          </button>
         </div>
       </main>
 
@@ -273,18 +285,6 @@ export default function CustomerProfilePage() {
         initialPhone={userPhone}
         onProfileUpdated={handleProfileUpdated}
       />
-
-      {/* Tombol Keluar Akun - Fixed di atas BottomBar */}
-      <div className="absolute bottom-2 left-0 right-0 z-30 flex justify-center pb-2">
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="inline-flex items-center justify-center gap-1.5 p-1.5 text-rose-600 dark:text-rose-400 font-normal text-xs hover:underline cursor-pointer transition-colors"
-        >
-          <FiLogOut className="h-4 w-4" />
-          <span>Keluar Akun</span>
-        </button>
-      </div>
     </div>
   )
 }
