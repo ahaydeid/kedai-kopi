@@ -104,16 +104,17 @@ function buildEscPosBuffer(data) {
 
   chunks.push(Buffer.from(`--------------------------------\n`, 'latin1'))
 
-  const discountVal = Number(data.discountAmount || data.claimedPoints || data.discount || 0)
-  if (discountVal > 0) {
-    let subtotal = 0
-    if (Array.isArray(data.items)) {
-      subtotal = data.items.reduce((acc, item) => acc + item.price * (item.quantity > 1 ? item.quantity : 1), 0)
-    }
-    if (!subtotal || subtotal <= 0) {
-      subtotal = Number(data.totalAmount || 0) + discountVal
-    }
+  let itemsSubtotal = 0
+  if (Array.isArray(data.items)) {
+    itemsSubtotal = data.items.reduce((acc, item) => acc + item.price * (item.quantity > 1 ? item.quantity : 1), 0)
+  }
 
+  const explicitDiscount = Number(data.discountAmount || data.claimedPoints || data.discount || 0)
+  const autoDiscount = itemsSubtotal > (data.totalAmount || 0) ? itemsSubtotal - (data.totalAmount || 0) : 0
+  const discountVal = explicitDiscount > 0 ? explicitDiscount : autoDiscount
+
+  if (discountVal > 0) {
+    const subtotal = itemsSubtotal > 0 ? itemsSubtotal : (data.totalAmount || 0) + discountVal
     const subLabel = 'Subtotal'
     const subStr = formatRupiah(subtotal)
     const subSpaces = ' '.repeat(Math.max(0, 32 - subLabel.length - subStr.length))

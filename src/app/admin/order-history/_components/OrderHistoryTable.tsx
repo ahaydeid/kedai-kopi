@@ -85,6 +85,7 @@ export function OrderHistoryTable({
       dateTime: item.dateTime,
       items: parsedItems.length > 0 ? parsedItems : [{ name: item.itemsSummary, quantity: 1, price: item.totalAmount }],
       totalAmount: item.totalAmount,
+      discountAmount: item.discountAmount || item.claimedPoints || 0,
     })
   }
 

@@ -64,6 +64,11 @@ export async function printThermalReceipt(data: ReceiptData) {
     )
     .join('')
 
+  const itemsSum = data.items.reduce((acc, i) => acc + i.price * (i.quantity > 1 ? i.quantity : 1), 0)
+  const explicitDisc = Number(data.discountAmount || data.claimedPoints || 0)
+  const autoDisc = itemsSum > data.totalAmount ? itemsSum - data.totalAmount : 0
+  const effectiveDiscount = explicitDisc > 0 ? explicitDisc : autoDisc
+
   const receiptHtml = `
     <!DOCTYPE html>
     <html>
@@ -78,35 +83,19 @@ export async function printThermalReceipt(data: ReceiptData) {
           body {
             font-family: 'Courier New', Courier, monospace;
             font-size: 11px;
-            line-height: 1.2;
+            line-height: 1.3;
+            width: ${maxWidthPx};
+            margin: 0 auto;
+            padding: 8px;
             color: #000;
-            background: #fff;
-            margin: 0;
-            padding: 8px 6px;
-            width: ${paperWidth};
-            max-width: ${maxWidthPx};
-            box-sizing: border-box;
           }
           .text-center { text-align: center; }
-          .text-right { text-align: right; }
+          .header-title { font-size: 14px; font-weight: bold; }
+          .divider { border-bottom: 1px dashed #000; margin: 6px 0; }
+          .double-divider { border-bottom: 2px solid #000; margin: 6px 0; }
+          .row { display: flex; justify-content: space-between; }
           .bold { font-weight: bold; }
-          .uppercase { text-transform: uppercase; }
-          .divider {
-            border-top: 1px dashed #000;
-            margin: 5px 0;
-          }
-          .double-divider {
-            border-top: 2px dashed #000;
-            margin: 6px 0;
-          }
-          .row {
-            display: flex;
-            justify-content: space-between;
-          }
-          .header-title {
-            font-size: 14px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
+          letter-spacing: 0.5px;
           }
         </style>
       </head>
@@ -132,12 +121,10 @@ export async function printThermalReceipt(data: ReceiptData) {
         </div>
 
         ${
-          (data.discountAmount || data.claimedPoints || 0) > 0
+          effectiveDiscount > 0
             ? `
-            <div class="row"><span>Subtotal:</span><span>${formatRupiah(
-              data.items.reduce((acc, i) => acc + i.price * i.quantity, 0) || (data.totalAmount + (data.discountAmount || data.claimedPoints || 0))
-            )}</span></div>
-            <div class="row"><span>Diskon:</span><span>-${formatRupiah(data.discountAmount || data.claimedPoints || 0)}</span></div>
+            <div class="row"><span>Subtotal:</span><span>${formatRupiah(itemsSum > 0 ? itemsSum : data.totalAmount + effectiveDiscount)}</span></div>
+            <div class="row"><span>Diskon:</span><span>-${formatRupiah(effectiveDiscount)}</span></div>
             `
             : ''
         }

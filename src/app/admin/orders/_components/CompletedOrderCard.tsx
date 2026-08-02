@@ -51,6 +51,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
         }
       }),
       totalAmount: order.totalAmount,
+      discountAmount: order.discountAmount || order.claimedPoints || 0,
     })
   }
 
