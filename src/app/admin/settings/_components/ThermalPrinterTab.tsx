@@ -226,7 +226,7 @@ export function ThermalPrinterTab() {
         </div>
       </div>
 
-      <div className="space-y-6 divide-y divide-zinc-100 dark:divide-zinc-800/60">
+      <div className="space-y-6">
         {/* Section 1: Tipe Koneksi */}
         <div className="pt-2 space-y-3">
           <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
@@ -238,8 +238,8 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'bluetooth')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'bluetooth'
-                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
-                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
+                  : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >
               <FiBluetooth className="w-5 h-5 shrink-0" />
@@ -254,8 +254,8 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'usb')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'usb'
-                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
-                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
+                  ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
+                  : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >
               <FiCpu className="w-5 h-5 shrink-0" />
@@ -281,7 +281,7 @@ export function ThermalPrinterTab() {
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '58mm'
                       ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300'
-                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
+                      : 'border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                   }`}
                 >
                   58 mm (Mini Thermal)
@@ -292,7 +292,7 @@ export function ThermalPrinterTab() {
                   className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '80mm'
                       ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300'
-                      : 'border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
+                      : 'border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                   }`}
                 >
                   80 mm (Lebar Kasir)
@@ -307,7 +307,7 @@ export function ThermalPrinterTab() {
               <select
                 value={settings.printCopies}
                 onChange={(e) => updateSetting('printCopies', Number(e.target.value))}
-                className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
+                className="w-full rounded-lg border border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
               >
                 <option value={1}>1 Lembar (Struk Pembeli)</option>
                 <option value={2}>2 Lembar (Pembeli + Barista Dapur)</option>
