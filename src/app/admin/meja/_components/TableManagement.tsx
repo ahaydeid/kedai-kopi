@@ -11,6 +11,8 @@ import { BsQrCode } from 'react-icons/bs'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
 
+import { getTables, createTable, updateTable, deleteTable, subscribeToTables, TableItem } from '@/services/supabase/tableService'
+
 export interface TableData {
   id: string
   number: string
@@ -19,19 +21,9 @@ export interface TableData {
   qrUrl: string
 }
 
-const DEFAULT_TABLES: TableData[] = Array.from({ length: 15 }, (_, i) => {
-  const num = String(i + 1).padStart(2, '0')
-  return {
-    id: `table-${i + 1}`,
-    number: num,
-    capacity: i % 3 === 0 ? 6 : i % 2 === 0 ? 4 : 2,
-    status: i === 4 ? 'Penuh' : i === 8 ? 'Dipesan' : i === 12 ? 'Tidak tersedia' : 'Tersedia',
-    qrUrl: `https://kedaikopi.com/?meja=${num}`,
-  }
-})
-
 export function TableManagement() {
-  const [tables, setTables] = useState<TableData[]>(DEFAULT_TABLES)
+  const [tables, setTables] = useState<TableData[]>([])
+  const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')
@@ -45,6 +37,32 @@ export function TableManagement() {
 
   // QR Modal State
   const [qrModalTable, setQrModalTable] = useState<TableData | null>(null)
+
+  const fetchTablesFromSupabase = React.useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true)
+    const data = await getTables()
+    const mapped: TableData[] = data.map((t) => ({
+      id: t.id,
+      number: t.number,
+      capacity: t.capacity,
+      status: t.status,
+      qrUrl: `https://kedaikopi.com/?meja=${t.number}`,
+    }))
+    setTables(mapped)
+    setLoading(false)
+  }, [])
+
+  React.useEffect(() => {
+    fetchTablesFromSupabase(false)
+
+    const unsubscribe = subscribeToTables(() => {
+      fetchTablesFromSupabase(true)
+    })
+
+    return () => {
+      unsubscribe()
+    }
+  }, [fetchTablesFromSupabase])
 
   const filteredTables = tables.filter((t) => {
     const matchSearch = t.number.includes(search) || t.status.toLowerCase().includes(search.toLowerCase())
@@ -69,49 +87,43 @@ export function TableManagement() {
     setIsModalOpen(true)
   }
 
-  const handleSave = (e: React.FormEvent) => {
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.number.trim()) return
 
     if (editingTable) {
-      setTables((prev) =>
-        prev.map((t) =>
-          t.id === editingTable.id
-            ? {
-                ...t,
-                number: formData.number,
-                capacity: Number(formData.capacity),
-                status: formData.status,
-                qrUrl: `https://kedaikopi.com/?meja=${formData.number}`,
-              }
-            : t
-        )
-      )
-      playSwalSound('success')
-      Swal.fire({
-        title: 'Berhasil Diperbarui',
-        text: `Meja #${formData.number} telah diperbarui.`,
-        icon: 'success',
-        confirmButtonColor: '#3D2514',
-      })
-    } else {
-      const newTable: TableData = {
-        id: `table-${Date.now()}`,
+      const res = await updateTable(editingTable.id, {
         number: formData.number,
         capacity: Number(formData.capacity),
         status: formData.status,
-        qrUrl: `https://kedaikopi.com/?meja=${formData.number}`,
-      }
-      setTables((prev) => [...prev, newTable])
-      playSwalSound('success')
-      Swal.fire({
-        title: 'Meja Ditambahkan',
-        text: `Meja #${formData.number} telah ditambahkan.`,
-        icon: 'success',
-        confirmButtonColor: '#3D2514',
       })
+      if (res) {
+        playSwalSound('success')
+        Swal.fire({
+          title: 'Berhasil Diperbarui',
+          text: `Meja #${formData.number} telah diperbarui.`,
+          icon: 'success',
+          confirmButtonColor: '#3D2514',
+        })
+      }
+    } else {
+      const res = await createTable({
+        number: formData.number,
+        capacity: Number(formData.capacity),
+        status: formData.status,
+      })
+      if (res) {
+        playSwalSound('success')
+        Swal.fire({
+          title: 'Meja Ditambahkan',
+          text: `Meja #${formData.number} telah ditambahkan.`,
+          icon: 'success',
+          confirmButtonColor: '#3D2514',
+        })
+      }
     }
     setIsModalOpen(false)
+    fetchTablesFromSupabase(true)
   }
 
   const handleDelete = (table: TableData) => {
@@ -125,16 +137,19 @@ export function TableManagement() {
       cancelButtonColor: '#64748b',
       confirmButtonText: 'Ya, Hapus',
       cancelButtonText: 'Batal',
-    }).then((result) => {
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        setTables((prev) => prev.filter((t) => t.id !== table.id))
-        playSwalSound('success')
-        Swal.fire({
-          title: 'Dihapus',
-          text: `Meja #${table.number} telah dihapus.`,
-          icon: 'success',
-          confirmButtonColor: '#3D2514',
-        })
+        const success = await deleteTable(table.id)
+        if (success) {
+          playSwalSound('success')
+          Swal.fire({
+            title: 'Dihapus',
+            text: `Meja #${table.number} telah dihapus.`,
+            icon: 'success',
+            confirmButtonColor: '#3D2514',
+          })
+          fetchTablesFromSupabase(true)
+        }
       }
     })
   }
