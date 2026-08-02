@@ -342,7 +342,7 @@ export function ThermalPrinterTab() {
     <Modal
       isOpen={isTestPrintOpen}
       onClose={() => setIsTestPrintOpen(false)}
-      title="Preview Struk Uji Coba"
+      title="Preview Struk"
       size="xs"
     >
       <div className="p-5">
@@ -359,7 +359,7 @@ export function ThermalPrinterTab() {
           {/* Info Order */}
           <p>Tgl&nbsp;: {new Date().toLocaleDateString('id-ID')} {new Date().toLocaleTimeString('id-ID')}</p>
           <p>No&nbsp;&nbsp;: #TEST-0001</p>
-          <p>Nama: Budi Santoso</p>
+          <p>Nama: Joko Widodo</p>
 
           <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
 

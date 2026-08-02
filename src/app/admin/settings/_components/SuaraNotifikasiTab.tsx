@@ -85,9 +85,6 @@ export function SuaraNotifikasiTab() {
     return true
   });
   const [notifOrder, setNotifOrder] = useState(true);
-  const [notifBayar, setNotifBayar] = useState(true);
-  const [notifChat, setNotifChat] = useState(true);
-  const [notifStok, setNotifStok] = useState(true);
 
   const playPreviewSound = (id: string) => {
     if (!soundMode) return;
@@ -124,9 +121,6 @@ export function SuaraNotifikasiTab() {
 
   const notificationList = [
     { id: "order", label: "Pesanan Baru", desc: "Dapatkan notifikasi instan saat pembeli membuat pesanan baru", state: notifOrder, setter: setNotifOrder },
-    { id: "bayar", label: "Konfirmasi Pembayaran", desc: "Dapatkan notifikasi pembayaran sukses/konfirmasi transfer dari pembeli", state: notifBayar, setter: setNotifBayar },
-    { id: "chat", label: "Pesan Pelanggan", desc: "Dapatkan notifikasi chat masuk dari calon pembeli", state: notifChat, setter: setNotifChat },
-    { id: "stok", label: "Peringatan Stok Menipis", desc: "Beritahu saya saat stok menu kurang dari batas minimum", state: notifStok, setter: setNotifStok },
   ];
 
   return (
