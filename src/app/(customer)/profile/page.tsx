@@ -157,7 +157,7 @@ export default function CustomerProfilePage() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans selection:bg-[#3D2514] selection:text-white">
       {/* Main Content Area */}
-      <main className="flex-1 w-full max-w-md mx-auto pb-28 space-y-4">
+      <main className="flex-1 w-full max-w-md mx-auto pb-16 space-y-4">
         {/* Header User Info & Poin Saya */}
         <section className="bg-white dark:bg-slate-900 p-4 rounded border-none space-y-3.5">
           <div className="flex items-center justify-between gap-3">
@@ -169,14 +169,15 @@ export default function CustomerProfilePage() {
                     {userName}
                   </h1>
                 </div>
-                {userPhone && (
+                {userPhone ? (
                   <p className="text-xs text-slate-700 dark:text-slate-200 font-medium truncate mt-0.5">
                     {userPhone}
                   </p>
+                ) : (
+                  <p className="text-xs text-slate-400 font-normal italic truncate mt-0.5">
+                    Belum ada No. HP
+                  </p>
                 )}
-                <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
-                  {userEmail}
-                </p>
               </div>
             </div>
 
@@ -252,6 +253,13 @@ export default function CustomerProfilePage() {
             <FiChevronRight className="h-4 w-4 text-slate-400" />
           </div>
         </section>
+
+        {/* Email Pelanggan Rata Tengah di Bawah Section Menu */}
+        <div className="text-center pt-1">
+          <p className="text-[11px] font-normal text-slate-400 dark:text-slate-500 truncate">
+            {userEmail}
+          </p>
+        </div>
       </main>
 
       {/* Modal Info Kedai Kopi */}
