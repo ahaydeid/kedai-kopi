@@ -1,0 +1,147 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/Button'
+import { FiUser, FiPhone } from 'react-icons/fi'
+import Swal from 'sweetalert2'
+import { playSwalSound } from '@/utils/sound'
+import { updateUserProfile } from '@/services/supabase/authService'
+
+interface EditProfileModalProps {
+  isOpen: boolean
+  onClose: () => void
+  initialName: string
+  initialPhone: string
+  onProfileUpdated: (newName: string, newPhone: string) => void
+}
+
+export const EditProfileModal: React.FC<EditProfileModalProps> = ({
+  isOpen,
+  onClose,
+  initialName,
+  initialPhone,
+  onProfileUpdated,
+}) => {
+  const [fullName, setFullName] = useState(initialName)
+  const [phone, setPhone] = useState(initialPhone)
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (isOpen) {
+      setFullName(initialName || '')
+      setPhone(initialPhone || '')
+    }
+  }, [isOpen, initialName, initialPhone])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!fullName.trim()) {
+      playSwalSound('confirm')
+      Swal.fire({
+        title: 'Nama Wajib Diisi',
+        text: 'Silakan masukkan nama lengkap kamu.',
+        icon: 'warning',
+        confirmButtonColor: '#3D2514',
+        customClass: { popup: 'swal2-popup' },
+      })
+      return
+    }
+
+    setSaving(true)
+    const res = await updateUserProfile({ fullName, phone })
+    setSaving(false)
+
+    if (res.success) {
+      onProfileUpdated(fullName.trim(), phone.trim())
+      onClose()
+      playSwalSound('success')
+      Swal.fire({
+        title: 'Profil Diperbarui',
+        text: 'Nama dan nomor telepon kamu berhasil disimpan.',
+        icon: 'success',
+        confirmButtonColor: '#3D2514',
+        confirmButtonText: 'Oke',
+        customClass: { popup: 'swal2-popup' },
+      })
+    } else {
+      playSwalSound('confirm')
+      Swal.fire({
+        title: 'Gagal Memperbarui',
+        text: res.error || 'Terjadi kesalahan saat menyimpan profil.',
+        icon: 'error',
+        confirmButtonColor: '#ef4444',
+        customClass: { popup: 'swal2-popup' },
+      })
+    }
+  }
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      size="md"
+      title="Edit Profil Pelanggan"
+      bodyClassName="p-4"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Input Nama Lengkap */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <FiUser className="h-3.5 w-3.5 text-slate-500" />
+            <span>Nama Lengkap</span>
+          </label>
+          <input
+            type="text"
+            required
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
+            placeholder="Masukkan nama lengkap kamu"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#3D2514] dark:focus:ring-amber-500/50"
+          />
+        </div>
+
+        {/* Input Nomor HP / WhatsApp */}
+        <div className="space-y-1.5">
+          <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
+            <FiPhone className="h-3.5 w-3.5 text-slate-500" />
+            <span>Nomor HP / WhatsApp</span>
+          </label>
+          <input
+            type="tel"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="Contoh: 081234567890"
+            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#3D2514] dark:focus:ring-amber-500/50"
+          />
+          <p className="text-[11px] text-slate-400">
+            Nomor HP digunakan kasir/barista saat mengonfirmasi pesanan kamu.
+          </p>
+        </div>
+
+        {/* Tombol Action */}
+        <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100 dark:border-slate-800">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            disabled={saving}
+          >
+            Batal
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            size="sm"
+            className="bg-[#3D2514] hover:bg-[#2B190E] text-white"
+            disabled={saving}
+          >
+            {saving ? 'Menyimpan...' : 'Simpan Perubahan'}
+          </Button>
+        </div>
+      </form>
+    </Modal>
+  )
+}

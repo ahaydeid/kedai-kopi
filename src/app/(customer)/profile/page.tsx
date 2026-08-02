@@ -10,6 +10,7 @@ import {
   FiInfo,
   FiChevronRight,
   FiLogOut,
+  FiEdit3,
 } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
@@ -17,6 +18,7 @@ import { getCurrentUser, getCachedUserSync, signOut } from '@/services/supabase/
 import { createClient } from '@/services/supabase/client'
 
 import { InfoModal } from '../_components/InfoModal'
+import { EditProfileModal } from '../_components/EditProfileModal'
 
 const CUSTOMER_POINTS_CACHE_KEY = 'customer_points_cache_v1'
 let pointsMemoryCache: number | null = null
@@ -26,6 +28,7 @@ export default function CustomerProfilePage() {
   const [user, setUser] = useState<any>(cachedUser)
   const [loading, setLoading] = useState<boolean>(() => !cachedUser)
   const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+  const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
   const router = useRouter()
 
   const [userPoints, setUserPoints] = useState<number>(() => {
@@ -136,6 +139,19 @@ export default function CustomerProfilePage() {
   const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Pelanggan Kedai'
   const userPhoto = user?.user_metadata?.avatar_url || null
   const userEmail = user?.email || 'Pelanggan'
+  const userPhone = user?.user_metadata?.phone || user?.user_metadata?.phone_number || ''
+
+  const handleProfileUpdated = (newName: string, newPhone: string) => {
+    setUser((prev: any) => ({
+      ...prev,
+      user_metadata: {
+        ...prev?.user_metadata,
+        full_name: newName,
+        phone: newPhone,
+        phone_number: newPhone,
+      },
+    }))
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans selection:bg-[#3D2514] selection:text-white">
@@ -143,16 +159,36 @@ export default function CustomerProfilePage() {
       <main className="flex-1 w-full max-w-md mx-auto pb-28 space-y-4">
         {/* Header User Info & Poin Saya */}
         <section className="bg-white dark:bg-slate-900 p-4 rounded border-none space-y-3.5">
-          <div className="flex items-center gap-3.5">
-            <Avatar name={userName} photo={userPhoto} size="medium" />
-            <div className="min-w-0 flex-1">
-              <h1 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
-                {userName}
-              </h1>
-              <p className="text-xs text-slate-400 font-medium truncate">
-                {userEmail}
-              </p>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3.5 min-w-0 flex-1">
+              <Avatar name={userName} photo={userPhoto} size="medium" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2">
+                  <h1 className="font-bold text-base text-slate-900 dark:text-slate-100 truncate">
+                    {userName}
+                  </h1>
+                </div>
+                <p className="text-xs text-slate-400 font-medium truncate">
+                  {userEmail}
+                </p>
+                {userPhone && (
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 font-normal truncate mt-0.5">
+                    {userPhone}
+                  </p>
+                )}
+              </div>
             </div>
+
+            {/* Tombol Edit Profil */}
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors cursor-pointer shrink-0"
+              title="Edit Profil"
+            >
+              <FiEdit3 className="h-3.5 w-3.5 text-slate-500" />
+              <span>Edit</span>
+            </button>
           </div>
 
           {/* Ringkasan Poin Saya (Style Card Sky) */}
@@ -219,6 +255,15 @@ export default function CustomerProfilePage() {
 
       {/* Modal Info Kedai Kopi */}
       <InfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
+
+      {/* Modal Edit Profil Pelanggan */}
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        initialName={userName}
+        initialPhone={userPhone}
+        onProfileUpdated={handleProfileUpdated}
+      />
 
       {/* Tombol Keluar Akun - Fixed di atas BottomBar */}
       <div className="fixed bottom-14 left-0 right-0 z-30 flex justify-center pb-3 pt-2">

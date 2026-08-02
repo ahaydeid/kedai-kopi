@@ -203,3 +203,25 @@ export async function getCurrentUser(forceRefresh = false) {
   customerUserCache = { user, timestamp: now }
   return user
 }
+
+/**
+ * Update Customer User Profile (Full Name & Phone Number)
+ */
+export async function updateUserProfile(data: { fullName: string; phone: string }): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient()
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      full_name: data.fullName.trim(),
+      phone: data.phone.trim(),
+      phone_number: data.phone.trim(),
+    },
+  })
+
+  if (error) {
+    console.error('Error updating user profile:', error)
+    return { success: false, error: error.message }
+  }
+
+  clearUserCache()
+  return { success: true }
+}
