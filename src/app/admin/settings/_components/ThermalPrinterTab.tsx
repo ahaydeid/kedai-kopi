@@ -10,8 +10,6 @@ import Swal from 'sweetalert2'
 
 interface PrinterSettings {
   connectionType: 'bluetooth' | 'usb'
-  ipAddress: string
-  port: string
   paperWidth: '58mm' | '80mm'
   autoPrint: boolean
   printCopies: number
@@ -22,8 +20,6 @@ interface PrinterSettings {
 export function ThermalPrinterTab() {
   const [settings, setSettings] = useState<PrinterSettings>({
     connectionType: 'bluetooth',
-    ipAddress: '192.168.1.200',
-    port: '9100',
     paperWidth: '58mm',
     autoPrint: true,
     printCopies: 1,
@@ -114,19 +110,6 @@ export function ThermalPrinterTab() {
             })
           }, 800)
         }
-      } else {
-        // Network IP Connection
-        setTimeout(() => {
-          setDeviceName(`LAN Printer (${settings.ipAddress}:${settings.port})`)
-          setIsConnected(true)
-          playSwalSound('success')
-          Swal.fire({
-            title: 'Koneksi Jaringan Siap',
-            text: `Printer LAN pada ${settings.ipAddress}:${settings.port} terhubung.`,
-            icon: 'success',
-            confirmButtonColor: '#0284c7',
-          })
-        }, 600)
       }
     } catch {
       setIsConnected(false)
@@ -147,7 +130,7 @@ export function ThermalPrinterTab() {
     Swal.fire({
       title: '🖨️ Mencetak Struk Uji Coba...',
       html: `
-        <div class="text-left text-xs font-mono bg-amber-50 dark:bg-zinc-950 p-4 rounded-lg border border-amber-200 dark:border-zinc-800 space-y-1 text-zinc-800 dark:text-zinc-200">
+        <div class="text-left text-xs font-mono bg-white dark:bg-slate-950 p-4 rounded-md border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-200">
           <p class="text-center font-bold uppercase text-sm">${settings.headerText}</p>
           <p class="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
@@ -185,7 +168,7 @@ export function ThermalPrinterTab() {
   return (
     <form onSubmit={handleSave} className="space-y-6">
       {/* Header Info & Status Connection Badge */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200/80 dark:border-zinc-700/80">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 dark:bg-zinc-800/50 border border-none dark:border-zinc-700/80">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-lg bg-sky-100 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400">
             <FiPrinter className="w-6 h-6" />
@@ -238,7 +221,7 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'bluetooth')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'bluetooth'
-                  ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
+                  ? 'border-sky-500 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >
@@ -254,7 +237,7 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'usb')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'usb'
-                  ? 'border-sky-500 bg-sky-50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
+                  ? 'border-sky-500 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-100 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >
@@ -278,9 +261,9 @@ export function ThermalPrinterTab() {
                 <button
                   type="button"
                   onClick={() => updateSetting('paperWidth', '58mm')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all whitespace-nowrap ${
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '58mm'
-                      ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300'
+                      ? 'border-sky-500 text-sky-600 dark:text-sky-300'
                       : 'border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                   }`}
                 >
@@ -289,9 +272,9 @@ export function ThermalPrinterTab() {
                 <button
                   type="button"
                   onClick={() => updateSetting('paperWidth', '80mm')}
-                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-semibold border cursor-pointer transition-all whitespace-nowrap ${
+                  className={`flex-1 py-2 px-3 rounded-lg text-xs font-medium border cursor-pointer transition-all whitespace-nowrap ${
                     settings.paperWidth === '80mm'
-                      ? 'border-sky-600 bg-sky-50 dark:bg-sky-950/40 text-sky-600 dark:text-sky-300'
+                      ? 'border-sky-500 text-sky-600 dark:text-sky-300'
                       : 'border-zinc-100 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'
                   }`}
                 >
