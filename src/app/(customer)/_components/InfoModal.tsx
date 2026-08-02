@@ -24,7 +24,7 @@ interface SocialLink {
 
 const SOCIAL_LINKS: SocialLink[] = [
   {
-    title: 'Google Maps (Lokasi Kedai)',
+    title: 'Lokasi Kedai',
     subtitle: 'maps.google.com/kedaikopi',
     url: 'https://maps.google.com/?q=Kedai+Kopi',
     icon: <FiMapPin className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
