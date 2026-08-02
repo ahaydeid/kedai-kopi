@@ -195,7 +195,7 @@ export function ThermalPrinterTab() {
               Status Printer
             </h3>
             {isConnected ? (
-              <div className="flex items-center gap-2 mt-0.5 text-xs font-medium">
+              <div className="flex items-center gap-2 mt-0.5 text-xs font-normal">
                 <span className="text-zinc-700 dark:text-zinc-300">{deviceName}</span>
                 <div className="flex items-center gap-1 text-emerald-600 dark:text-emerald-400">
                   <CheckCircle size="sm" />
@@ -203,7 +203,7 @@ export function ThermalPrinterTab() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-1.5 mt-0.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+              <div className="flex items-center gap-1.5 mt-0.5 text-xs font-normal text-rose-500 dark:text-rose-400">
                 <CrossCircle size="sm" />
                 <span>Terputus</span>
               </div>

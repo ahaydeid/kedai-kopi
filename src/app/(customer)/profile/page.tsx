@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import Avatar from '@/components/ui/Avatar'
 import {
   FiShoppingBag,
-  FiTag,
+  FiSettings,
   FiChevronRight,
   FiLogOut,
   FiEdit3,
@@ -21,6 +21,7 @@ import { createClient } from '@/services/supabase/client'
 
 
 import { EditProfileModal } from '../_components/EditProfileModal'
+import { SettingsModal } from '../_components/SettingsModal'
 
 const CUSTOMER_POINTS_CACHE_KEY = 'customer_points_cache_v1'
 let pointsMemoryCache: number | null = null
@@ -29,7 +30,7 @@ export default function CustomerProfilePage() {
   const cachedUser = getCachedUserSync()
   const [user, setUser] = useState<any>(cachedUser)
   const [loading, setLoading] = useState<boolean>(() => !cachedUser)
-
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
   const router = useRouter()
 
@@ -229,13 +230,13 @@ export default function CustomerProfilePage() {
           </Link>
 
           <div
-            onClick={() => alert('Voucher Saya')}
+            onClick={() => setIsSettingsOpen(true)}
             className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-3">
-              <FiTag className="h-4 w-4 text-slate-500" />
+              <FiSettings className="h-4 w-4 text-slate-500" />
               <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                Voucher Saya
+                Pengaturan
               </span>
             </div>
             <FiChevronRight className="h-4 w-4 text-slate-400" />
@@ -309,6 +310,9 @@ export default function CustomerProfilePage() {
         initialPhone={userPhone}
         onProfileUpdated={handleProfileUpdated}
       />
+
+      {/* Modal Pengaturan */}
+      <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
 
       {/* Tombol Keluar Akun - Fixed di atas BottomBar */}
       <div className="fixed bottom-14 left-0 right-0 z-30 flex justify-center pb-3 pt-2">
