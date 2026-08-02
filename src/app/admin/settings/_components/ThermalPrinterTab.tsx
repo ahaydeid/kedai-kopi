@@ -2,8 +2,10 @@
 
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
+import { CheckCircle } from '@/components/ui/CheckCircle'
+import { CrossCircle } from '@/components/ui/CrossCircle'
 import { playSwalSound } from '@/utils/sound'
-import { FiPrinter, FiBluetooth, FiCpu, FiCheckCircle, FiAlertCircle, FiRefreshCw } from 'react-icons/fi'
+import { FiPrinter, FiBluetooth, FiCpu, FiRefreshCw } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 
 interface PrinterSettings {
@@ -200,13 +202,15 @@ export function ThermalPrinterTab() {
 
         <div className="flex items-center gap-2">
           {isConnected ? (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
-              <FiCheckCircle className="w-3.5 h-3.5" /> Terhubung
-            </span>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
+              <CheckCircle size="sm" />
+              <span>Terhubung</span>
+            </div>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-              <FiAlertCircle className="w-3.5 h-3.5" /> Terputus
-            </span>
+            <div className="flex items-center gap-1.5 text-xs font-medium text-rose-500 dark:text-rose-400">
+              <CrossCircle size="sm" />
+              <span>Terputus</span>
+            </div>
           )}
 
           <Button
