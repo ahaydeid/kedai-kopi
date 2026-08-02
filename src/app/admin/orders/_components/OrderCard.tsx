@@ -41,7 +41,7 @@ export function OrderCard({ order, collapsible = false, defaultExpanded = true }
     return (
       <div
         onClick={() => setIsExpanded(true)}
-        className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-3 flex items-center justify-between gap-3 cursor-pointer hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sm transition-all"
+        className="bg-white dark:bg-slate-900 rounded p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 shadow-sm transition-colors"
       >
         <div className="min-w-0 flex-1 space-y-0.5">
           <div className="flex items-center gap-2">
@@ -82,7 +82,7 @@ export function OrderCard({ order, collapsible = false, defaultExpanded = true }
   }
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800 p-4 space-y-3 flex flex-col justify-between hover:shadow-md hover:-translate-y-0.5 transition-all duration-300 ease-in-out">
+    <div className="bg-white dark:bg-slate-900 rounded p-4 space-y-3 flex flex-col justify-between shadow-sm transition-colors">
       <div className="space-y-2">
         {/* Header Card */}
         <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
