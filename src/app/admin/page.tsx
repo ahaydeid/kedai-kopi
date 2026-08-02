@@ -7,6 +7,9 @@ import { getDashboardMetrics, DashboardMetrics } from '@/services/supabase/repor
 import { subscribeToOrders } from '@/services/supabase/orderService'
 import { formatOrderIdDisplay } from '@/utils/orderId'
 
+// Client-side in-memory cache untuk instant 0ms render saat navigasi ulang
+let dashboardCache: DashboardMetrics | null = null
+
 interface TrendItem {
   label: string
   value: number
@@ -79,21 +82,22 @@ function LineTrendChart({ data, height = 220 }: { data: TrendItem[]; height?: nu
 }
 
 export default function AdminDashboardPage() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => dashboardCache)
+  const [loading, setLoading] = useState(!dashboardCache)
 
-  const fetchMetrics = useCallback(async () => {
-    setLoading(true)
+  const fetchMetrics = useCallback(async (isSilent = false) => {
+    if (!isSilent) setLoading(true)
     const data = await getDashboardMetrics()
+    dashboardCache = data
     setMetrics(data)
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    fetchMetrics()
+    fetchMetrics(dashboardCache !== null)
 
     const unsubscribe = subscribeToOrders(() => {
-      fetchMetrics()
+      fetchMetrics(true)
     })
 
     return () => {
