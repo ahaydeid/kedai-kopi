@@ -7,11 +7,9 @@ import Avatar from '@/components/ui/Avatar'
 import {
   FiShoppingBag,
   FiTag,
-  FiInfo,
   FiChevronRight,
   FiLogOut,
   FiEdit3,
-  FiMail,
   FiInstagram,
   FiMapPin,
 } from 'react-icons/fi'
@@ -21,7 +19,7 @@ import { playSwalSound } from '@/utils/sound'
 import { getCurrentUser, getCachedUserSync, signOut } from '@/services/supabase/authService'
 import { createClient } from '@/services/supabase/client'
 
-import { InfoModal } from '../_components/InfoModal'
+
 import { EditProfileModal } from '../_components/EditProfileModal'
 
 const CUSTOMER_POINTS_CACHE_KEY = 'customer_points_cache_v1'
@@ -31,7 +29,7 @@ export default function CustomerProfilePage() {
   const cachedUser = getCachedUserSync()
   const [user, setUser] = useState<any>(cachedUser)
   const [loading, setLoading] = useState<boolean>(() => !cachedUser)
-  const [isInfoOpen, setIsInfoOpen] = useState<boolean>(false)
+
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
   const router = useRouter()
 
@@ -178,7 +176,7 @@ export default function CustomerProfilePage() {
                   </p>
                 ) : (
                   <p className="text-xs text-slate-400 font-normal italic truncate mt-0.5">
-                    Belum ada No. HP
+                    Telp: -
                   </p>
                 )}
               </div>
@@ -243,18 +241,6 @@ export default function CustomerProfilePage() {
             <FiChevronRight className="h-4 w-4 text-slate-400" />
           </div>
 
-          <div
-            onClick={() => setIsInfoOpen(true)}
-            className="flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
-          >
-            <div className="flex items-center gap-3">
-              <FiInfo className="h-4 w-4 text-slate-500" />
-              <span className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                Info
-              </span>
-            </div>
-            <FiChevronRight className="h-4 w-4 text-slate-400" />
-          </div>
         </section>
 
         {/* Email Pelanggan Rata Tengah di Atas Tombol Bulat */}
@@ -271,7 +257,7 @@ export default function CustomerProfilePage() {
             target="_blank"
             rel="noopener noreferrer"
             title="Lokasi Kedai (Google Maps)"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
           >
             <FiMapPin className="h-5 w-5 text-rose-600 dark:text-rose-400" />
           </a>
@@ -280,7 +266,7 @@ export default function CustomerProfilePage() {
             target="_blank"
             rel="noopener noreferrer"
             title="WhatsApp Official"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
           >
             <FaWhatsapp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           </a>
@@ -289,7 +275,7 @@ export default function CustomerProfilePage() {
             target="_blank"
             rel="noopener noreferrer"
             title="Instagram Official"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
           >
             <FiInstagram className="h-5 w-5 text-pink-600 dark:text-pink-400" />
           </a>
@@ -298,7 +284,7 @@ export default function CustomerProfilePage() {
             target="_blank"
             rel="noopener noreferrer"
             title="TikTok Official"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
           >
             <FaTiktok className="h-5 w-5 text-slate-900 dark:text-slate-100" />
           </a>
@@ -307,15 +293,13 @@ export default function CustomerProfilePage() {
             target="_blank"
             rel="noopener noreferrer"
             title="ShopeeFood"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
           >
             <FiShoppingBag className="h-5 w-5 text-orange-600 dark:text-orange-400" />
           </a>
         </div>
       </main>
 
-      {/* Modal Info Kedai Kopi */}
-      <InfoModal isOpen={isInfoOpen} onClose={() => setIsInfoOpen(false)} />
 
       {/* Modal Edit Profil Pelanggan */}
       <EditProfileModal
