@@ -149,9 +149,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
 
   const getMaskClass = (position: "top" | "bottom", isActive: boolean) => {
     const basePos = position === "top" ? "-top-4" : "-bottom-4";
-    const base = `absolute ${basePos} right-0 w-4 h-4 bg-zinc-50 dark:bg-zinc-950 pointer-events-none z-10`;
-    const transition = isActive ? "opacity-100" : "opacity-0";
-    return `${base} ${transition}`;
+    const base = `absolute ${basePos} right-0 h-4 bg-zinc-50 dark:bg-zinc-950 pointer-events-none z-10`;
+    if (isActive) {
+      const anim = isCollapsed ? "animate-expand-collapsed" : "animate-expand-expanded";
+      return `${base} ${anim} opacity-100`;
+    }
+    const width = isCollapsed ? "w-[calc(100%-12px)]" : "w-[calc(100%-16px)]";
+    return `${base} opacity-0 ${width}`;
   };
 
   const getIconClass = (itemId: string, isActive: boolean) => {
