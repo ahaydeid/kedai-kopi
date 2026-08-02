@@ -169,10 +169,15 @@ export async function printThermalReceipt(data: ReceiptData) {
     }
   }
 
-  // Attempt 1: 0-Click Instant Printing via Local Print Bridge (RPP02N /dev/rfcomm0)
+  if (settings.connectionType === 'browser') {
+    executeIframeBrowserPrint()
+    return
+  }
+
+  // Connection type is 'bluetooth' (Default Direct ESC/POS Printing to /dev/rfcomm0)
   try {
     const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 2500)
+    const timeoutId = setTimeout(() => controller.abort(), 3000)
 
     const response = await fetch(`${bridgeUrl}/api/print`, {
       method: 'POST',
@@ -196,13 +201,17 @@ export async function printThermalReceipt(data: ReceiptData) {
       if (resData.success) {
         console.log('[Direct Print Success]: Receipt printed via Local Print Bridge to RPP02N')
         return
+      } else {
+        alert(`[Local Print Bridge Error]: ${resData.error || resData.message || 'Gagal mengirim dokumen ke printer RPP02N'}`)
+        return
       }
+    } else {
+      alert(`[Local Print Bridge Error]: Server merespons HTTP ${response.status}`)
+      return
     }
-    console.warn('[Print Bridge Error]: Failed to print via Local Print Bridge to ' + bridgeUrl)
   } catch (err) {
-    console.warn('[Print Bridge Notice]: Local Print Bridge not reachable at ' + bridgeUrl + '.', err)
+    console.error('[Print Bridge Error]: Local Print Bridge tidak dapat dijangkau di ' + bridgeUrl, err)
+    alert(`Local Print Bridge tidak terjangkau di ${bridgeUrl}. Pastikan service print-bridge (node print-bridge/server.js) berjalan di komputer kasir Anda.`)
+    return
   }
-
-  // Attempt 2: Fallback Iframe Browser Print (Triggered only if Bridge fails)
-  executeIframeBrowserPrint()
 }
