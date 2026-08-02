@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { OrderCard, OrderItem } from './OrderCard'
+import { CompletedOrderCard } from './CompletedOrderCard'
 import { getOrders, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
 
 let ordersClientCache: OrderItem[] | null = null
@@ -133,7 +134,7 @@ export function OrdersManagement() {
             ) : (
               <div className="space-y-4 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-1.5 scrollbar-thin">
                 {completedOrders.map((order) => (
-                  <OrderCard key={order.id} order={order} collapsible defaultExpanded={false} />
+                  <CompletedOrderCard key={order.id} order={order} defaultExpanded={false} />
                 ))}
               </div>
             )}
