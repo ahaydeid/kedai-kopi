@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { CheckCircle } from '@/components/ui/CheckCircle'
 import { CrossCircle } from '@/components/ui/CrossCircle'
@@ -18,32 +18,32 @@ interface PrinterSettings {
 }
 
 export function ThermalPrinterTab() {
-  const [settings, setSettings] = useState<PrinterSettings>({
+  const DEFAULT_SETTINGS: PrinterSettings = {
     connectionType: 'bluetooth',
     paperWidth: '58mm',
     autoPrint: true,
     printCopies: 1,
     headerText: 'Kedai Kopi',
     footerText: 'Terima kasih atas kunjungan Anda!',
-  })
+  }
 
-  const [isConnected, setIsConnected] = useState(false)
-  const [deviceName, setDeviceName] = useState<string>('')
-  const [isConnecting, setIsConnecting] = useState(false)
-
-  useEffect(() => {
+  const [settings, setSettings] = useState<PrinterSettings>(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('setting_thermal_printer')
       if (saved) {
         try {
-          const parsed = JSON.parse(saved)
-          setSettings((prev) => ({ ...prev, ...parsed }))
+          return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
         } catch {
           // fallback default
         }
       }
     }
-  }, [])
+    return DEFAULT_SETTINGS
+  })
+
+  const [isConnected, setIsConnected] = useState(false)
+  const [deviceName, setDeviceName] = useState<string>('')
+  const [isConnecting, setIsConnecting] = useState(false)
 
   const updateSetting = <K extends keyof PrinterSettings>(key: K, value: PrinterSettings[K]) => {
     setSettings((prev) => ({ ...prev, [key]: value }))
