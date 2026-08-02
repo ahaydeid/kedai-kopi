@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { FiChevronDown, FiPlus, FiCheck, FiCamera, FiTrash2 } from 'react-icons/fi'
 import { Modal } from '@/components/ui/Modal'
 import { Toggle } from '@/components/ui/Toggle'
@@ -34,10 +35,20 @@ export function MenuModal({
   const [images, setImages] = useState<string[]>([])
   const [isUploading, setIsUploading] = useState(false)
 
-  // State untuk Combobox Sub-Kategori
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
   const [comboboxSearch, setComboboxSearch] = useState('')
   const comboboxRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; left: number; width: number } | null>(null)
+
+  const openCombobox = () => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect()
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left, width: rect.width })
+    }
+    setIsComboboxOpen(true)
+  }
 
   useEffect(() => {
     if (initialData) {
@@ -113,7 +124,11 @@ export function MenuModal({
   // Close combobox when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
+      const target = e.target as Node
+      if (
+        comboboxRef.current && !comboboxRef.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
         setIsComboboxOpen(false)
       }
     }
@@ -159,7 +174,7 @@ export function MenuModal({
       isOpen={isOpen}
       onClose={onClose}
       title={initialData ? 'Edit Menu' : 'Tambah Menu Baru'}
-      size="lg"
+      size="xl"
       bodyClassName="p-5 sm:p-6"
     >
       <form onSubmit={handleSubmit} className="space-y-4 text-xs">
@@ -246,30 +261,47 @@ export function MenuModal({
             </label>
             <div className="relative">
               <input
+                ref={inputRef}
                 type="text"
                 required
                 value={comboboxSearch}
-                onFocus={() => setIsComboboxOpen(true)}
+                onFocus={openCombobox}
                 onChange={(e) => {
                   setComboboxSearch(e.target.value)
                   setSubCategory(e.target.value)
-                  setIsComboboxOpen(true)
+                  openCombobox()
                 }}
                 placeholder="Pilih atau ketik baru..."
                 className="w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 pr-8 text-xs outline-none focus:border-sky-500 text-slate-900 dark:text-slate-100 placeholder-slate-400"
               />
               <button
                 type="button"
-                onClick={() => setIsComboboxOpen(!isComboboxOpen)}
+                onClick={() => {
+                  if (isComboboxOpen) {
+                    setIsComboboxOpen(false)
+                  } else {
+                    openCombobox()
+                  }
+                }}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
               >
                 <FiChevronDown className={`h-4 w-4 transition-transform ${isComboboxOpen ? 'rotate-180' : ''}`} />
               </button>
             </div>
 
-            {/* Combobox Dropdown List */}
-            {isComboboxOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 z-50 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-lg max-h-48 overflow-y-auto py-1">
+            {/* Combobox Dropdown via Portal (fixed positioning, escapes modal overflow) */}
+            {isComboboxOpen && dropdownPos && typeof document !== 'undefined' && createPortal(
+              <div
+                ref={dropdownRef}
+                style={{
+                  position: 'fixed',
+                  top: dropdownPos.top,
+                  left: dropdownPos.left,
+                  width: dropdownPos.width,
+                  zIndex: 9999,
+                }}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl max-h-48 overflow-y-auto py-1"
+              >
                 {filteredSubCats.map((cat) => (
                   <button
                     key={cat}
@@ -307,7 +339,8 @@ export function MenuModal({
                     Ketik untuk membuat sub-kategori baru
                   </div>
                 )}
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         </div>
