@@ -147,7 +147,7 @@ export function ThermalPrinterTab() {
       html: `
         <div class="text-left text-xs font-mono bg-amber-50 dark:bg-zinc-950 p-4 rounded-lg border border-amber-200 dark:border-zinc-800 space-y-1 text-zinc-800 dark:text-zinc-200">
           <p class="text-center font-bold uppercase text-sm">${settings.headerText}</p>
-          <p class="text-center text-[10px] text-zinc-500">Jl. Kedai Kopi No. 1, Kota Bandung</p>
+          <p class="text-center text-[10px] text-zinc-500">Ruko Al Husna. Saga, Balaraja</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
           <p>Tgl: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}</p>
           <p>No: #TEST-0001</p>
@@ -235,7 +235,7 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'bluetooth')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'bluetooth'
-                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 font-semibold shadow-sm'
+                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >
@@ -251,7 +251,7 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'usb')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'usb'
-                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 font-semibold shadow-sm'
+                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >
@@ -267,7 +267,7 @@ export function ThermalPrinterTab() {
               onClick={() => updateSetting('connectionType', 'network')}
               className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
                 settings.connectionType === 'network'
-                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300 font-semibold shadow-sm'
+                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
                   : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
               }`}
             >

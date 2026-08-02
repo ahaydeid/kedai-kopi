@@ -73,9 +73,6 @@ export default function RiwayatPage() {
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               Belum ada riwayat pesanan
             </p>
-            <p className="text-xs text-slate-400">
-              Pesanan yang sudah ditandai selesai akan muncul di sini.
-            </p>
           </div>
         </div>
       ) : (

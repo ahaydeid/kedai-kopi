@@ -48,7 +48,7 @@ export const CustomerFooter: React.FC = () => {
           <div className="space-y-2 text-xs">
             <div className="flex items-center gap-2">
               <FiMapPin className="h-4 w-4 shrink-0 text-slate-400" />
-              <span>Jl. Kedai Kopi No. 1, Kota Bandung</span>
+              <span>Ruko Al Husna. Saga, Balaraja</span>
             </div>
             <div className="flex items-center gap-2">
               <FiPhone className="h-4 w-4 shrink-0 text-slate-400" />
