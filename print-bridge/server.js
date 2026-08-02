@@ -104,6 +104,27 @@ function buildEscPosBuffer(data) {
 
   chunks.push(Buffer.from(`--------------------------------\n`, 'latin1'))
 
+  const discountVal = Number(data.discountAmount || data.claimedPoints || data.discount || 0)
+  if (discountVal > 0) {
+    let subtotal = 0
+    if (Array.isArray(data.items)) {
+      subtotal = data.items.reduce((acc, item) => acc + item.price * (item.quantity > 1 ? item.quantity : 1), 0)
+    }
+    if (!subtotal || subtotal <= 0) {
+      subtotal = Number(data.totalAmount || 0) + discountVal
+    }
+
+    const subLabel = 'Subtotal'
+    const subStr = formatRupiah(subtotal)
+    const subSpaces = ' '.repeat(Math.max(0, 32 - subLabel.length - subStr.length))
+    chunks.push(Buffer.from(`${subLabel}${subSpaces}${subStr}\n`, 'latin1'))
+
+    const discLabel = 'Diskon'
+    const discStr = `-${formatRupiah(discountVal)}`
+    const discSpaces = ' '.repeat(Math.max(0, 32 - discLabel.length - discStr.length))
+    chunks.push(Buffer.from(`${discLabel}${discSpaces}${discStr}\n`, 'latin1'))
+  }
+
   // Total
   chunks.push(Buffer.from(CMD_BOLD_ON, 'latin1'))
   const totalLabel = 'TOTAL'

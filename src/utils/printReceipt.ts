@@ -12,6 +12,8 @@ export interface ReceiptData {
   dateTime?: string
   items: ReceiptItem[]
   totalAmount: number
+  discountAmount?: number
+  claimedPoints?: number
   paymentMethod?: string
 }
 
@@ -163,8 +165,16 @@ export async function printThermalReceipt(data: ReceiptData) {
           ${itemsHtml}
         </div>
 
-        <div class="divider"></div>
-
+        ${
+          (data.discountAmount || data.claimedPoints || 0) > 0
+            ? `
+            <div class="row"><span>Subtotal:</span><span>${formatRupiah(
+              data.items.reduce((acc, i) => acc + i.price * i.quantity, 0) || (data.totalAmount + (data.discountAmount || data.claimedPoints || 0))
+            )}</span></div>
+            <div class="row"><span>Diskon:</span><span>-${formatRupiah(data.discountAmount || data.claimedPoints || 0)}</span></div>
+            `
+            : ''
+        }
         <div class="row bold" style="font-size: 12px; margin-top: 2px;">
           <span>TOTAL</span>
           <span>${formatRupiah(data.totalAmount)}</span>

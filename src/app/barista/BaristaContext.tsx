@@ -53,6 +53,8 @@ function mapFetchedOrderToBaristaOrder(item: FetchedOrderWithItems): BaristaOrde
       price: Number(i.price) * i.quantity,
     })),
     totalAmount: Number(item.total_amount),
+    discountAmount: Number(item.claimed_points || 0),
+    claimedPoints: Number(item.claimed_points || 0),
     status: item.status,
   }
 }
@@ -133,6 +135,7 @@ export function BaristaProvider({ children }: { children: React.ReactNode }) {
         }
       }),
       totalAmount: order.totalAmount,
+      discountAmount: order.discountAmount || order.claimedPoints || 0,
     })
   }
 

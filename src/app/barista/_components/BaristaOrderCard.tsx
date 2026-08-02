@@ -20,6 +20,8 @@ export interface BaristaOrder {
   dateTime: string
   items: BaristaOrderItem[]
   totalAmount: number
+  discountAmount?: number
+  claimedPoints?: number
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
 }
 

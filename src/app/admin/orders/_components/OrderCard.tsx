@@ -21,6 +21,8 @@ export interface OrderItem {
   createdAt?: string
   items: OrderCartItem[]
   totalAmount: number
+  discountAmount?: number
+  claimedPoints?: number
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
   orderType?: 'dine_in' | 'takeaway'
   tableNumber?: string | null
@@ -129,6 +131,7 @@ export function OrderCard({ order }: OrderCardProps) {
                 }
               }),
               totalAmount: order.totalAmount,
+              discountAmount: order.discountAmount || order.claimedPoints || 0,
             })
           }}
           className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 transition-colors cursor-pointer"
