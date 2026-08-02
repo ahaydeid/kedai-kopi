@@ -28,14 +28,14 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
         onClick={() => setIsExpanded(true)}
         className="bg-white dark:bg-slate-900 rounded p-3 flex flex-col gap-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
       >
-        {/* Row 1: ID Pesanan & Nama Pelanggan di Kiri, Total Rp & Chevron di Kanan */}
+        {/* Row 1: ID Pesanan & Waktu di Kiri, Total Rp & Chevron di Kanan */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
               {formatOrderIdDisplay(order.orderNumber)}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-              • {order.customerName}
+              • {order.dateTime.split(', ')[1] || order.dateTime}
             </span>
           </div>
 
@@ -56,9 +56,9 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           </div>
         </div>
 
-        {/* Row 2: Waktu & Jumlah Item */}
+        {/* Row 2: Nama Pelanggan & Jumlah Item */}
         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-          {order.dateTime.split(', ')[1] || order.dateTime} • {totalItemsCount} item
+          {order.customerName} • {totalItemsCount} item
         </p>
       </div>
     )
