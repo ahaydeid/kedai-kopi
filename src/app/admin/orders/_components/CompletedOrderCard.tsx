@@ -30,7 +30,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
       >
         <div className="min-w-0 flex-1 space-y-0.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-900 dark:text-slate-100 truncate">
+            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
               {formatOrderIdDisplay(order.orderNumber)}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
@@ -46,9 +46,6 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           <div className="text-right">
             <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
               {formatRupiah(order.totalAmount)}
-            </span>
-            <span className="text-[10px] font-medium text-emerald-600 dark:text-emerald-400 block">
-              Selesai
             </span>
           </div>
           <button
