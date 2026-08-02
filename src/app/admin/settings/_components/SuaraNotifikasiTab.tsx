@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { playSound } from "@/utils/sound";
+import { playSound, playSwalSound } from "@/utils/sound";
 import Swal from 'sweetalert2';
 
 // iOS-style Switch component
@@ -84,6 +84,17 @@ export function SuaraNotifikasiTab() {
   const [notifChat, setNotifChat] = useState(true);
   const [notifStok, setNotifStok] = useState(true);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const mode = localStorage.getItem("setting_sound_mode");
+      if (mode === "hening") {
+        setSoundMode(false);
+      } else {
+        setSoundMode(true);
+      }
+    }
+  }, []);
+
   const playPreviewSound = (id: string) => {
     if (!soundMode) return;
     let file = "";
@@ -96,11 +107,22 @@ export function SuaraNotifikasiTab() {
     }
   };
 
+  const handleSoundModeChange = (val: boolean) => {
+    setSoundMode(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("setting_sound_mode", val ? "normal" : "hening");
+    }
+  };
+
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
+    if (typeof window !== "undefined") {
+      localStorage.setItem("setting_sound_mode", soundMode ? "normal" : "hening");
+    }
+    playSwalSound('success');
     Swal.fire({
       title: 'Disimpan!',
-      text: 'Preferensi suara dan notifikasi kedai berhasil diperbarui. (Simulasi Tampilan)',
+      text: 'Preferensi suara dan notifikasi kedai berhasil diperbarui.',
       icon: 'success',
       confirmButtonColor: '#0284c7',
     });
@@ -124,7 +146,7 @@ export function SuaraNotifikasiTab() {
             </span>
             <SoundModeToggle
               checked={soundMode}
-              onChange={setSoundMode}
+              onChange={handleSoundModeChange}
             />
           </div>
         </div>
