@@ -6,7 +6,7 @@ import { OrderHistoryFilter } from './OrderHistoryFilter'
 import { OrderHistoryDetailModal } from './OrderHistoryDetailModal'
 import { playSwalSound } from '@/utils/sound'
 import Swal from 'sweetalert2'
-import { getOrders, getPaginatedOrders, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
+import { getOrders, getPaginatedOrders, getCachedOrdersSync, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
 import { TableSkeleton } from '@/components/ui/TableSkeleton'
 
 // Client-side in-memory cache untuk instant 0ms render saat navigasi ulang
@@ -54,13 +54,25 @@ export function OrderHistoryManagement() {
 
   const cacheKey = `${currentPage}-${pageSize}-${searchTerm}-${timeFilter}`
 
-  const [orders, setOrders] = useState<OrderHistoryItem[]>(() => 
-    orderHistoryClientCache && orderHistoryClientCache.key === cacheKey ? orderHistoryClientCache.orders : (orderHistoryClientCache?.orders || [])
-  )
-  const [totalCount, setTotalCount] = useState<number>(() => 
-    orderHistoryClientCache && orderHistoryClientCache.key === cacheKey ? orderHistoryClientCache.totalCount : (orderHistoryClientCache?.totalCount || 0)
-  )
-  const [loading, setLoading] = useState(!orderHistoryClientCache)
+  const [orders, setOrders] = useState<OrderHistoryItem[]>(() => {
+    if (orderHistoryClientCache && orderHistoryClientCache.key === cacheKey) {
+      return orderHistoryClientCache.orders
+    }
+    const syncCache = getCachedOrdersSync()
+    if (syncCache.length > 0) {
+      const historyOnly = syncCache.filter((o) => o.status === 'Selesai' || o.status === 'Dibatalkan')
+      return historyOnly.slice(0, pageSize).map(mapFetchedToOrderHistoryItem)
+    }
+    return []
+  })
+  const [totalCount, setTotalCount] = useState<number>(() => {
+    if (orderHistoryClientCache && orderHistoryClientCache.key === cacheKey) {
+      return orderHistoryClientCache.totalCount
+    }
+    const syncCache = getCachedOrdersSync()
+    return syncCache.filter((o) => o.status === 'Selesai' || o.status === 'Dibatalkan').length
+  })
+  const [loading, setLoading] = useState<boolean>(() => !orderHistoryClientCache && getCachedOrdersSync().length === 0)
   const [isFetching, setIsFetching] = useState(false)
 
   useEffect(() => {

@@ -23,9 +23,30 @@ export interface UpdateTableInput {
 
 let tablesCache: { data: TableItem[]; timestamp: number } | null = null
 const CACHE_TTL_MS = 30 * 1000
+const LOCAL_STORAGE_TABLES_KEY = 'admin_tables_cache_v1'
+
+export function getCachedTablesSync(): TableItem[] {
+  if (tablesCache && tablesCache.data.length > 0) return tablesCache.data
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_TABLES_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        tablesCache = { data: parsed, timestamp: Date.now() }
+        return parsed
+      }
+    } catch {}
+  }
+  return []
+}
 
 export function clearTablesCache() {
   tablesCache = null
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_TABLES_KEY)
+    } catch {}
+  }
 }
 
 export async function getTables(): Promise<TableItem[]> {
@@ -40,12 +61,18 @@ export async function getTables(): Promise<TableItem[]> {
     .order('number', { ascending: true })
 
   if (error) {
-    console.error('Error fetching tables from Supabase:', error)
-    return tablesCache ? tablesCache.data : []
+    console.warn('Error fetching tables from Supabase. Falling back to local cache:', error)
+    return getCachedTablesSync()
   }
 
-  tablesCache = { data: data || [], timestamp: Date.now() }
-  return data || []
+  const result = data || []
+  tablesCache = { data: result, timestamp: Date.now() }
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_TABLES_KEY, JSON.stringify(result))
+    } catch {}
+  }
+  return result
 }
 
 export async function createTable(input: CreateTableInput): Promise<TableItem | null> {

@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import Link from 'next/link'
 import { FiArrowRight } from 'react-icons/fi'
-import { getDashboardMetrics, DashboardMetrics } from '@/services/supabase/reportService'
+import { getDashboardMetrics, getDashboardMetricsSync, DashboardMetrics } from '@/services/supabase/reportService'
 import { subscribeToOrders } from '@/services/supabase/orderService'
 import { formatOrderIdDisplay } from '@/utils/orderId'
 
@@ -82,19 +82,20 @@ function LineTrendChart({ data, height = 220 }: { data: TrendItem[]; height?: nu
 }
 
 export default function AdminDashboardPage() {
-  const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => dashboardCache)
-  const [loading, setLoading] = useState(!dashboardCache)
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(() => getDashboardMetricsSync())
+  const [loading, setLoading] = useState<boolean>(() => !getDashboardMetricsSync())
 
   const fetchMetrics = useCallback(async (isSilent = false) => {
-    if (!isSilent) setLoading(true)
+    const hasCache = getDashboardMetricsSync() !== null
+    if (!isSilent && !hasCache) setLoading(true)
     const data = await getDashboardMetrics()
-    dashboardCache = data
     setMetrics(data)
     setLoading(false)
   }, [])
 
   useEffect(() => {
-    fetchMetrics(dashboardCache !== null)
+    const hasCache = getDashboardMetricsSync() !== null
+    fetchMetrics(hasCache)
 
     const unsubscribe = subscribeToOrders(() => {
       fetchMetrics(true)

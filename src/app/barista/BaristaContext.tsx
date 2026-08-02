@@ -6,6 +6,7 @@ import { playSound, playSwalSound } from '@/utils/sound'
 import Swal from 'sweetalert2'
 import {
   getOrders,
+  getCachedOrdersSync,
   createOrder,
   updateOrderStatus,
   subscribeToOrders,
@@ -54,8 +55,14 @@ function mapFetchedOrderToBaristaOrder(item: FetchedOrderWithItems): BaristaOrde
 }
 
 export function BaristaProvider({ children }: { children: React.ReactNode }) {
-  const [orders, setOrders] = useState<BaristaOrder[]>([])
-  const [loading, setLoading] = useState(true)
+  const [orders, setOrders] = useState<BaristaOrder[]>(() => {
+    const syncCache = getCachedOrdersSync()
+    if (syncCache.length > 0) {
+      return syncCache.map(mapFetchedOrderToBaristaOrder)
+    }
+    return []
+  })
+  const [loading, setLoading] = useState<boolean>(() => getCachedOrdersSync().length === 0)
 
   const fetchOrdersFromSupabase = useCallback(async () => {
     setLoading(true)

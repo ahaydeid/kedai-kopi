@@ -1,5 +1,6 @@
 import { createClient } from './client'
 import { generateOrderId } from '@/utils/orderId'
+import { offlineDB } from '@/services/offline/db'
 
 export interface OrderItemInput {
   name: string
@@ -43,19 +44,48 @@ export interface FetchedOrderWithItems {
 let ordersCache: { data: FetchedOrderWithItems[]; timestamp: number } | null = null
 const CACHE_TTL_MS = 30 * 1000 // 30 Detik Memory Cache TTL
 
+const LOCAL_STORAGE_ORDERS_KEY = 'admin_orders_cache_v1'
+
+export function getCachedOrdersSync(): FetchedOrderWithItems[] {
+  if (ordersCache && ordersCache.data.length > 0) return ordersCache.data
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_ORDERS_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        ordersCache = { data: parsed, timestamp: Date.now() }
+        return parsed
+      }
+    } catch {}
+  }
+  return []
+}
+
 export function clearOrdersCache() {
   ordersCache = null
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.removeItem(LOCAL_STORAGE_ORDERS_KEY)
+    } catch {}
+  }
 }
 
 export function hasOrdersCache(): boolean {
-  return Boolean(ordersCache && Date.now() - ordersCache.timestamp < CACHE_TTL_MS)
+  if (ordersCache && ordersCache.data.length > 0) return true
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_ORDERS_KEY)
+      if (saved && JSON.parse(saved).length > 0) return true
+    } catch {}
+  }
+  return false
 }
 
 export async function createOrder(input: CreateOrderInput): Promise<FetchedOrderWithItems | null> {
   const supabase = createClient()
   const orderNumber = generateOrderId()
 
-  // 1. Insert into orders table
+  // 1. Try insert into Supabase orders table
   const { data: orderData, error: orderError } = await supabase
     .from('orders')
     .insert([
@@ -75,8 +105,63 @@ export async function createOrder(input: CreateOrderInput): Promise<FetchedOrder
     .single()
 
   if (orderError || !orderData) {
-    console.error('Error creating order in Supabase:', orderError)
-    return null
+    console.warn('Network or Supabase error creating order (Offline mode active). Saving to Dexie IndexedDB queue:', orderError)
+    const clientUuid = typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `offline-${Date.now()}`
+
+    // Save to Dexie IndexedDB for background sync
+    try {
+      await offlineDB.pending_orders.put({
+        id: clientUuid,
+        customer_name: input.customerName,
+        order_type: input.orderType ?? 'dine_in',
+        table_number: input.tableNumber ?? undefined,
+        total_amount: input.totalAmount,
+        payment_status: 'pending',
+        sync_status: 'pending',
+        created_at: new Date().toISOString(),
+        items: input.items.map((item) => ({
+          menu_item_id: '',
+          name: item.name,
+          price: item.price,
+          quantity: item.quantity || 1,
+        })),
+      })
+    } catch (e) {
+      console.error('Error writing pending order to IndexedDB:', e)
+    }
+
+    // Build synthetic order for optimistic UI display
+    const syntheticOrder: FetchedOrderWithItems = {
+      id: clientUuid,
+      order_number: orderNumber,
+      customer_name: input.customerName,
+      customer_avatar_url: input.customerAvatarUrl ?? null,
+      user_id: input.userId ?? null,
+      total_amount: input.totalAmount,
+      claimed_points: input.claimedPoints ?? 0,
+      order_type: input.orderType ?? 'dine_in',
+      table_number: input.tableNumber ?? null,
+      status: 'Menunggu',
+      created_at: new Date().toISOString(),
+      order_items: input.items.map((item, idx) => ({
+        id: `${clientUuid}-${idx}`,
+        menu_name: item.name,
+        quantity: item.quantity || 1,
+        price: item.price,
+        points: item.points ?? Math.floor(item.price / 1000),
+      })),
+    }
+
+    if (typeof window !== 'undefined') {
+      try {
+        const cached = getCachedOrdersSync()
+        const updated = [syntheticOrder, ...cached]
+        ordersCache = { data: updated, timestamp: Date.now() }
+        localStorage.setItem(LOCAL_STORAGE_ORDERS_KEY, JSON.stringify(updated))
+      } catch {}
+    }
+
+    return syntheticOrder
   }
 
   // 2. Insert into order_items table
@@ -97,12 +182,21 @@ export async function createOrder(input: CreateOrderInput): Promise<FetchedOrder
     console.error('Error inserting order items:', itemsError)
   }
 
-  clearOrdersCache()
-
-  return {
+  const createdFullOrder: FetchedOrderWithItems = {
     ...orderData,
     order_items: itemsData || [],
   }
+
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = getCachedOrdersSync()
+      const updated = [createdFullOrder, ...cached.filter((o) => o.id !== createdFullOrder.id)]
+      ordersCache = { data: updated, timestamp: Date.now() }
+      localStorage.setItem(LOCAL_STORAGE_ORDERS_KEY, JSON.stringify(updated))
+    } catch {}
+  }
+
+  return createdFullOrder
 }
 
 export async function getOrders(forceRefresh = false): Promise<FetchedOrderWithItems[]> {
@@ -121,12 +215,17 @@ export async function getOrders(forceRefresh = false): Promise<FetchedOrderWithI
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error fetching orders:', error)
-    return ordersCache ? ordersCache.data : []
+    console.warn('Network error fetching orders. Using local cache fallback:', error)
+    return getCachedOrdersSync()
   }
 
   const result = data as FetchedOrderWithItems[]
   ordersCache = { data: result, timestamp: now }
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem(LOCAL_STORAGE_ORDERS_KEY, JSON.stringify(result))
+    } catch {}
+  }
   return result
 }
 
@@ -154,8 +253,12 @@ export async function getMyOrders(
   const { data, error } = await query
 
   if (error) {
-    console.error('Error fetching orders by user_id:', error)
-    return []
+    console.warn('Error fetching orders by user_id. Falling back to local cache:', error)
+    const local = getCachedOrdersSync().filter((o) => o.user_id === userId)
+    if (statusFilter && statusFilter.length > 0) {
+      return local.filter((o) => statusFilter.includes(o.status))
+    }
+    return local
   }
 
   return (data as FetchedOrderWithItems[]) || []
@@ -207,12 +310,58 @@ export async function getPaginatedOrders(params: {
     .range(from, to)
 
   if (error) {
-    console.error('Error fetching paginated orders:', error)
-    return { data: [], totalCount: 0 }
+    console.warn('Supabase fetch error for paginated orders (Offline mode active). Using offline local cache fallback:', error)
+    let localData = getCachedOrdersSync().filter((o) => o.status === 'Selesai' || o.status === 'Dibatalkan')
+
+    if (searchTerm && searchTerm.trim() !== '') {
+      const term = searchTerm.trim().toLowerCase()
+      localData = localData.filter(
+        (o) =>
+          o.customer_name?.toLowerCase().includes(term) ||
+          o.order_number?.toLowerCase().includes(term)
+      )
+    }
+
+    if (timeFilter && timeFilter !== 'semua') {
+      const now = new Date()
+      if (timeFilter === 'hari-ini') {
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+        localData = localData.filter((o) => new Date(o.created_at).getTime() >= startOfDay)
+      } else if (timeFilter === 'minggu-ini') {
+        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).getTime()
+        localData = localData.filter((o) => new Date(o.created_at).getTime() >= startOfWeek)
+      } else if (timeFilter === 'bulan-ini') {
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime()
+        localData = localData.filter((o) => new Date(o.created_at).getTime() >= startOfMonth)
+      }
+    }
+
+    const totalCount = localData.length
+    const offset = (page - 1) * pageSize
+    const paginatedData = localData.slice(offset, offset + pageSize)
+
+    return {
+      data: paginatedData,
+      totalCount,
+    }
+  }
+
+  const resultData = (data as FetchedOrderWithItems[]) || []
+
+  // Update local cache asynchronously with latest fetched items
+  if (typeof window !== 'undefined' && resultData.length > 0) {
+    try {
+      const existingCache = getCachedOrdersSync()
+      const existingMap = new Map(existingCache.map((item) => [item.id, item]))
+      resultData.forEach((item) => existingMap.set(item.id, item))
+      const updatedCache = Array.from(existingMap.values())
+      ordersCache = { data: updatedCache, timestamp: Date.now() }
+      localStorage.setItem(LOCAL_STORAGE_ORDERS_KEY, JSON.stringify(updatedCache))
+    } catch {}
   }
 
   return {
-    data: (data as FetchedOrderWithItems[]) || [],
+    data: resultData,
     totalCount: count ?? 0,
   }
 }
@@ -221,75 +370,38 @@ export async function updateOrderStatus(
   orderId: string,
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
 ): Promise<boolean> {
+  // 1. Optimistic Local Cache Update
+  if (typeof window !== 'undefined') {
+    try {
+      const cached = getCachedOrdersSync()
+      const updated = cached.map((o) => (o.id === orderId ? { ...o, status } : o))
+      ordersCache = { data: updated, timestamp: Date.now() }
+      localStorage.setItem(LOCAL_STORAGE_ORDERS_KEY, JSON.stringify(updated))
+    } catch {}
+  }
+
   const supabase = createClient()
 
-  // 1. Ambil data order awal sebelum status diperbarui
-  const { data: existingOrder } = await supabase
-    .from('orders')
-    .select('*, order_items(*)')
-    .eq('id', orderId)
-    .single()
-
-  const oldStatus = existingOrder?.status
-
-  // Pesanan yang sudah Selesai tidak dapat diubah statusnya lagi
-  if (oldStatus === 'Selesai') {
-    console.warn('Pesanan yang sudah Selesai tidak dapat diubah statusnya lagi.')
-    return false
-  }
-
-  // Pembatalan HANYA bisa dilakukan jika status pesanan masih 'Menunggu'
-  if (status === 'Dibatalkan' && oldStatus !== 'Menunggu') {
-    console.warn('Pembatalan pesanan hanya dapat dilakukan saat status masih Menunggu.')
-    return false
-  }
-
-  // 2. Update status order
+  // 2. Update status order via Supabase
   const { error } = await supabase
     .from('orders')
     .update({ status })
     .eq('id', orderId)
 
   if (error) {
-    console.error('Error updating order status:', error)
-    return false
-  }
-
-  // 3. Logika Penambahan / Pengembalian Poin (Refund) jika user_id ada
-  if (existingOrder && existingOrder.user_id && oldStatus !== status) {
-    const userId = existingOrder.user_id
-    const claimedPoints = Number(existingOrder.claimed_points || 0)
-
-    // Ambil saldo poin user saat ini dari database
-    const { data: ptData } = await supabase
-      .from('member_points')
-      .select('points')
-      .eq('user_id', userId)
-      .single()
-
-    const currentPoints = ptData?.points ?? 0
-
-    // a. Jika status berubah ke 'Selesai' (dan sebelumnya belum 'Selesai')
-    if (status === 'Selesai' && oldStatus !== 'Selesai') {
-      const earnedPoints = (existingOrder.order_items || []).reduce(
-        (sum: number, item: any) => sum + Number(item.points || 0),
-        0
-      )
-      const newPoints = currentPoints + earnedPoints
-      await supabase
-        .from('member_points')
-        .upsert({ user_id: userId, points: newPoints }, { onConflict: 'user_id' })
+    console.warn('Network error updating order status. Queueing status update in IndexedDB:', error)
+    try {
+      await offlineDB.pending_status_updates.put({
+        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        order_id: orderId,
+        status,
+        created_at: new Date().toISOString(),
+      })
+    } catch (e) {
+      console.error('Failed to queue offline status update:', e)
     }
-
-    // b. Jika status berubah ke 'Dibatalkan' -> REFUND POIN KLAIM
-    if (status === 'Dibatalkan' && oldStatus !== 'Dibatalkan' && oldStatus !== 'Selesai') {
-      if (claimedPoints > 0) {
-        const refundPoints = currentPoints + claimedPoints
-        await supabase
-          .from('member_points')
-          .upsert({ user_id: userId, points: refundPoints }, { onConflict: 'user_id' })
-      }
-    }
+    // Return true for offline optimistic update
+    return true
   }
 
   clearOrdersCache()

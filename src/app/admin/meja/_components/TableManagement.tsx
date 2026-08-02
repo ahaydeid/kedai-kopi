@@ -11,7 +11,7 @@ import { BsQrCode } from 'react-icons/bs'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
 
-import { getTables, createTable, updateTable, deleteTable, subscribeToTables, TableItem } from '@/services/supabase/tableService'
+import { getTables, getCachedTablesSync, createTable, updateTable, deleteTable, subscribeToTables, TableItem } from '@/services/supabase/tableService'
 
 export interface TableData {
   id: string
@@ -22,8 +22,20 @@ export interface TableData {
 }
 
 export function TableManagement() {
-  const [tables, setTables] = useState<TableData[]>([])
-  const [loading, setLoading] = useState(true)
+  const [tables, setTables] = useState<TableData[]>(() => {
+    const syncCache = getCachedTablesSync()
+    if (syncCache.length > 0) {
+      return syncCache.map((t) => ({
+        id: t.id,
+        number: t.number,
+        capacity: t.capacity,
+        status: t.status,
+        qrUrl: `https://kedaikopi.com/?meja=${t.number}`,
+      }))
+    }
+    return []
+  })
+  const [loading, setLoading] = useState(() => getCachedTablesSync().length === 0)
   const [search, setSearch] = useState('')
   const [isFocused, setIsFocused] = useState(false)
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')

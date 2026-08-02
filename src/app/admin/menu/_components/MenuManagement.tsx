@@ -12,6 +12,7 @@ import Swal from 'sweetalert2'
 import {
   getMenuItems,
   getPaginatedMenuItems,
+  getCachedMenuItemsSync,
   createMenuItem,
   updateMenuItem,
   deleteMenuItem,
@@ -51,13 +52,24 @@ export function MenuManagement() {
 
   const cacheKey = `${currentPage}-${pageSize}-${searchQuery}-${selectedCategoryFilter}`
 
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(() =>
-    menuClientCache && menuClientCache.key === cacheKey ? menuClientCache.menuItems : (menuClientCache?.menuItems || [])
-  )
-  const [totalCount, setTotalCount] = useState<number>(() =>
-    menuClientCache && menuClientCache.key === cacheKey ? menuClientCache.totalCount : (menuClientCache?.totalCount || 0)
-  )
-  const [loading, setLoading] = useState<boolean>(!menuClientCache)
+  const [menuItems, setMenuItems] = useState<MenuItem[]>(() => {
+    if (menuClientCache && menuClientCache.key === cacheKey) {
+      return menuClientCache.menuItems
+    }
+    const syncCache = getCachedMenuItemsSync()
+    if (syncCache.length > 0) {
+      return syncCache.slice(0, pageSize).map(mapDatabaseMenuToMenuItem)
+    }
+    return []
+  })
+  const [totalCount, setTotalCount] = useState<number>(() => {
+    if (menuClientCache && menuClientCache.key === cacheKey) {
+      return menuClientCache.totalCount
+    }
+    const syncCache = getCachedMenuItemsSync()
+    return syncCache.length
+  })
+  const [loading, setLoading] = useState<boolean>(() => !menuClientCache && getCachedMenuItemsSync().length === 0)
   const [isFetching, setIsFetching] = useState<boolean>(false)
 
   // Reset ke halaman 1 saat filter, pencarian, atau pageSize berubah

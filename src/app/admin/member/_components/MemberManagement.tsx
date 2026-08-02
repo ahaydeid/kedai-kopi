@@ -33,6 +33,22 @@ let memberClientCache: {
   key: string
 } | null = null
 
+const LOCAL_STORAGE_MEMBERS_KEY = 'admin_members_cache_v1'
+
+function getCachedMembersSync(): MemberData[] {
+  if (memberClientCache && memberClientCache.members.length > 0) return memberClientCache.members
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_MEMBERS_KEY)
+      if (saved) {
+        const parsed = JSON.parse(saved)
+        return parsed
+      }
+    } catch {}
+  }
+  return []
+}
+
 function formatJoinedDate(isoString: string): string {
   if (!isoString) return '-'
   const date = new Date(isoString)
@@ -48,13 +64,24 @@ export function MemberManagement() {
 
   const cacheKey = `${currentPage}-${pageSize}-${search}`
 
-  const [members, setMembers] = useState<MemberData[]>(() => 
-    memberClientCache && memberClientCache.key === cacheKey ? memberClientCache.members : (memberClientCache?.members || [])
-  )
-  const [totalCount, setTotalCount] = useState<number>(() => 
-    memberClientCache && memberClientCache.key === cacheKey ? memberClientCache.totalCount : (memberClientCache?.totalCount || 0)
-  )
-  const [loading, setLoading] = useState<boolean>(!memberClientCache)
+  const [members, setMembers] = useState<MemberData[]>(() => {
+    if (memberClientCache && memberClientCache.key === cacheKey) {
+      return memberClientCache.members
+    }
+    const syncCache = getCachedMembersSync()
+    if (syncCache.length > 0) {
+      return syncCache.slice(0, pageSize)
+    }
+    return []
+  })
+  const [totalCount, setTotalCount] = useState<number>(() => {
+    if (memberClientCache && memberClientCache.key === cacheKey) {
+      return memberClientCache.totalCount
+    }
+    const syncCache = getCachedMembersSync()
+    return syncCache.length
+  })
+  const [loading, setLoading] = useState<boolean>(() => !memberClientCache && getCachedMembersSync().length === 0)
   const [isFetching, setIsFetching] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -87,8 +114,39 @@ export function MemberManagement() {
       setMembers(fetchedMembers)
       setTotalCount(fetchedTotal)
       memberClientCache = { members: fetchedMembers, totalCount: fetchedTotal, key }
+
+      if (typeof window !== 'undefined' && fetchedMembers.length > 0) {
+        try {
+          const existing = getCachedMembersSync()
+          const map = new Map(existing.map((m) => [m.id, m]))
+          fetchedMembers.forEach((m: MemberData) => map.set(m.id, m))
+          localStorage.setItem(LOCAL_STORAGE_MEMBERS_KEY, JSON.stringify(Array.from(map.values())))
+        } catch {}
+      }
     } catch (err: any) {
-      setError(err.message)
+      console.warn('Fetch members network error (Offline mode active). Using local cache fallback:', err)
+      let localData = getCachedMembersSync()
+
+      if (search && search.trim() !== '') {
+        const term = search.trim().toLowerCase()
+        localData = localData.filter(
+          (m) =>
+            m.name.toLowerCase().includes(term) ||
+            (m.email && m.email.toLowerCase().includes(term)) ||
+            (m.phone && m.phone.includes(term))
+        )
+      }
+
+      if (localData.length > 0) {
+        const total = localData.length
+        const offset = (currentPage - 1) * pageSize
+        const paginated = localData.slice(offset, offset + pageSize)
+        setMembers(paginated)
+        setTotalCount(total)
+        setError(null)
+      } else {
+        setError(err.message || 'Gagal memuat data member')
+      }
     } finally {
       setLoading(false)
       setIsFetching(false)

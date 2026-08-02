@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react'
 import { OrderCard, OrderItem } from './OrderCard'
 import { CompletedOrderCard } from './CompletedOrderCard'
-import { getOrders, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
+import { getOrders, getCachedOrdersSync, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
 
 let ordersClientCache: OrderItem[] | null = null
 
@@ -49,8 +49,15 @@ function mapFetchedToAdminOrderItem(item: FetchedOrderWithItems): OrderItem | nu
 }
 
 export function OrdersManagement() {
-  const [allOrders, setAllOrders] = useState<OrderItem[]>(() => ordersClientCache || [])
-  const [loading, setLoading] = useState(!ordersClientCache && !hasOrdersCache())
+  const [allOrders, setAllOrders] = useState<OrderItem[]>(() => {
+    if (ordersClientCache) return ordersClientCache
+    const syncCache = getCachedOrdersSync()
+    if (syncCache.length > 0) {
+      return syncCache.map(mapFetchedToAdminOrderItem).filter((o): o is OrderItem => o !== null)
+    }
+    return []
+  })
+  const [loading, setLoading] = useState(() => !ordersClientCache && getCachedOrdersSync().length === 0)
 
   const fetchOrders = useCallback(async (isSilent = false) => {
     if (!isSilent && !ordersClientCache && !hasOrdersCache()) {

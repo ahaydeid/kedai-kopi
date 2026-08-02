@@ -1,6 +1,7 @@
-const CACHE_NAME = 'kedai-moods-v1';
+const CACHE_NAME = 'kedai-kopi-v2';
 const STATIC_ASSETS = [
   '/',
+  '/manifest.json',
   '/icons/icon.svg',
   '/icons/icon-192.svg',
   '/icons/icon-512.svg',
@@ -10,7 +11,9 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS);
+      return cache.addAll(STATIC_ASSETS).catch((err) => {
+        console.warn('[PWA SW] Pre-caching partial failure:', err);
+      });
     })
   );
   self.skipWaiting();
@@ -32,30 +35,42 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Fetch Event (Network First with Cache Fallback)
+// Fetch Event (Stale-While-Revalidate & Cache Fallback)
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  
-  // Skip localhost / development requests to avoid caching dev HMR
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
 
-  // Skip browser-extension or chrome-extension requests
+  // Skip dev HMR
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') return;
   if (!event.request.url.startsWith('http')) return;
 
+  // Bypass Supabase API calls from SW caching (handled via Dexie IndexedDB)
+  if (event.request.url.includes('/rest/v1/') || event.request.url.includes('/auth/v1/')) {
+    return;
+  }
+
   event.respondWith(
-    fetch(event.request)
-      .then((response) => {
-        // Clone and store clean GET responses in cache
-        if (response && response.status === 200 && response.type === 'basic') {
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
-        }
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request);
-      })
+    caches.match(event.request).then((cachedResponse) => {
+      const fetchPromise = fetch(event.request)
+        .then((networkResponse) => {
+          if (
+            networkResponse &&
+            networkResponse.status === 200 &&
+            (networkResponse.type === 'basic' || networkResponse.type === 'cors')
+          ) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        })
+        .catch(() => {
+          // Network failed, return cached response if available
+          return cachedResponse;
+        });
+
+      // Return cached response immediately if available, otherwise wait for network
+      return cachedResponse || fetchPromise;
+    })
   );
 });

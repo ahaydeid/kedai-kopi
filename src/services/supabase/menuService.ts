@@ -1,6 +1,7 @@
 import { createClient } from './client'
 import { DatabaseMenu } from '@/types/database'
 import { compressImage } from '@/utils/imageCompression'
+import { offlineDB } from '@/services/offline/db'
 
 export type CreateMenuInput = Omit<DatabaseMenu, 'id' | 'created_at'>
 
@@ -57,7 +58,7 @@ export async function getMenuItems(forceRefresh = false): Promise<DatabaseMenu[]
     .order('updated_at', { ascending: false, nullsFirst: false })
 
   if (error) {
-    console.error('Error fetching menu items:', error)
+    console.warn('Network or Supabase error fetching menu items. Using offline cache fallback:', error)
     return getCachedMenuItemsSync()
   }
 
@@ -66,6 +67,21 @@ export async function getMenuItems(forceRefresh = false): Promise<DatabaseMenu[]
   if (typeof window !== 'undefined') {
     try {
       localStorage.setItem(LOCAL_STORAGE_MENU_KEY, JSON.stringify(result))
+      // Save items asynchronously to Dexie IndexedDB
+      offlineDB.cached_menu_items.clear().then(() => {
+        offlineDB.cached_menu_items.bulkPut(
+          result.map((m) => ({
+            id: m.id,
+            name: m.name,
+            price: Number(m.price),
+            category_id: m.main_category || 'Minuman',
+            category_name: m.sub_category,
+            image_url: m.images?.[0] || undefined,
+            available: m.is_available,
+            updated_at: m.updated_at,
+          }))
+        ).catch((err) => console.warn('Dexie sync warning:', err))
+      }).catch(() => {})
     } catch {}
   }
   return result
@@ -105,8 +121,32 @@ export async function getPaginatedMenuItems(params: {
     .range(from, to)
 
   if (error) {
-    console.error('Error fetching paginated menu items:', error)
-    return { data: [], totalCount: 0 }
+    console.warn('Supabase fetch error for paginated menu (Offline mode active). Using offline local cache fallback:', error)
+    let localData = getCachedMenuItemsSync()
+
+    if (categoryFilter && categoryFilter !== 'semua') {
+      localData = localData.filter(
+        (m) => m.main_category === categoryFilter || m.sub_category === categoryFilter
+      )
+    }
+
+    if (searchQuery && searchQuery.trim() !== '') {
+      const term = searchQuery.trim().toLowerCase()
+      localData = localData.filter(
+        (m) =>
+          m.name.toLowerCase().includes(term) ||
+          (m.sub_category && m.sub_category.toLowerCase().includes(term))
+      )
+    }
+
+    const totalCount = localData.length
+    const offset = (page - 1) * pageSize
+    const paginatedData = localData.slice(offset, offset + pageSize)
+
+    return {
+      data: paginatedData,
+      totalCount,
+    }
   }
 
   return {
