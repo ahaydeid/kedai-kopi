@@ -169,49 +169,71 @@ export async function printThermalReceipt(data: ReceiptData) {
     }
   }
 
+function getCandidateBridgeUrls(configuredUrl?: string): string[] {
+  if (configuredUrl) return [configuredUrl]
+  if (process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL) return [process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL]
+
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host === 'localhost') {
+      return ['http://localhost:5000', 'http://127.0.0.1:5000']
+    }
+    if (host === '127.0.0.1') {
+      return ['http://127.0.0.1:5000', 'http://localhost:5000']
+    }
+    if (host) {
+      return [`http://${host}:5000`, 'http://localhost:5000', 'http://127.0.0.1:5000']
+    }
+  }
+  return ['http://localhost:5000', 'http://127.0.0.1:5000']
+}
+
   if (settings.connectionType === 'browser') {
     executeIframeBrowserPrint()
     return
   }
 
   // Connection type is 'bluetooth' (Default Direct ESC/POS Printing to /dev/rfcomm0)
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 3000)
+  const candidateUrls = getCandidateBridgeUrls(settings.bridgeUrl)
+  let lastError = ''
 
-    const response = await fetch(`${bridgeUrl}/api/print`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...data,
-        headerText: settings.headerText,
-        addressText: settings.addressText,
-        footerText: settings.footerText,
-        printCopies: settings.printCopies || 1,
-      }),
-      signal: controller.signal,
-    })
+  for (const url of candidateUrls) {
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 2000)
 
-    clearTimeout(timeoutId)
+      const response = await fetch(`${url}/api/print`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...data,
+          headerText: settings.headerText,
+          addressText: settings.addressText,
+          footerText: settings.footerText,
+          printCopies: settings.printCopies || 1,
+        }),
+        signal: controller.signal,
+      })
 
-    if (response.ok) {
-      const resData = await response.json()
-      if (resData.success) {
-        console.log('[Direct Print Success]: Receipt printed via Local Print Bridge to RPP02N')
-        return
+      clearTimeout(timeoutId)
+
+      if (response.ok) {
+        const resData = await response.json()
+        if (resData.success) {
+          console.log(`[Direct Print Success]: Printed via Local Print Bridge at ${url}`)
+          return
+        } else {
+          lastError = resData.error || resData.message || 'Gagal mengirim dokumen ke RPP02N'
+        }
       } else {
-        alert(`[Local Print Bridge Error]: ${resData.error || resData.message || 'Gagal mengirim dokumen ke printer RPP02N'}`)
-        return
+        lastError = `HTTP ${response.status}`
       }
-    } else {
-      alert(`[Local Print Bridge Error]: Server merespons HTTP ${response.status}`)
-      return
+    } catch (err: any) {
+      lastError = err?.message || 'Connection refused'
     }
-  } catch (err) {
-    console.error('[Print Bridge Error]: Local Print Bridge tidak dapat dijangkau di ' + bridgeUrl, err)
-    alert(`Local Print Bridge tidak terjangkau di ${bridgeUrl}. Pastikan service print-bridge (node print-bridge/server.js) berjalan di komputer kasir Anda.`)
-    return
   }
+
+  alert(`Local Print Bridge tidak terjangkau (${candidateUrls.join(', ')}). Pastikan service print-bridge (node print-bridge/server.js) berjalan di komputer kasir Anda.`)
 }

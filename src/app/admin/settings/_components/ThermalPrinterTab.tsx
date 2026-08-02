@@ -46,38 +46,43 @@ export function ThermalPrinterTab() {
 
   const checkLivePrinterStatus = useCallback(async (customUrl?: string) => {
     setIsConnecting(true)
-    try {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 2000)
-      const targetUrl = customUrl || settings.bridgeUrl || 'http://127.0.0.1:5000'
+    const urlsToTest = customUrl || settings.bridgeUrl
+      ? [customUrl || settings.bridgeUrl || '']
+      : typeof window !== 'undefined' && window.location.hostname === 'localhost'
+      ? ['http://localhost:5000', 'http://127.0.0.1:5000']
+      : ['http://127.0.0.1:5000', 'http://localhost:5000']
 
-      const res = await fetch(`${targetUrl}/api/status`, {
-        method: 'GET',
-        headers: {
-          'Accept': 'application/json',
-        },
-        signal: controller.signal,
-      })
-      clearTimeout(timeoutId)
+    for (const targetUrl of urlsToTest) {
+      try {
+        const controller = new AbortController()
+        const timeoutId = setTimeout(() => controller.abort(), 1500)
 
-      if (res.ok) {
-        const data = await res.json()
-        if (data.ready === true && data.connected === true) {
-          setIsConnected(true)
-          if (data.printer) {
-            setDeviceName(data.printer)
+        const res = await fetch(`${targetUrl}/api/status`, {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json',
+          },
+          signal: controller.signal,
+        })
+        clearTimeout(timeoutId)
+
+        if (res.ok) {
+          const data = await res.json()
+          if (data.ready === true && data.connected === true) {
+            setIsConnected(true)
+            if (data.printer) {
+              setDeviceName(data.printer)
+            }
+            setIsConnecting(false)
+            return true
           }
-          return true
         }
-      }
-      setIsConnected(false)
-      return false
-    } catch {
-      setIsConnected(false)
-      return false
-    } finally {
-      setIsConnecting(false)
+      } catch {}
     }
+
+    setIsConnected(false)
+    setIsConnecting(false)
+    return false
   }, [settings.bridgeUrl])
 
   useEffect(() => {
