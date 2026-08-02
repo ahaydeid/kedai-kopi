@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import Avatar from '@/components/ui/Avatar'
 import { Table, TableHead, TableBody, TableRow, TableHeaderCell, TableCell } from '@/components/ui/Table'
 import { FiSearch, FiX, FiChevronLeft, FiChevronRight, FiEdit2, FiCheck, FiX as FiCancel } from 'react-icons/fi'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { ActionButton } from '@/components/ui/ActionButton'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
@@ -285,7 +286,26 @@ export function MemberManagement() {
                     {/* No. HP / Whatsapp */}
                     <TableCell className="text-xs font-normal text-slate-500 dark:text-slate-400 whitespace-nowrap">
                       {member.phone ? (
-                        <span className="font-medium text-slate-700 dark:text-slate-300">{member.phone}</span>
+                        (() => {
+                          const cleanDigits = member.phone.replace(/\D/g, '')
+                          const waNumber = cleanDigits.startsWith('62')
+                            ? cleanDigits
+                            : cleanDigits.startsWith('0')
+                            ? '62' + cleanDigits.slice(1)
+                            : '62' + cleanDigits
+                          return (
+                            <a
+                              href={`https://wa.me/${waNumber}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 font-medium text-emerald-600 dark:text-emerald-400 hover:underline cursor-pointer"
+                              title={`Chat WhatsApp dengan ${member.name}`}
+                            >
+                              <FaWhatsapp className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
+                              <span>{member.phone}</span>
+                            </a>
+                          )
+                        })()
                       ) : (
                         <span className="text-slate-400 dark:text-slate-600">-</span>
                       )}

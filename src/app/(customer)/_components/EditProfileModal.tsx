@@ -16,6 +16,13 @@ interface EditProfileModalProps {
   onProfileUpdated: (newName: string, newPhone: string) => void
 }
 
+function cleanDigitsOnly(phoneStr: string): string {
+  const digits = phoneStr.replace(/\D/g, '')
+  if (digits.startsWith('62')) return digits.slice(2)
+  if (digits.startsWith('0')) return digits.slice(1)
+  return digits
+}
+
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
@@ -24,13 +31,13 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   onProfileUpdated,
 }) => {
   const [fullName, setFullName] = useState(initialName)
-  const [phone, setPhone] = useState(initialPhone)
+  const [phoneDigits, setPhoneDigits] = useState(() => cleanDigitsOnly(initialPhone))
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     if (isOpen) {
       setFullName(initialName || '')
-      setPhone(initialPhone || '')
+      setPhoneDigits(cleanDigitsOnly(initialPhone || ''))
     }
   }, [isOpen, initialName, initialPhone])
 
@@ -49,12 +56,14 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
       return
     }
 
+    const fullPhone = phoneDigits.trim() ? `+62${phoneDigits.trim()}` : ''
+
     setSaving(true)
-    const res = await updateUserProfile({ fullName, phone })
+    const res = await updateUserProfile({ fullName, phone: fullPhone })
     setSaving(false)
 
     if (res.success) {
-      onProfileUpdated(fullName.trim(), phone.trim())
+      onProfileUpdated(fullName.trim(), fullPhone)
       onClose()
       playSwalSound('success')
       Swal.fire({
@@ -102,19 +111,25 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
           />
         </div>
 
-        {/* Input Nomor HP / WhatsApp */}
+        {/* Input Nomor HP / WhatsApp (+62 Prefix) */}
         <div className="space-y-1.5">
           <label className="text-xs font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
             <FiPhone className="h-3.5 w-3.5 text-slate-500" />
             <span>Nomor HP / WhatsApp</span>
           </label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="Contoh: 081234567890"
-            className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#3D2514] dark:focus:ring-amber-500/50"
-          />
+          <div className="flex items-center">
+            <span className="px-3.5 py-2.5 bg-slate-100 dark:bg-slate-800 border border-r-0 border-slate-200 dark:border-slate-800 rounded-l-xl text-xs font-bold text-slate-600 dark:text-slate-300 select-none shrink-0">
+              +62
+            </span>
+            <input
+              type="text"
+              inputMode="numeric"
+              value={phoneDigits}
+              onChange={(e) => setPhoneDigits(e.target.value.replace(/\D/g, ''))}
+              placeholder="81234567890"
+              className="w-full px-3.5 py-2.5 rounded-r-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-xs text-slate-900 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-[#3D2514] dark:focus:ring-amber-500/50"
+            />
+          </div>
         </div>
 
         {/* Tombol Action */}
