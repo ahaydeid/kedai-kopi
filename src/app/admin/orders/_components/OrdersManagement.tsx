@@ -95,10 +95,10 @@ export function OrdersManagement() {
           {/* Section 1: Pesanan Aktif (2 Kolom di Desktop) dengan Garis Pemisah Vertikal Full Height */}
           <div className="lg:col-span-2 space-y-4 lg:pr-6 lg:border-r border-slate-200/80 dark:border-slate-800 lg:min-h-[calc(100vh-160px)]">
             <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <span>Pesanan Aktif</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300">
-                  {activeOrders.length}
+                <span className="text-sm font-normal text-slate-400 dark:text-slate-500">
+                  ({activeOrders.length})
                 </span>
               </h2>
             </div>
@@ -119,10 +119,10 @@ export function OrdersManagement() {
           {/* Section 2: Pesanan Selesai (1 Kolom di Desktop dengan Local Scroll & Sticky Position) */}
           <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-4">
             <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
-              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">
                 <span>Pesanan Selesai</span>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
-                  {completedOrders.length}
+                <span className="text-sm font-normal text-slate-400 dark:text-slate-500">
+                  ({completedOrders.length})
                 </span>
               </h2>
             </div>
