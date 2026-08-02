@@ -114,8 +114,8 @@ export function OrderHistoryDetailModal({
               <span>Subtotal</span>
               <span>{formatRupiah(order.totalAmount + (order.discountAmount || order.claimedPoints || 0))}</span>
             </div>
-            <div className="flex items-center justify-between text-rose-500 font-medium">
-              <span>Potongan Harga (Poin Member)</span>
+            <div className="flex items-center justify-between text-rose-500 font-normal">
+              <span>Potongan Poin</span>
               <span>-{formatRupiah(order.discountAmount || order.claimedPoints || 0)}</span>
             </div>
           </div>

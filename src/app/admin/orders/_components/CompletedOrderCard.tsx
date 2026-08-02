@@ -163,7 +163,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           })}
 
           {(order.discountAmount || order.claimedPoints || 0) > 0 && (
-            <div className="flex items-center justify-between text-xs text-rose-500 font-medium pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between text-xs text-rose-500 font-normal pt-1 border-t border-dashed border-slate-200 dark:border-slate-800">
               <span>Potongan Harga</span>
               <span>-{formatRupiah(order.discountAmount || order.claimedPoints || 0)}</span>
             </div>

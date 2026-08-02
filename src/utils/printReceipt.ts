@@ -49,40 +49,6 @@ export async function printThermalReceipt(data: ReceiptData) {
   const settings = getPrinterSettings()
   const bridgeUrl = settings.bridgeUrl || process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL || 'http://127.0.0.1:5000'
 
-  // Attempt 1: 0-Click Instant Printing via Local Print Bridge (RPP02N /dev/rfcomm0)
-  try {
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 2000)
-
-    const response = await fetch(`${bridgeUrl}/api/print`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...data,
-        headerText: settings.headerText,
-        addressText: settings.addressText,
-        footerText: settings.footerText,
-        printCopies: settings.printCopies || 1,
-      }),
-      signal: controller.signal,
-    })
-
-    clearTimeout(timeoutId)
-
-    if (response.ok) {
-      const resData = await response.json()
-      if (resData.success) {
-        console.log('[Direct Print Success]: Receipt printed via Local Print Bridge to RPP02N')
-        return
-      }
-    }
-  } catch (err) {
-    console.warn('[Print Bridge Notice]: Local Print Bridge not reachable at ' + bridgeUrl + '. Using fallback browser print.', err)
-  }
-
-  // Attempt 2: Fallback Iframe Browser Print Spooler
   const paperWidth = settings.paperWidth === '80mm' ? '80mm' : '58mm'
   const maxWidthPx = settings.paperWidth === '80mm' ? '300px' : '210px'
   const nowStr = data.dateTime || new Date().toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })
@@ -185,39 +151,71 @@ export async function printThermalReceipt(data: ReceiptData) {
         <div class="double-divider"></div>
 
         <div class="text-center" style="font-size: 9px; margin-top: 4px;">${settings.footerText}</div>
-
-        <script>
-          window.onload = function() {
-            window.print();
-            setTimeout(function() { window.close(); }, 500);
-          };
-        </script>
       </body>
     </html>
   `
 
-  const iframe = document.createElement('iframe')
-  iframe.style.position = 'fixed'
-  iframe.style.right = '0'
-  iframe.style.bottom = '0'
-  iframe.style.width = '0px'
-  iframe.style.height = '0px'
-  iframe.style.border = '0px'
-  document.body.appendChild(iframe)
+  function executeIframeBrowserPrint() {
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.right = '0'
+    iframe.style.bottom = '0'
+    iframe.style.width = '0px'
+    iframe.style.height = '0px'
+    iframe.style.border = '0px'
+    document.body.appendChild(iframe)
 
-  const doc = iframe.contentWindow?.document
-  if (doc) {
-    doc.open()
-    doc.write(receiptHtml)
-    doc.close()
-    setTimeout(() => {
-      iframe.contentWindow?.focus()
-      iframe.contentWindow?.print()
+    const doc = iframe.contentWindow?.document
+    if (doc) {
+      doc.open()
+      doc.write(receiptHtml)
+      doc.close()
       setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe)
-        }
-      }, 1500)
-    }, 200)
+        iframe.contentWindow?.focus()
+        iframe.contentWindow?.print()
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe)
+          }
+        }, 1500)
+      }, 250)
+    }
   }
+
+  // Attempt 1: 0-Click Instant Printing via Local Print Bridge (RPP02N /dev/rfcomm0)
+  try {
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 2500)
+
+    const response = await fetch(`${bridgeUrl}/api/print`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ...data,
+        headerText: settings.headerText,
+        addressText: settings.addressText,
+        footerText: settings.footerText,
+        printCopies: settings.printCopies || 1,
+      }),
+      signal: controller.signal,
+    })
+
+    clearTimeout(timeoutId)
+
+    if (response.ok) {
+      const resData = await response.json()
+      if (resData.success) {
+        console.log('[Direct Print Success]: Receipt printed via Local Print Bridge to RPP02N')
+        return
+      }
+    }
+    console.warn('[Print Bridge Error]: Failed to print via Local Print Bridge to ' + bridgeUrl)
+  } catch (err) {
+    console.warn('[Print Bridge Notice]: Local Print Bridge not reachable at ' + bridgeUrl + '.', err)
+  }
+
+  // Attempt 2: Fallback Iframe Browser Print (Triggered only if Bridge fails)
+  executeIframeBrowserPrint()
 }
