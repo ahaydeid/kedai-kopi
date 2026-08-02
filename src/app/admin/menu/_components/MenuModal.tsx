@@ -151,16 +151,6 @@ export function MenuModal({
       images,
     })
 
-    playSwalSound('success')
-    Swal.fire({
-      icon: 'success',
-      title: initialData ? 'Menu Berhasil Diperbarui' : 'Menu Berhasil Ditambahkan',
-      text: `Menu "${name.trim()}" telah disimpan.`,
-      confirmButtonColor: '#0284c7',
-      timer: 2000,
-      showConfirmButton: false,
-    })
-
     onClose()
   }
 
