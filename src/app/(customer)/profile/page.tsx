@@ -160,13 +160,7 @@ export default function CustomerProfilePage() {
       <main className="flex-1 w-full max-w-md mx-auto pb-28 space-y-4">
         {/* Header User Info & Poin Saya */}
         <section className="bg-white dark:bg-slate-900 p-4 rounded border-none space-y-3.5">
-          {/* Baris Email Paling Atas */}
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-400 dark:text-slate-400 font-normal pb-1 border-b border-slate-100 dark:border-slate-800/80">
-            <FiMail className="h-3 w-3 shrink-0 text-slate-400" />
-            <span className="truncate">{userEmail}</span>
-          </div>
-
-          <div className="flex items-center justify-between gap-3 pt-0.5">
+          <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3.5 min-w-0 flex-1">
               <Avatar name={userName} photo={userPhoto} size="medium" />
               <div className="min-w-0 flex-1">
@@ -259,6 +253,13 @@ export default function CustomerProfilePage() {
             <FiChevronRight className="h-4 w-4 text-slate-400" />
           </div>
         </section>
+
+        {/* Email Pelanggan Rata Tengah di Bawah Section Menu */}
+        <div className="text-center pt-1 px-4">
+          <p className="text-[11px] font-normal text-slate-400 dark:text-slate-500 truncate">
+            {userEmail}
+          </p>
+        </div>
       </main>
 
       {/* Modal Info Kedai Kopi */}
