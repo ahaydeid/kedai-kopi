@@ -6,6 +6,7 @@ import {
   FiInstagram,
   FiShoppingBag,
   FiArrowUpRight,
+  FiMapPin,
 } from 'react-icons/fi'
 import { FaWhatsapp, FaTiktok } from 'react-icons/fa6'
 
@@ -22,6 +23,12 @@ interface SocialLink {
 }
 
 const SOCIAL_LINKS: SocialLink[] = [
+  {
+    title: 'Google Maps (Lokasi Kedai)',
+    subtitle: 'maps.google.com/kedaikopi',
+    url: 'https://maps.google.com/?q=Kedai+Kopi',
+    icon: <FiMapPin className="h-5 w-5 text-rose-600 dark:text-rose-400" />,
+  },
   {
     title: 'WhatsApp',
     subtitle: 'wa.me/6281234567890',
