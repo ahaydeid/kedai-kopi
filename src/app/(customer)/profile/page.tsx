@@ -16,17 +16,33 @@ import { playSwalSound } from '@/utils/sound'
 import { getCurrentUser, getCachedUserSync, signOut } from '@/services/supabase/authService'
 import { createClient } from '@/services/supabase/client'
 
+const CUSTOMER_POINTS_CACHE_KEY = 'customer_points_cache_v1'
+let pointsMemoryCache: number | null = null
+
 export default function CustomerProfilePage() {
   const cachedUser = getCachedUserSync()
   const [user, setUser] = useState<any>(cachedUser)
-  const [loading, setLoading] = useState(!cachedUser)
+  const [loading, setLoading] = useState<boolean>(() => !cachedUser)
   const router = useRouter()
 
-  const [userPoints, setUserPoints] = useState<number>(0)
+  const [userPoints, setUserPoints] = useState<number>(() => {
+    if (pointsMemoryCache !== null) return pointsMemoryCache
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(CUSTOMER_POINTS_CACHE_KEY)
+        if (saved !== null) {
+          const parsed = Number(saved)
+          pointsMemoryCache = parsed
+          return parsed
+        }
+      } catch {}
+    }
+    return 0
+  })
 
   useEffect(() => {
     async function loadUser() {
-      if (!cachedUser) {
+      if (!cachedUser && !user) {
         setLoading(true)
       }
       const u = await getCurrentUser()
@@ -44,11 +60,18 @@ export default function CustomerProfilePage() {
         .eq('user_id', u.id)
         .single()
 
-      setUserPoints(pointsData?.points ?? 0)
+      const pts = pointsData?.points ?? 0
+      setUserPoints(pts)
+      pointsMemoryCache = pts
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(CUSTOMER_POINTS_CACHE_KEY, String(pts))
+        } catch {}
+      }
       setLoading(false)
     }
     loadUser()
-  }, [router, cachedUser])
+  }, [router, cachedUser, user])
 
   const handleSignOut = () => {
     playSwalSound('confirm')
@@ -68,6 +91,12 @@ export default function CustomerProfilePage() {
       },
     }).then(async (result) => {
       if (result.isConfirmed) {
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.removeItem(CUSTOMER_POINTS_CACHE_KEY)
+          } catch {}
+        }
+        pointsMemoryCache = null
         await signOut()
         router.push('/login')
       }
@@ -76,8 +105,27 @@ export default function CustomerProfilePage() {
 
   if (loading || !user) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
-        <div className="text-xs text-slate-400 font-medium">Memuat profil...</div>
+      <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans">
+        <main className="flex-1 w-full max-w-md mx-auto pb-28 space-y-4 p-4">
+          {/* Skeleton Header User Info */}
+          <section className="bg-white dark:bg-slate-900 p-4 rounded border-none space-y-3.5 animate-pulse">
+            <div className="flex items-center gap-3.5">
+              <div className="h-12 w-12 bg-slate-200 dark:bg-slate-800 rounded-full" />
+              <div className="space-y-2 flex-1">
+                <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-32" />
+                <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-44" />
+              </div>
+            </div>
+            <div className="h-20 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+          </section>
+
+          {/* Skeleton Menu Items */}
+          <section className="bg-white dark:bg-slate-900 rounded p-4 space-y-3 animate-pulse">
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full" />
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full" />
+            <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded w-full" />
+          </section>
+        </main>
       </div>
     )
   }
