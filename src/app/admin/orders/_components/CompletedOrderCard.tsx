@@ -26,10 +26,11 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
     return (
       <div
         onClick={() => setIsExpanded(true)}
-        className="bg-white dark:bg-slate-900 rounded p-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+        className="bg-white dark:bg-slate-900 rounded p-3 flex flex-col gap-1 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
       >
-        <div className="min-w-0 flex-1 space-y-0.5">
-          <div className="flex items-center gap-2">
+        {/* Row 1: ID Pesanan & Nama Pelanggan di Kiri, Total Rp & Chevron di Kanan */}
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5 min-w-0 flex-1">
             <span className="text-xs font-semibold text-slate-900 dark:text-slate-100 truncate">
               {formatOrderIdDisplay(order.orderNumber)}
             </span>
@@ -37,28 +38,28 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
               • {order.customerName}
             </span>
           </div>
-          <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-            {order.dateTime.split(', ')[1] || order.dateTime} • {totalItemsCount} item
-          </p>
-        </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="text-right">
-            <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs font-semibold text-slate-900 dark:text-slate-100">
               {formatRupiah(order.totalAmount)}
             </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation()
+                setIsExpanded(true)
+              }}
+              className="p-0.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+            >
+              <FiChevronDown className="w-4 h-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation()
-              setIsExpanded(true)
-            }}
-            className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-          >
-            <FiChevronDown className="w-4 h-4" />
-          </button>
         </div>
+
+        {/* Row 2: Waktu & Jumlah Item */}
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
+          {order.dateTime.split(', ')[1] || order.dateTime} • {totalItemsCount} item
+        </p>
       </div>
     )
   }
