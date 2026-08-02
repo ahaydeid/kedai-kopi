@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/Button'
 import { playSwalSound } from '@/utils/sound'
-import { FiPrinter, FiBluetooth, FiCpu, FiGlobe, FiCheckCircle, FiAlertCircle, FiRefreshCw } from 'react-icons/fi'
+import { FiPrinter, FiBluetooth, FiCpu, FiCheckCircle, FiAlertCircle, FiRefreshCw } from 'react-icons/fi'
 import Swal from 'sweetalert2'
 
 interface PrinterSettings {
-  connectionType: 'bluetooth' | 'usb' | 'network'
+  connectionType: 'bluetooth' | 'usb'
   ipAddress: string
   port: string
   paperWidth: '58mm' | '80mm'
@@ -229,7 +229,7 @@ export function ThermalPrinterTab() {
           <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
             Tipe Koneksi Printer
           </label>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <button
               type="button"
               onClick={() => updateSetting('connectionType', 'bluetooth')}
@@ -261,53 +261,7 @@ export function ThermalPrinterTab() {
                 <p className="text-[10px] text-zinc-500 dark:text-zinc-400">Direct USB Kasir PC</p>
               </div>
             </button>
-
-            <button
-              type="button"
-              onClick={() => updateSetting('connectionType', 'network')}
-              className={`flex items-center gap-3 p-3.5 rounded-lg border text-left cursor-pointer transition-all ${
-                settings.connectionType === 'network'
-                  ? 'border-sky-600 bg-sky-50/50 dark:bg-sky-950/30 text-sky-700 dark:text-sky-300'
-                  : 'border-zinc-200 dark:border-zinc-800 hover:border-zinc-300 dark:hover:border-zinc-700 text-zinc-700 dark:text-zinc-300'
-              }`}
-            >
-              <FiGlobe className="w-5 h-5 shrink-0" />
-              <div>
-                <p className="text-xs font-bold">Network / LAN</p>
-                <p className="text-[10px] text-zinc-500 dark:text-zinc-400">Alamat IP & Port ESC/POS</p>
-              </div>
-            </button>
           </div>
-
-          {/* Network IP Input if Network selected */}
-          {settings.connectionType === 'network' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div>
-                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                  Alamat IP Printer LAN
-                </label>
-                <input
-                  type="text"
-                  value={settings.ipAddress}
-                  onChange={(e) => updateSetting('ipAddress', e.target.value)}
-                  placeholder="Contoh: 192.168.1.200"
-                  className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-zinc-600 dark:text-zinc-400 mb-1">
-                  Port Printer (Default: 9100)
-                </label>
-                <input
-                  type="text"
-                  value={settings.port}
-                  onChange={(e) => updateSetting('port', e.target.value)}
-                  placeholder="9100"
-                  className="w-full rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-3 py-2 text-xs outline-none focus:border-sky-500 text-zinc-900 dark:text-zinc-100"
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* Section 2: Ukuran Kertas & Jumlah Cetak */}
