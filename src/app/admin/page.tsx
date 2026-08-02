@@ -227,7 +227,7 @@ export default function AdminDashboardPage() {
       <div className="pt-2">
         <div className="bg-white dark:bg-zinc-900 p-6 rounded">
           <h3 className="mb-6 text-sm font-bold text-slate-700 dark:text-zinc-200">
-            Pertumbuhan Transaksi (dalam Ribuan Rp)
+            Pertumbuhan Transaksi (Rp)
           </h3>
           <div className="h-64">
             <LineTrendChart data={metrics?.salesTrend || []} />
