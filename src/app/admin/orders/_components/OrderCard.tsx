@@ -57,12 +57,15 @@ export function OrderCard({ order }: OrderCardProps) {
           </span>
         </div>
 
-        {/* Detail Pelanggan */}
-        <div className="text-xs text-slate-700 dark:text-slate-300 pt-1">
-          <div className="flex items-center gap-2">
+        {/* Detail Pelanggan & Nomor Meja */}
+        <div className="text-xs text-slate-700 dark:text-slate-300 pt-1 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Avatar name={order.customerName} photo={order.customerAvatarUrl} size="small" />
-            <span className="font-medium text-slate-900 dark:text-slate-100">{order.customerName}</span>
+            <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{order.customerName}</span>
           </div>
+          <span className="text-xs font-medium text-slate-400 shrink-0">
+            Meja #05
+          </span>
         </div>
 
         {/* Rincian Item dengan harga di sebelah kanan */}

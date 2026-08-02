@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { FiX, FiPlus, FiMinus, FiCoffee, FiCheck } from 'react-icons/fi'
+import { createPortal } from 'react-dom'
+import { FiX, FiPlus, FiMinus, FiCoffee, FiCheck, FiChevronDown } from 'react-icons/fi'
 import { CartItem } from '@/types/customer'
 
 interface CartDrawerProps {
@@ -13,6 +14,10 @@ interface CartDrawerProps {
   formatRupiah: (num: number) => string
   claimedProductId?: string | null
   claimedDiscountAmount?: number
+  orderType: 'dine_in' | 'takeaway'
+  onOrderTypeChange: (type: 'dine_in' | 'takeaway') => void
+  tableNumber: string
+  onTableNumberChange: (table: string) => void
 }
 
 export const CartDrawer: React.FC<CartDrawerProps> = ({
@@ -24,7 +29,42 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   formatRupiah,
   claimedProductId,
   claimedDiscountAmount,
+  orderType,
+  onOrderTypeChange,
+  tableNumber,
+  onTableNumberChange,
 }) => {
+  const [isTableDropdownOpen, setIsTableDropdownOpen] = useState<boolean>(false)
+  const tableDropdownRef = React.useRef<HTMLDivElement>(null)
+  const buttonRef = React.useRef<HTMLButtonElement>(null)
+  const portalRef = React.useRef<HTMLDivElement>(null)
+  const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number } | null>(null)
+
+  const toggleTableDropdown = () => {
+    if (!isTableDropdownOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setDropdownPos({
+        top: rect.bottom + 4,
+        right: window.innerWidth - rect.right,
+      })
+    }
+    setIsTableDropdownOpen((v) => !v)
+  }
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (
+        tableDropdownRef.current && !tableDropdownRef.current.contains(target) &&
+        portalRef.current && !portalRef.current.contains(target)
+      ) {
+        setIsTableDropdownOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const handleClose = () => {
     onClose()
   }
@@ -84,6 +124,89 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             >
               <FiX className="h-5 w-5" />
             </button>
+          </div>
+
+          {/* Opsi Tipe Pesanan: Dine In / Takeaway */}
+          <div className="px-4 py-2.5 bg-white dark:bg-slate-900/80 border-b border-slate-100 dark:border-slate-800 flex flex-col gap-2 shrink-0 text-xs">
+            <div className="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-950 p-1 rounded-lg border border-slate-200/80 dark:border-slate-800 w-full justify-center">
+              <button
+                type="button"
+                onClick={() => onOrderTypeChange('dine_in')}
+                className={`flex-1 py-1.5 rounded-md font-medium text-xs transition-all cursor-pointer text-center ${
+                  orderType === 'dine_in'
+                    ? 'bg-[#3D2514] text-white dark:bg-amber-100 dark:text-[#3D2514] shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Makan di Tempat
+              </button>
+              <button
+                type="button"
+                onClick={() => onOrderTypeChange('takeaway')}
+                className={`flex-1 py-1.5 rounded-md font-medium text-xs transition-all cursor-pointer text-center ${
+                  orderType === 'takeaway'
+                    ? 'bg-[#3D2514] text-white dark:bg-amber-100 dark:text-[#3D2514] shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
+                }`}
+              >
+                Bawa Pulang
+              </button>
+            </div>
+
+            {/* Posisi Meja Editable (Portal Popup, melepaskan dari overflow clipping) */}
+            {orderType === 'dine_in' && (
+              <div className="flex items-center justify-between text-xs px-1 text-slate-500 dark:text-slate-400 font-medium">
+                <span>Posisi Meja</span>
+                <div ref={tableDropdownRef} className="relative inline-flex items-center">
+                  <button
+                    ref={buttonRef}
+                    type="button"
+                    onClick={toggleTableDropdown}
+                    className="inline-flex items-center gap-1 font-bold text-sm text-[#3D2514] dark:text-amber-300 bg-transparent cursor-pointer outline-none hover:underline"
+                  >
+                    <span><span className="font-normal opacity-50">#</span>{tableNumber}</span>
+                    <FiChevronDown className={`h-3 w-3 transition-transform ${isTableDropdownOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Dropdown popup via createPortal (z-index 9999, bebas dari overflow) */}
+                  {isTableDropdownOpen && dropdownPos && typeof document !== 'undefined' && createPortal(
+                    <div
+                      ref={portalRef}
+                      style={{
+                        position: 'fixed',
+                        top: dropdownPos.top,
+                        right: dropdownPos.right,
+                        zIndex: 9999,
+                      }}
+                      className="w-24 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl max-h-56 overflow-y-auto py-1 text-center divide-y divide-slate-100 dark:divide-slate-800/60 thin-scroll"
+                    >
+                      {Array.from({ length: 20 }, (_, i) => {
+                        const num = String(i + 1).padStart(2, '0')
+                        const isSelected = num === tableNumber
+                        return (
+                          <button
+                            key={num}
+                            type="button"
+                            onClick={() => {
+                              onTableNumberChange(num)
+                              setIsTableDropdownOpen(false)
+                            }}
+                            className={`w-full py-1.5 text-xs font-semibold cursor-pointer transition-colors block ${
+                              isSelected
+                                ? 'bg-amber-100 dark:bg-amber-950/80 text-[#3D2514] dark:text-amber-200'
+                                : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
+                            }`}
+                          >
+                            #{num}
+                          </button>
+                        )
+                      })}
+                    </div>,
+                    document.body
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* List Items */}
@@ -189,28 +312,26 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
             })}
           </div>
 
-          {/* Footer Ringkasan Total */}
-          <div className="flex flex-col gap-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-100 dark:border-slate-800 shrink-0">
-            {Boolean(claimedDiscountAmount && claimedDiscountAmount > 0) && (
+          {/* Footer Ringkasan Total (Hanya tampil jika ada diskon poin yang diclaim) */}
+          {Boolean(claimedDiscountAmount && claimedDiscountAmount > 0) && (
+            <div className="flex flex-col gap-1 px-4 py-2.5 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-100 dark:border-slate-800 shrink-0">
               <div className="flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                 <span>Diskon Poin</span>
                 <span>-{formatRupiah(claimedDiscountAmount || 0)}</span>
               </div>
-            )}
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total</span>
-              <div className="flex items-baseline gap-1.5">
-                {Boolean(claimedDiscountAmount && claimedDiscountAmount > 0) && (
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">Total</span>
+                <div className="flex items-baseline gap-1.5">
                   <span className="text-xs font-semibold text-slate-400 line-through">
                     {formatRupiah(cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0))}
                   </span>
-                )}
-                <span className="text-xs sm:text-sm font-black text-[#3D2514] dark:text-amber-200">
-                  {formatRupiah(Math.max(0, cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0) - (claimedDiscountAmount || 0)))}
-                </span>
+                  <span className="text-xs sm:text-sm font-black text-[#3D2514] dark:text-amber-200">
+                    {formatRupiah(Math.max(0, cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0) - (claimedDiscountAmount || 0)))}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

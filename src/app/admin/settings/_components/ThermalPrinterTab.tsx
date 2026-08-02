@@ -360,6 +360,7 @@ export function ThermalPrinterTab() {
           <p>Tgl&nbsp;: {new Date().toLocaleDateString('id-ID')} {new Date().toLocaleTimeString('id-ID')}</p>
           <p>No&nbsp;&nbsp;: #TEST-0001</p>
           <p>Nama: Joko Widodo</p>
+          <p>Meja: 05</p>
 
           <hr className="border-dashed border-zinc-300 dark:border-zinc-600 my-1" />
 

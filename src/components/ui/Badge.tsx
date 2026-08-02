@@ -5,16 +5,16 @@ export interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
 
 export function Badge({ className = "", variant = "default", ...props }: BadgeProps) {
-  const baseStyled = "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium tracking-tight transition-colors";
+  const baseStyled = "inline-flex items-center rounded-full px-2.5 py-1.5 text-xs font-normal transition-colors";
   
   const variantStyles = {
-    default: "bg-slate-900 text-white border-transparent",
-    secondary: "bg-slate-500 text-white border-transparent",
-    destructive: "bg-rose-500 text-white border-transparent",
-    outline: "text-slate-600 border-slate-200",
-    success: "bg-emerald-500 text-white border-transparent",
-    warning: "bg-amber-500 text-white border-transparent",
-    info: "bg-sky-500 text-white border-transparent",
+    default: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200",
+    secondary: "bg-slate-100 text-slate-600 dark:bg-slate-800/80 dark:text-slate-400",
+    destructive: "bg-rose-100 text-rose-600 dark:bg-rose-950/60 dark:text-rose-400",
+    outline: "border border-slate-200 text-slate-600 dark:border-slate-800 dark:text-slate-400 bg-transparent",
+    success: "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/60 dark:text-emerald-400",
+    warning: "bg-amber-100 text-amber-600 dark:bg-amber-950/60 dark:text-amber-400",
+    info: "bg-sky-100 text-sky-600 dark:bg-sky-950/60 dark:text-sky-400",
   };
 
   const currentVariantStyle = variantStyles[variant] || variantStyles.default;

@@ -8,11 +8,12 @@ import {
   HiOutlineCog6Tooth, 
   HiOutlineArrowLeftOnRectangle, 
   HiOutlineChevronDown, 
-  HiOutlineBars3,
+  HiOutlineBars3, 
   HiOutlineClipboardDocumentList,
   HiOutlineMegaphone,
   HiOutlineClock,
   HiOutlineUsers,
+  HiOutlineRectangleGroup,
 } from "react-icons/hi2";
 import { FiCoffee } from "react-icons/fi";
 import { signOutAdmin, getCurrentUser } from "@/services/supabase/authService";
@@ -37,9 +38,11 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
           ? "menu"
           : pathname.startsWith("/admin/member")
             ? "member"
-            : pathname.startsWith("/admin/settings")
-              ? "pengaturan"
-              : "";
+            : pathname.startsWith("/admin/meja")
+              ? "meja"
+              : pathname.startsWith("/admin/settings")
+                ? "pengaturan"
+                : "";
 
   const config = {
     bgDarkClass: "bg-sky-900 dark:bg-zinc-900",
@@ -125,7 +128,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
     { type: "header", label: "Operasional" },
     { type: "item", id: "orders", label: "Pesanan", href: "/admin/orders", icon: HiOutlineClipboardDocumentList },
     { type: "item", id: "order-history", label: "Riwayat Pesanan", href: "/admin/order-history", icon: HiOutlineClock },
+    { type: "header", label: "Master Data" },
     { type: "item", id: "menu", label: "Menu", href: "/admin/menu", icon: FiCoffee },
+    { type: "item", id: "meja", label: "Meja", href: "/admin/meja", icon: HiOutlineRectangleGroup },
     { type: "item", id: "member", label: "Member", href: "/admin/member", icon: HiOutlineUsers },
     { type: "header", label: "Konfigurasi" },
     { type: "item", id: "pengaturan", label: "Pengaturan", href: "/admin/settings", icon: HiOutlineCog6Tooth },
@@ -149,13 +154,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
 
   const getMaskClass = (position: "top" | "bottom", isActive: boolean) => {
     const basePos = position === "top" ? "-top-4" : "-bottom-4";
-    const base = `absolute ${basePos} right-0 h-4 bg-zinc-50 dark:bg-zinc-950 pointer-events-none z-10`;
-    if (isActive) {
-      const anim = isCollapsed ? "animate-expand-collapsed" : "animate-expand-expanded";
-      return `${base} ${anim} opacity-100`;
-    }
-    const width = isCollapsed ? "w-[calc(100%-12px)]" : "w-[calc(100%-16px)]";
-    return `${base} opacity-0 ${width}`;
+    const base = `absolute ${basePos} right-0 w-4 h-4 bg-zinc-50 dark:bg-zinc-950 pointer-events-none z-10`;
+    const transition = isActive ? "opacity-100" : "opacity-0";
+    return `${base} ${transition}`;
   };
 
   const getIconClass = (itemId: string, isActive: boolean) => {

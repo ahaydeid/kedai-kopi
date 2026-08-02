@@ -99,9 +99,11 @@ export default function CustomerMenuPage() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Cart state
+  // Cart & Order Options state
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false)
+  const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
+  const [tableNumber, setTableNumber] = useState<string>('05')
 
   // Image Gallery Modal state (Produk Tunggal)
   const [selectedGalleryProduct, setSelectedGalleryProduct] = useState<MenuItem | null>(null)
@@ -241,10 +243,17 @@ export default function CustomerMenuPage() {
     const defaultName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || ''
     const avatarUrl = user?.user_metadata?.avatar_url || user?.user_metadata?.picture || null
 
+    const orderInfoText = orderType === 'dine_in'
+      ? `Makan di Tempat • <span class="font-semibold text-slate-700 dark:text-slate-200"><span class="font-normal opacity-50">#</span>${tableNumber}</span>`
+      : `Bawa Pulang (Takeaway)`
+
     playSwalSound('confirm')
     Swal.fire({
       title: 'Konfirmasi Pesanan',
-      text: `${totalCartItems} item · ${formatRupiah(finalCartPrice)}`,
+      html: `
+        <div class="text-xs text-slate-500 mb-1">${totalCartItems} item · ${formatRupiah(finalCartPrice)}</div>
+        <div class="text-xs font-medium text-slate-400 mb-4">${orderInfoText}</div>
+      `,
       input: 'text',
       inputValue: defaultName,
       inputPlaceholder: 'Masukkan nama kamu',
@@ -258,7 +267,7 @@ export default function CustomerMenuPage() {
       customClass: {
         popup: 'swal2-popup',
         cancelButton: '!text-slate-600',
-        input: '!rounded-xl !border-slate-200 !text-sm !py-2.5 !mt-2 !mb-5 !shadow-none !outline-none !focus:outline-none !focus:ring-0 !focus:shadow-none !focus:border-amber-800',
+        input: '!rounded-xl !border-slate-200 !text-sm !py-2.5 !mt-1 !mb-5 !shadow-none !outline-none !focus:outline-none !focus:ring-0 !focus:shadow-none !focus:border-amber-800',
       },
       inputValidator: (value) => {
         if (!value || !value.trim()) {
@@ -547,6 +556,10 @@ export default function CustomerMenuPage() {
             formatRupiah={formatRupiah}
             claimedProductId={null}
             claimedDiscountAmount={claimedDiscountAmount}
+            orderType={orderType}
+            onOrderTypeChange={setOrderType}
+            tableNumber={tableNumber}
+            onTableNumberChange={setTableNumber}
           />
 
           <div 

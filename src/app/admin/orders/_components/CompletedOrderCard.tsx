@@ -50,6 +50,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           <p>Tgl&nbsp;: ${tanggal} ${waktu} WIB</p>
           <p>No&nbsp;&nbsp;: ${order.orderNumber}</p>
           <p>Nama: ${namaPelanggan}</p>
+          <p>Meja: 05</p>
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
           ${itemsHtml}
           <p class="border-b border-dashed border-zinc-400 my-2"></p>
@@ -104,9 +105,9 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           </div>
         </div>
 
-        {/* Row 2: Nama Pelanggan & Jumlah Item */}
+        {/* Row 2: Nama Pelanggan & Jumlah Item & Nomor Meja */}
         <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-          {order.customerName} • {totalItemsCount} item
+          {order.customerName} • Meja #05 • {totalItemsCount} item
         </p>
       </div>
     )
@@ -135,12 +136,15 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
           </button>
         </div>
 
-        {/* Detail Pelanggan */}
-        <div className="text-xs text-slate-700 dark:text-slate-300 pt-1">
-          <div className="flex items-center gap-2">
+        {/* Detail Pelanggan & Nomor Meja */}
+        <div className="text-xs text-slate-700 dark:text-slate-300 pt-1 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
             <Avatar name={order.customerName} photo={order.customerAvatarUrl} size="small" />
-            <span className="font-medium text-slate-900 dark:text-slate-100">{order.customerName}</span>
+            <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{order.customerName}</span>
           </div>
+          <span className="text-xs font-medium text-slate-400 shrink-0">
+            Meja #05
+          </span>
         </div>
 
         {/* Rincian Item dengan harga di sebelah kanan */}
