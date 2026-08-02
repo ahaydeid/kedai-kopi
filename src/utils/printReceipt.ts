@@ -188,6 +188,85 @@ function getCandidateBridgeUrls(configuredUrl?: string): string[] {
   return ['http://localhost:5000', 'http://127.0.0.1:5000']
 }
 
+  const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
+  if (isAndroid || settings.connectionType === 'rawbt') {
+    let text = ''
+    const headerStr = String(settings.headerText || 'KEDAI KOPI').substring(0, 32)
+    text += `${headerStr}\n`
+    if (settings.addressText) {
+      text += `${String(settings.addressText).substring(0, 32)}\n`
+    }
+    text += `--------------------------------\n`
+    text += `Tgl : ${nowStr}\n`
+    const orderNo = String(data.orderNumber || '').replace(/^#\s*/, '')
+    const idStr = orderNo.startsWith('ORD-') ? orderNo : `ORD-${orderNo}`
+    text += `ID  : ${idStr}\n`
+    if (data.customerName) {
+      text += `Nama: ${String(data.customerName).substring(0, 24)}\n`
+    }
+    if (String(data.orderType || '').toLowerCase() === 'takeaway' || String(data.tableNumber || '').toLowerCase() === 'takeaway' || !data.tableNumber) {
+      text += `Tipe: Take Away\n`
+    } else {
+      const tableNo = String(data.tableNumber).replace(/^Meja\s*#?/i, '').trim()
+      text += `Meja: Meja #${tableNo}\n`
+    }
+    text += `--------------------------------\n`
+
+    if (Array.isArray(data.items)) {
+      data.items.forEach((item) => {
+        const qtyStr = item.quantity > 1 ? `${item.quantity}x ` : ''
+        const itemTitle = `${qtyStr}${item.name}`
+        const priceVal = item.price * (item.quantity > 1 ? item.quantity : 1)
+        const priceStr = formatRupiah(priceVal)
+
+        if (itemTitle.length + priceStr.length + 1 <= 32) {
+          const spaces = ' '.repeat(32 - itemTitle.length - priceStr.length)
+          text += `${itemTitle}${spaces}${priceStr}\n`
+        } else {
+          const spaces = ' '.repeat(Math.max(0, 32 - priceStr.length))
+          text += `${itemTitle}\n${spaces}${priceStr}\n`
+        }
+      })
+    }
+
+    text += `--------------------------------\n`
+
+    if (effectiveDiscount > 0) {
+      const subtotal = itemsSum > 0 ? itemsSum : data.totalAmount + effectiveDiscount
+      const subLabel = 'Subtotal'
+      const subStr = formatRupiah(subtotal)
+      const subSpaces = ' '.repeat(Math.max(0, 32 - subLabel.length - subStr.length))
+      text += `${subLabel}${subSpaces}${subStr}\n`
+
+      const discLabel = 'Diskon'
+      const discStr = `-${formatRupiah(effectiveDiscount)}`
+      const discSpaces = ' '.repeat(Math.max(0, 32 - discLabel.length - discStr.length))
+      text += `${discLabel}${discSpaces}${discStr}\n`
+    }
+
+    const totalLabel = 'TOTAL'
+    const totalValStr = formatRupiah(data.totalAmount || 0)
+    const totalSpaces = ' '.repeat(Math.max(0, 32 - totalLabel.length - totalValStr.length))
+    text += `${totalLabel}${totalSpaces}${totalValStr}\n`
+
+    if (data.paymentMethod) {
+      text += `Bayar: ${data.paymentMethod}\n`
+    }
+
+    text += `--------------------------------\n`
+    const footerStr = String(settings.footerText || 'Terima kasih atas kunjungan Anda!').substring(0, 32)
+    text += `${footerStr}\n\n\n\n`
+
+    const copies = Math.max(1, settings.printCopies || 1)
+    let fullText = text
+    if (copies > 1) {
+      fullText = (text + '\n').repeat(copies)
+    }
+
+    window.location.href = `rawbt:data:text/plain;charset=utf-8,${encodeURIComponent(fullText)}`
+    return
+  }
+
   if (settings.connectionType === 'browser') {
     executeIframeBrowserPrint()
     return
