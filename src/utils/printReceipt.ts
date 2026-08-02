@@ -200,7 +200,7 @@ function getCandidateBridgeUrls(configuredUrl?: string): string[] {
   for (const url of candidateUrls) {
     try {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 2000)
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
 
       const response = await fetch(`${url}/api/print`, {
         method: 'POST',
