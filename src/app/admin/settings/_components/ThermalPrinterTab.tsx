@@ -128,7 +128,7 @@ export function ThermalPrinterTab() {
   const handleTestPrint = () => {
     playSwalSound('success')
     Swal.fire({
-      title: '🖨️ Mencetak Struk Uji Coba...',
+      title: 'Mencetak Struk Uji Coba...',
       html: `
         <div class="text-left text-xs font-mono bg-white dark:bg-slate-950 p-4 rounded-md border border-slate-200 dark:border-slate-800 space-y-1 text-slate-800 dark:text-slate-200">
           <p class="text-center font-bold uppercase text-sm">${settings.headerText}</p>
@@ -147,7 +147,7 @@ export function ThermalPrinterTab() {
         </div>
       `,
       icon: 'info',
-      confirmButtonText: 'Selesai Uji Coba',
+      confirmButtonText: 'Tutup',
       confirmButtonColor: '#0284c7',
     })
   }
