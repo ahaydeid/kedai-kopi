@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { FiLock, FiVolume2, FiChevronLeft } from "react-icons/fi";
+import { FiLock, FiVolume2, FiPrinter, FiChevronLeft } from "react-icons/fi";
 
 import { SidebarMenu, MenuItem } from "./_components/SidebarMenu";
 import { SuaraNotifikasiTab } from "./_components/SuaraNotifikasiTab";
 import { AksesBaristaTab } from "./_components/AksesBaristaTab";
+import { ThermalPrinterTab } from "./_components/ThermalPrinterTab";
 import { playSwalSound } from "@/utils/sound";
 
 export default function SettingsPage() {
@@ -57,6 +58,12 @@ export default function SettingsPage() {
       subtitle: "Atur preferensi suara notifikasi pesanan masuk dan stok",
       icon: FiVolume2,
     },
+    {
+      id: "printer",
+      title: "Thermal Printer",
+      subtitle: "Atur koneksi printer thermal kasir untuk cetak struk otomatis",
+      icon: FiPrinter,
+    },
   ];
 
   return (
@@ -98,6 +105,10 @@ export default function SettingsPage() {
 
             {activeTab === "notifikasi" && (
               <SuaraNotifikasiTab />
+            )}
+
+            {activeTab === "printer" && (
+              <ThermalPrinterTab />
             )}
           </div>
         </div>

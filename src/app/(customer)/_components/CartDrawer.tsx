@@ -145,7 +145,7 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                                 {formatRupiah(cartItem.product.price)}
                               </span>
                               <span className="text-[9px] font-normal text-emerald-600 dark:text-emerald-400">
-                                (+{cartItem.product.points ?? Math.floor(cartItem.product.price / 1000)})
+                                (+{cartItem.product.points ?? Math.floor(cartItem.product.price / 1000)} poin)
                               </span>
                             </>
                           )}
