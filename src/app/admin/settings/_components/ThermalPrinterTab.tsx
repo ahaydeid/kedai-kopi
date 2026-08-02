@@ -159,10 +159,9 @@ export function ThermalPrinterTab() {
   }
 
   const handleTestRawBtAndroid = () => {
-    const rawText = "KEDAI KOPI\n--------------------------------\nTgl : 3 Agu 2026 00:56 WIB\nID  : ORD-TEST-RAWBT\nNama: Tes Android HP\nMeja: Meja #05\n--------------------------------\nKopi Susu Aren       Rp 13.000\nCireng Rujak         Rp 10.000\n--------------------------------\nTOTAL                Rp 23.000\n--------------------------------\nTerima Kasih!\n\n\n\n"
-    const encodedText = encodeURIComponent(rawText)
-    const intentUrl = `intent:#Intent;scheme=rawbt;package=ru.a404.rawbtprinter;S.txt=${encodedText};end;`
-    window.location.href = intentUrl
+    const rawText = "KEDAI KOPI\n--------------------------------\nTgl : 3 Agu 2026 01:06 WIB\nID  : ORD-TEST-RAWBT\nNama: Tes Android HP\nMeja: Meja #05\n--------------------------------\nKopi Susu Aren       Rp 13.000\nCireng Rujak         Rp 10.000\n--------------------------------\nTOTAL                Rp 23.000\n--------------------------------\nTerima Kasih!\n\n\n\n"
+    const rawBtUrl = `rawbt:data:text/plain;charset=utf-8,${encodeURIComponent(rawText)}`
+    window.location.href = rawBtUrl
   }
 
   const handleSave = async (e: React.FormEvent) => {
@@ -404,10 +403,9 @@ export function ThermalPrinterTab() {
 
           <Button
             type="button"
-            variant="secondary"
             size="sm"
             onClick={handleTestRawBtAndroid}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 border-emerald-300 text-emerald-700 dark:text-emerald-300 dark:border-emerald-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-xs border-transparent"
           >
             <FiPrinter className="w-4 h-4" />
             <span>Tes RawBT (Android HP)</span>
