@@ -26,6 +26,9 @@ interface HistoryOrder {
   items: OrderItem[]
 }
 
+const HISTORY_CACHE_KEY = 'customer_history_cache_v1'
+let historyClientMemoryCache: HistoryOrder[] | null = null
+
 const STATUS_CONFIG: Record<HistoryStatus, { label: string; className: string }> = {
   selesai: {
     label: 'Selesai',
@@ -69,37 +72,75 @@ function mapToHistoryOrder(item: FetchedOrderWithItems): HistoryOrder | null {
 
 export default function CustomerHistoryPage() {
   const router = useRouter()
-  const [historyOrders, setHistoryOrders] = useState<HistoryOrder[]>([])
-  const [loading, setLoading] = useState(true)
+
+  const [historyOrders, setHistoryOrders] = useState<HistoryOrder[]>(() => {
+    if (historyClientMemoryCache) return historyClientMemoryCache
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(HISTORY_CACHE_KEY)
+        if (saved) {
+          const parsed = JSON.parse(saved)
+          historyClientMemoryCache = parsed
+          return parsed
+        }
+      } catch {}
+    }
+    return []
+  })
+
+  const [loading, setLoading] = useState<boolean>(() => {
+    if (historyClientMemoryCache && historyClientMemoryCache.length > 0) return false
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(HISTORY_CACHE_KEY)
+        if (saved && JSON.parse(saved).length > 0) return false
+      } catch {}
+    }
+    return true
+  })
+
   const [displayLimit, setDisplayLimit] = useState<number>(5)
   const observerTargetRef = useRef<HTMLDivElement | null>(null)
 
-  const fetchHistoryOrders = useCallback(async () => {
+  const fetchHistoryOrders = useCallback(async (isSilent = false) => {
     const user = await getCurrentUser()
     if (!user) {
       router.push('/login')
       return
     }
-    setLoading(true)
+
+    const hasData = historyClientMemoryCache !== null || historyOrders.length > 0
+    if (!isSilent && !hasData) {
+      setLoading(true)
+    }
+
     const orders = await getMyOrders(user.id, ['Selesai', 'Dibatalkan'])
     const historyOnly = orders
       .map(mapToHistoryOrder)
       .filter((o): o is HistoryOrder => o !== null)
+
     setHistoryOrders(historyOnly)
+    historyClientMemoryCache = historyOnly
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(historyOnly))
+      } catch {}
+    }
     setLoading(false)
-  }, [router])
+  }, [router, historyOrders.length])
 
   useEffect(() => {
-    fetchHistoryOrders()
+    const hasData = historyClientMemoryCache !== null || historyOrders.length > 0
+    fetchHistoryOrders(hasData)
 
     const unsubscribe = subscribeToOrders(() => {
-      fetchHistoryOrders()
+      fetchHistoryOrders(true)
     })
 
     return () => {
       unsubscribe()
     }
-  }, [fetchHistoryOrders])
+  }, [fetchHistoryOrders, historyOrders.length])
 
   // Lazy Load Trigger saat scroll mendekati bawah list
   useEffect(() => {
@@ -146,7 +187,28 @@ export default function CustomerHistoryPage() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-md mx-auto px-1.5 pt-1.5 pb-28">
         {loading ? (
-          <div className="py-16 text-center text-slate-400 text-sm">Memuat riwayat transaksi...</div>
+          /* Skeleton Loader (Hanya saat kunjungan pertama tanpa cache) */
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white dark:bg-slate-900 rounded p-3.5 space-y-2 animate-pulse">
+                <div className="flex justify-between items-center">
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-28" />
+                  <div className="h-4 bg-slate-200 dark:bg-slate-800 rounded-full w-14" />
+                </div>
+                <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-36" />
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex justify-between">
+                    <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-44" />
+                    <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-16" />
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex justify-between">
+                  <div className="h-3 bg-slate-200 dark:bg-slate-800 rounded w-10" />
+                  <div className="h-3.5 bg-slate-200 dark:bg-slate-800 rounded w-20" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : hasHistory ? (
           <>
             <div className="space-y-3">
