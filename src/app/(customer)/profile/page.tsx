@@ -257,60 +257,60 @@ export default function CustomerProfilePage() {
           </div>
         </section>
 
+        {/* Email Pelanggan Rata Tengah di Atas Tombol Bulat */}
+        <div className="text-center pt-1">
+          <p className="text-[11px] font-normal text-slate-400 dark:text-slate-500 truncate">
+            {userEmail}
+          </p>
+        </div>
+
         {/* Tombol-Tombol Bulat Direct Link (Social & Location) */}
-        <div className="flex items-center justify-center gap-3.5 pt-2">
+        <div className="flex items-center justify-center gap-4 pt-1">
           <a
             href="https://maps.google.com/?q=Kedai+Kopi"
             target="_blank"
             rel="noopener noreferrer"
             title="Lokasi Kedai (Google Maps)"
-            className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-2xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
           >
-            <FiMapPin className="h-4.5 w-4.5 text-rose-600 dark:text-rose-400" />
+            <FiMapPin className="h-5 w-5 text-rose-600 dark:text-rose-400" />
           </a>
           <a
             href="https://wa.me/6281234567890"
             target="_blank"
             rel="noopener noreferrer"
             title="WhatsApp Official"
-            className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-2xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
           >
-            <FaWhatsapp className="h-4.5 w-4.5 text-emerald-600 dark:text-emerald-400" />
+            <FaWhatsapp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
           </a>
           <a
             href="https://instagram.com/kedaikopi.official"
             target="_blank"
             rel="noopener noreferrer"
             title="Instagram Official"
-            className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-2xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
           >
-            <FiInstagram className="h-4.5 w-4.5 text-pink-600 dark:text-pink-400" />
+            <FiInstagram className="h-5 w-5 text-pink-600 dark:text-pink-400" />
           </a>
           <a
             href="https://tiktok.com/@kedaikopi.official"
             target="_blank"
             rel="noopener noreferrer"
             title="TikTok Official"
-            className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-2xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
           >
-            <FaTiktok className="h-4.5 w-4.5 text-slate-900 dark:text-slate-100" />
+            <FaTiktok className="h-5 w-5 text-slate-900 dark:text-slate-100" />
           </a>
           <a
             href="https://shopee.co.id/universal-link/now-food/shop/kedaikopi"
             target="_blank"
             rel="noopener noreferrer"
             title="ShopeeFood"
-            className="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center text-slate-700 dark:text-slate-200 shadow-2xs hover:shadow-md hover:scale-105 transition-all"
+            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 flex items-center justify-center shadow-xs hover:shadow-md hover:scale-105 transition-all"
           >
-            <FiShoppingBag className="h-4.5 w-4.5 text-orange-600 dark:text-orange-400" />
+            <FiShoppingBag className="h-5 w-5 text-orange-600 dark:text-orange-400" />
           </a>
-        </div>
-
-        {/* Email Pelanggan Rata Tengah di Bawah Section Menu & Tombol Bulat */}
-        <div className="text-center pt-0.5">
-          <p className="text-[11px] font-normal text-slate-400 dark:text-slate-500 truncate">
-            {userEmail}
-          </p>
         </div>
       </main>
 
