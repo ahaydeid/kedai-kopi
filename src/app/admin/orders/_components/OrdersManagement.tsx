@@ -115,8 +115,8 @@ export function OrdersManagement() {
             )}
           </div>
 
-          {/* Section 2: Pesanan Selesai (1 Kolom di Desktop) */}
-          <div className="lg:col-span-1 space-y-4">
+          {/* Section 2: Pesanan Selesai (1 Kolom di Desktop dengan Local Scroll & Sticky Position) */}
+          <div className="lg:col-span-1 space-y-4 lg:sticky lg:top-4">
             <div className="flex items-center justify-between pb-1 border-b border-slate-200/80 dark:border-slate-800">
               <h2 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                 <span>Pesanan Selesai</span>
@@ -131,7 +131,7 @@ export function OrdersManagement() {
                 Belum ada pesanan selesai.
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-4 lg:max-h-[calc(100vh-180px)] lg:overflow-y-auto lg:pr-1.5 scrollbar-thin">
                 {completedOrders.map((order) => (
                   <OrderCard key={order.id} order={order} />
                 ))}
