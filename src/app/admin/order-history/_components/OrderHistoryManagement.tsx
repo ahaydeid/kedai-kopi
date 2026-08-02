@@ -148,7 +148,7 @@ export function OrderHistoryManagement() {
       {loading ? (
         <div className="p-8 text-center text-sm text-slate-500">Memuat riwayat pesanan...</div>
       ) : (
-        <div className={`transition-opacity duration-200 ${isFetching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+        <div className={isFetching ? 'pointer-events-none' : ''}>
           <OrderHistoryTable
             items={orders}
             totalCount={totalCount}

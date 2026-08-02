@@ -83,7 +83,7 @@ export function OrdersManagement() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-          Manajemen Pesanan
+          Pesanan Hari Ini
         </h1>
       </div>
 

@@ -248,7 +248,7 @@ export function MemberManagement() {
           {search ? `Tidak ada member dengan kata kunci "${search}"` : 'Belum ada member terdaftar.'}
         </div>
       ) : (
-        <div className={`transition-opacity duration-200 ${isFetching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+        <div className={isFetching ? 'pointer-events-none' : ''}>
           <Table>
             <TableHead>
               <tr>

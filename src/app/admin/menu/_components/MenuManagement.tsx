@@ -256,7 +256,7 @@ export function MenuManagement() {
       {loading ? (
         <div className="p-8 text-center text-sm text-zinc-500">Memuat data menu...</div>
       ) : (
-        <div className={`transition-opacity duration-200 ${isFetching ? 'opacity-60 pointer-events-none' : 'opacity-100'}`}>
+        <div className={isFetching ? 'pointer-events-none' : ''}>
           <MenuTable
             items={menuItems}
             totalCount={totalCount}
