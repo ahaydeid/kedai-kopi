@@ -78,7 +78,7 @@ function buildEscPosBuffer(data) {
     chunks.push(Buffer.from(`Tipe: Take Away\n`, 'latin1'))
   } else {
     const cleanTable = rawTable.replace(/^Meja\s*#?/i, '').trim()
-    chunks.push(Buffer.from(`Meja: Meja #${cleanTable}\n`, 'latin1'))
+    chunks.push(Buffer.from(`Meja: #${cleanTable}\n`, 'latin1'))
   }
   if (data.notes) {
     chunks.push(Buffer.from(`Note: ${data.notes}\n`, 'latin1'))

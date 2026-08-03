@@ -110,7 +110,7 @@ export async function printThermalReceipt(data: ReceiptData) {
     String(data.tableNumber || '').toLowerCase() === 'takeaway' ||
     !data.tableNumber
       ? 'Take Away'
-      : `Meja #${String(data.tableNumber).replace(/^Meja\s*#?/i, '').trim()}`
+      : `#${String(data.tableNumber).replace(/^Meja\s*#?/i, '').trim()}`
 
   const receiptHtml = `
     <!DOCTYPE html>
