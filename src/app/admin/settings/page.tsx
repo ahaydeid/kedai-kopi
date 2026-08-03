@@ -2,9 +2,10 @@
 
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { FiLock, FiVolume2, FiPrinter, FiChevronLeft, FiGlobe } from "react-icons/fi";
+import { FiLock, FiVolume2, FiPrinter, FiChevronLeft, FiGlobe, FiMapPin } from "react-icons/fi";
 
 import { SidebarMenu, MenuItem } from "./_components/SidebarMenu";
+import { ProfilKedaiTab } from "./_components/ProfilKedaiTab";
 import { SuaraNotifikasiTab } from "./_components/SuaraNotifikasiTab";
 import { AksesBaristaTab } from "./_components/AksesBaristaTab";
 import { ThermalPrinterTab } from "./_components/ThermalPrinterTab";
@@ -12,7 +13,7 @@ import { UrlMasukTab } from "./_components/UrlMasukTab";
 import { playSwalSound } from "@/utils/sound";
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("barista");
+  const [activeTab, setActiveTab] = useState("profil_kedai");
   const [showMobileDetail, setShowMobileDetail] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -21,7 +22,7 @@ export default function SettingsPage() {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "");
       const savedTab = localStorage.getItem("settings_active_tab");
-      const validTabs = ["barista", "notifikasi", "printer", "url_masuk"];
+      const validTabs = ["profil_kedai", "barista", "notifikasi", "printer", "url_masuk"];
 
       if (hash && validTabs.includes(hash)) {
         setActiveTab(hash);
@@ -68,6 +69,12 @@ export default function SettingsPage() {
   };
 
   const menuItems: MenuItem[] = [
+    {
+      id: "profil_kedai",
+      title: "Profil Kedai",
+      subtitle: "Atur nama kedai, alamat, lokasi peta, dan kontak sosial media",
+      icon: FiMapPin,
+    },
     {
       id: "barista",
       title: "Akses Barista",
@@ -125,6 +132,10 @@ export default function SettingsPage() {
         {/* Right Column - Tab Content */}
         <div className={`flex-1 w-full ${showMobileDetail ? "block" : "hidden"} md:block`}>
           <div className="bg-white dark:bg-zinc-900 p-5 md:p-6 rounded border border-zinc-100 dark:border-zinc-800/80">
+            {activeTab === "profil_kedai" && (
+              <ProfilKedaiTab />
+            )}
+
             {activeTab === "barista" && (
               <AksesBaristaTab
                 onShowSuccessAlert={showSuccessBanner}

@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Modal } from '@/components/ui/Modal'
 import {
   FiInstagram,
@@ -9,6 +9,12 @@ import {
   FiMapPin,
 } from 'react-icons/fi'
 import { FaWhatsapp, FaTiktok } from 'react-icons/fa6'
+import { SiGojek } from 'react-icons/si'
+import {
+  getStoreProfile,
+  getCachedStoreProfileSync,
+  StoreProfile,
+} from '@/services/supabase/storeProfileService'
 
 interface InfoModalProps {
   isOpen: boolean
@@ -17,51 +23,82 @@ interface InfoModalProps {
 
 interface SocialLink {
   title: string
-  subtitle: string
   url: string
   icon: React.ReactNode
 }
 
-const SOCIAL_LINKS: SocialLink[] = [
-  {
-    title: 'Lokasi Kedai',
-    subtitle: 'maps.google.com/kedaikopi',
-    url: 'https://maps.google.com/?q=Kedai+Kopi',
-    icon: <FiMapPin className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
-  },
-  {
-    title: 'WhatsApp',
-    subtitle: 'wa.me/6281234567890',
-    url: 'https://wa.me/6281234567890',
-    icon: <FaWhatsapp className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
-  },
-  {
-    title: 'Instagram',
-    subtitle: '@kedaikopi.official',
-    url: 'https://instagram.com/kedaikopi.official',
-    icon: <FiInstagram className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
-  },
-  {
-    title: 'TikTok',
-    subtitle: '@kedaikopi.official',
-    url: 'https://tiktok.com/@kedaikopi.official',
-    icon: <FaTiktok className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
-  },
-  {
-    title: 'ShopeeFood',
-    subtitle: 'shopeefood/kedaikopi.official',
-    url: 'https://shopee.co.id/universal-link/now-food/shop/kedaikopi',
-    icon: <FiShoppingBag className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
-  },
-]
-
 export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
+  const [profile, setProfile] = useState<StoreProfile>(() => getCachedStoreProfileSync())
+
+  useEffect(() => {
+    if (isOpen) {
+      getStoreProfile().then(setProfile)
+    }
+  }, [isOpen])
+
+  const socialLinks: SocialLink[] = [
+    ...(profile.gmapsUrl
+      ? [
+          {
+            title: 'Lokasi Kedai',
+            url: profile.gmapsUrl,
+            icon: <FiMapPin className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
+          },
+        ]
+      : []),
+    ...(profile.whatsapp
+      ? [
+          {
+            title: 'WhatsApp',
+            url: profile.whatsapp.startsWith('http') ? profile.whatsapp : `https://wa.me/${profile.whatsapp.replace(/\D/g, '')}`,
+            icon: <FaWhatsapp className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
+          },
+        ]
+      : []),
+    ...(profile.instagramUrl
+      ? [
+          {
+            title: 'Instagram',
+            url: profile.instagramUrl,
+            icon: <FiInstagram className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
+          },
+        ]
+      : []),
+    ...(profile.tiktokUrl
+      ? [
+          {
+            title: 'TikTok',
+            url: profile.tiktokUrl,
+            icon: <FaTiktok className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
+          },
+        ]
+      : []),
+    ...(profile.shopeefoodUrl
+      ? [
+          {
+            title: 'ShopeeFood',
+            url: profile.shopeefoodUrl,
+            icon: <FiShoppingBag className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
+          },
+        ]
+      : []),
+    ...(profile.gofoodUrl
+      ? [
+          {
+            title: 'GoFood',
+            url: profile.gofoodUrl,
+            icon: <SiGojek className="h-6 w-6 text-slate-700 dark:text-slate-200 shrink-0" />,
+          },
+        ]
+      : []),
+  ]
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       size="md"
-      title="Informasi & Kontak Kedai"
+      title={profile.storeName ? `Informasi & Kontak ${profile.storeName}` : 'Informasi & Kontak Kedai'}
       bodyClassName="p-0"
     >
       <div className="relative w-full overflow-hidden p-4 min-h-[380px] flex flex-col justify-center bg-[#eef2f6] dark:bg-slate-950">
@@ -77,7 +114,7 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
 
         {/* List Card Link Glassmorphism Sesuai Referensi Gambar */}
         <div className="relative z-10 space-y-3 my-auto">
-          {SOCIAL_LINKS.map((item, idx) => (
+          {socialLinks.map((item, idx) => (
             <a
               key={idx}
               href={item.url}
@@ -91,13 +128,10 @@ export const InfoModal: React.FC<InfoModalProps> = ({ isOpen, onClose }) => {
                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50 tracking-tight truncate">
                     {item.title}
                   </h3>
-                  <p className="text-[11px] font-medium text-slate-400 dark:text-slate-400 truncate mt-0.5">
-                    {item.subtitle}
-                  </p>
                 </div>
               </div>
 
-              <FiArrowUpRight className="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-800 dark:group-hover:text-slate-100 shrink-0 ml-2 self-start mt-0.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              <FiArrowUpRight className="h-4 w-4 text-slate-400 dark:text-slate-500 group-hover:text-slate-800 dark:group-hover:text-slate-100 shrink-0 ml-2 self-center group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
             </a>
           ))}
         </div>

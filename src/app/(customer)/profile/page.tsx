@@ -14,6 +14,7 @@ import {
   FiMapPin,
 } from 'react-icons/fi'
 import { FaWhatsapp, FaTiktok } from 'react-icons/fa6'
+import { SiGojek } from 'react-icons/si'
 import Swal from 'sweetalert2'
 import { playSwalSound } from '@/utils/sound'
 import { getCurrentUser, getCachedUserSync, signOut } from '@/services/supabase/authService'
@@ -23,16 +24,31 @@ import { createClient } from '@/services/supabase/client'
 import { EditProfileModal } from '../_components/EditProfileModal'
 import { SettingsModal } from '../_components/SettingsModal'
 
+import {
+  getStoreProfile,
+  getCachedStoreProfileSync,
+  StoreProfile,
+} from '@/services/supabase/storeProfileService'
+
 const CUSTOMER_POINTS_CACHE_KEY = 'customer_points_cache_v1'
 let pointsMemoryCache: number | null = null
 
 export default function CustomerProfilePage() {
   const cachedUser = getCachedUserSync()
   const [user, setUser] = useState<any>(cachedUser)
+  const [storeProfile, setStoreProfile] = useState<StoreProfile>(() => getCachedStoreProfileSync())
   const [loading, setLoading] = useState<boolean>(() => !cachedUser)
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false)
   const [isEditModalOpen, setIsEditModalOpen] = useState<boolean>(false)
   const router = useRouter()
+
+  useEffect(() => {
+    async function loadStoreInfo() {
+      const p = await getStoreProfile()
+      setStoreProfile(p)
+    }
+    loadStoreInfo()
+  }, [])
 
   const [userPoints, setUserPoints] = useState<number>(() => {
     if (pointsMemoryCache !== null) return pointsMemoryCache
@@ -253,51 +269,96 @@ export default function CustomerProfilePage() {
 
         {/* Tombol-Tombol Bulat Direct Link (Social & Location) */}
         <div className="flex items-center justify-center gap-4 pt-1">
-          <a
-            href="https://maps.google.com/?q=Kedai+Kopi"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Lokasi Kedai (Google Maps)"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
-          >
-            <FiMapPin className="h-5 w-5 text-rose-600 dark:text-rose-400" />
-          </a>
-          <a
-            href="https://wa.me/6281234567890"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="WhatsApp Official"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
-          >
-            <FaWhatsapp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-          </a>
-          <a
-            href="https://instagram.com/kedaikopi.official"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="Instagram Official"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
-          >
-            <FiInstagram className="h-5 w-5 text-pink-600 dark:text-pink-400" />
-          </a>
-          <a
-            href="https://tiktok.com/@kedaikopi.official"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="TikTok Official"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
-          >
-            <FaTiktok className="h-5 w-5 text-slate-900 dark:text-slate-100" />
-          </a>
-          <a
-            href="https://shopee.co.id/universal-link/now-food/shop/kedaikopi"
-            target="_blank"
-            rel="noopener noreferrer"
-            title="ShopeeFood"
-            className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
-          >
-            <FiShoppingBag className="h-5 w-5 text-orange-600 dark:text-orange-400" />
-          </a>
+          {storeProfile.gmapsUrl && (
+            <a
+              href={storeProfile.gmapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Lokasi Kedai (Google Maps)"
+              className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
+            >
+              <FiMapPin className="h-5 w-5 text-rose-600 dark:text-rose-400" />
+            </a>
+          )}
+          {storeProfile.whatsapp && (
+            <a
+              href={storeProfile.whatsapp.startsWith('http') ? storeProfile.whatsapp : `https://wa.me/${storeProfile.whatsapp.replace(/\D/g, '')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="WhatsApp"
+              className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
+            >
+              <FaWhatsapp className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </a>
+          )}
+          {storeProfile.instagramUrl && (
+            <a
+              href={storeProfile.instagramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Instagram"
+              className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
+            >
+              <FiInstagram className="h-5 w-5 text-pink-600 dark:text-pink-400" />
+            </a>
+          )}
+          {storeProfile.tiktokUrl && (
+            <a
+              href={storeProfile.tiktokUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="TikTok"
+              className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
+            >
+              <FaTiktok className="h-5 w-5 text-slate-900 dark:text-slate-100" />
+            </a>
+          )}
+          {storeProfile.shopeefoodUrl && (
+            <a
+              href={storeProfile.shopeefoodUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="ShopeeFood"
+              className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
+            >
+              <FiShoppingBag className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+            </a>
+          )}
+          {storeProfile.gofoodUrl && (
+            <a
+              href={storeProfile.gofoodUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="GoFood"
+              className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-slate-100/80 dark:border-slate-800 flex items-center justify-center hover:shadow-md hover:scale-105 transition-all"
+            >
+              <SiGojek className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            </a>
+          )}
+        </div>
+
+        {/* Alamat Kedai & Embedded Google Maps */}
+        <div className="space-y-3 pt-2 pb-16">
+          {storeProfile.address && (
+            <div className="text-center px-4">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                {storeProfile.storeName ? `${storeProfile.storeName} · ` : ''}{storeProfile.address}
+              </p>
+            </div>
+          )}
+          {storeProfile.gmapsEmbedUrl && (
+            <div className="w-full h-48 rounded-xl overflow-hidden border border-slate-200/80 dark:border-slate-800 shadow-xs">
+              <iframe
+                src={storeProfile.gmapsEmbedUrl}
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+              />
+            </div>
+          )}
         </div>
       </main>
 

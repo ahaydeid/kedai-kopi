@@ -130,6 +130,47 @@ export default function CustomerMenuPage() {
     }
   }, [])
 
+  // Auto add to cart if redirected via item share link ?item=<id>
+  useEffect(() => {
+    if (typeof window === 'undefined' || menuList.length === 0) return
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const itemParam = urlParams.get('item')
+
+    if (itemParam) {
+      const targetItem = menuList.find((m) => m.id === itemParam)
+      if (targetItem) {
+        handleAddToCart(targetItem)
+
+        // Hapus query param ?item= dari URL tanpa reload
+        const newUrl = new URL(window.location.href)
+        newUrl.searchParams.delete('item')
+        window.history.replaceState({}, '', newUrl.toString())
+
+        playSwalSound('success')
+        Swal.fire({
+          title: 'Item Ditambahkan!',
+          text: `"${targetItem.name}" otomatis masuk ke keranjang pesananmu.`,
+          icon: 'success',
+          confirmButtonColor: '#3D2514',
+          confirmButtonText: 'Lihat Keranjang',
+          showCancelButton: true,
+          cancelButtonText: 'Tutup',
+          cancelButtonColor: '#f1f5f9',
+          reverseButtons: true,
+          customClass: {
+            popup: 'swal2-popup',
+            cancelButton: '!text-slate-700 !font-semibold',
+          },
+        }).then((res) => {
+          if (res.isConfirmed) {
+            setIsCartOpen(true)
+          }
+        })
+      }
+    }
+  }, [menuList])
+
   // Image Gallery Modal state (Produk Tunggal)
   const [selectedGalleryProduct, setSelectedGalleryProduct] = useState<MenuItem | null>(null)
 

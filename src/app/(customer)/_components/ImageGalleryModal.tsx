@@ -2,7 +2,8 @@
 
 import React, { useState, useCallback, useEffect } from 'react'
 import { Modal } from '@/components/ui/Modal'
-import { FiChevronLeft, FiChevronRight, FiCoffee } from 'react-icons/fi'
+import { FiChevronLeft, FiChevronRight, FiCoffee, FiLink, FiCheck } from 'react-icons/fi'
+import { FaWhatsapp } from 'react-icons/fa6'
 import { MenuItem } from '@/types/customer'
 
 interface ImageGalleryModalProps {
@@ -19,6 +20,7 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
   formatRupiah,
 }) => {
   const [photoIndex, setPhotoIndex] = useState<number>(0)
+  const [copied, setCopied] = useState<boolean>(false)
 
   // Extract photos for THIS SINGLE PRODUCT (cap max 5 photos per product)
   const productPhotos = (
@@ -41,10 +43,11 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
     setPhotoIndex((prev) => (prev + 1) % totalPhotos)
   }, [totalPhotos])
 
-  // Reset photo index when product changes or modal opens
+  // Reset photo index & copy state when product changes or modal opens
   useEffect(() => {
     if (isOpen) {
       setPhotoIndex(0)
+      setCopied(false)
     }
   }, [isOpen, product?.id])
 
@@ -62,6 +65,30 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, handlePrev, handleNext])
+
+  const getItemShareUrl = () => {
+    if (!product) return ''
+    const origin = typeof window !== 'undefined' ? window.location.origin : ''
+    return `${origin}/item/${product.id}`
+  }
+
+  const handleShareWA = () => {
+    if (!product) return
+    const shareUrl = getItemShareUrl()
+    const text = `Coba pesan ${product.name} di Kedai Kopi! Klik link ini untuk langsung pesan:`
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(`${text}\n${shareUrl}`)}`
+    window.open(waUrl, '_blank')
+  }
+
+  const handleCopyLink = async () => {
+    if (!product) return
+    const shareUrl = getItemShareUrl()
+    try {
+      await navigator.clipboard.writeText(shareUrl)
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {}
+  }
 
   // Return null ALWAYS AFTER all hooks are called (enforces React Rules of Hooks)
   if (!isOpen || !product) return null
@@ -130,7 +157,7 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
         </div>
 
         {/* Footer Ringkas: Kategori & Harga Produk */}
-        <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-2">
+        <div className="px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-950 space-y-3">
           <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <span>Kategori</span>
             <span className="font-medium text-slate-700 dark:text-slate-300">
@@ -152,6 +179,30 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
                 </span>
               </div>
             ) : null}
+          </div>
+
+          {/* Tombol Share WhatsApp & Salin Link (Icon Only, Bulat, Rata Kanan) */}
+          <div className="pt-2 border-t border-slate-100/60 dark:border-slate-800/60 flex items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={handleShareWA}
+              className="w-9 h-9 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center transition-colors cursor-pointer shadow-xs"
+              title="Share ke WhatsApp"
+            >
+              <FaWhatsapp className="h-4.5 w-4.5" />
+            </button>
+            <button
+              type="button"
+              onClick={handleCopyLink}
+              className="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 flex items-center justify-center transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
+              title={copied ? 'Link Tersalin!' : 'Salin Link Menu'}
+            >
+              {copied ? (
+                <FiCheck className="h-4.5 w-4.5 text-emerald-500" />
+              ) : (
+                <FiLink className="h-4.5 w-4.5 text-slate-500 dark:text-slate-400" />
+              )}
+            </button>
           </div>
         </div>
       </div>
