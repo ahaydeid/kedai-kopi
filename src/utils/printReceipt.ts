@@ -185,84 +185,96 @@ export async function printThermalReceipt(data: ReceiptData) {
   // --- Android HP: route via RawBT direct scheme ---
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
   if (isAndroid || settings.connectionType === 'rawbt') {
-    try {
-      let text = ''
-      const headerStr = String(settings.headerText || 'KEDAI KOPI').substring(0, 32)
-      text += `${headerStr}\n`
-      if (settings.addressText) {
-        text += `${String(settings.addressText).substring(0, 32)}\n`
-      }
-      text += `--------------------------------\n`
-      text += `Tgl : ${nowStr}\n`
-      const orderNo = String(data.orderNumber || '').replace(/^#\s*/, '')
-      const idStr = orderNo.startsWith('ORD-') ? orderNo : `ORD-${orderNo}`
-      text += `ID  : ${idStr}\n`
-      if (data.customerName) {
-        text += `Nama: ${String(data.customerName).substring(0, 24)}\n`
-      }
-      text += `Tipe: ${orderTypeLabel}\n`
-      text += `--------------------------------\n`
+    let text = ''
+    const headerStr = String(settings.headerText || 'KEDAI KOPI').substring(0, 32)
+    text += `${headerStr}\n`
+    if (settings.addressText) {
+      text += `${String(settings.addressText).substring(0, 32)}\n`
+    }
+    text += `--------------------------------\n`
+    text += `Tgl : ${nowStr}\n`
+    const orderNo = String(data.orderNumber || '').replace(/^#\s*/, '')
+    const idStr = orderNo.startsWith('ORD-') ? orderNo : `ORD-${orderNo}`
+    text += `ID  : ${idStr}\n`
+    if (data.customerName) {
+      text += `Nama: ${String(data.customerName).substring(0, 24)}\n`
+    }
+    text += `Tipe: ${orderTypeLabel}\n`
+    text += `--------------------------------\n`
 
-      const safeItems = Array.isArray(data.items) ? data.items : []
-      safeItems.forEach((item) => {
-        if (!item) return
-        const qty = Math.max(1, Number(item.quantity || 1))
-        const qtyStr = qty > 1 ? `${qty}x ` : ''
-        const itemName = String(item.name || 'Produk').trim()
-        const itemTitle = `${qtyStr}${itemName}`
-        const unitPrice = Math.max(0, Number(item.price || 0))
-        const priceVal = unitPrice * (qty > 1 ? qty : 1)
+    if (Array.isArray(data.items)) {
+      data.items.forEach((item) => {
+        const qtyStr = item.quantity > 1 ? `${item.quantity}x ` : ''
+        const itemTitle = `${qtyStr}${item.name}`
+        const priceVal = item.price * (item.quantity > 1 ? item.quantity : 1)
         const priceStr = formatRupiah(priceVal)
 
         if (itemTitle.length + priceStr.length + 1 <= 32) {
-          const spaces = ' '.repeat(Math.max(1, 32 - itemTitle.length - priceStr.length))
+          const spaces = ' '.repeat(32 - itemTitle.length - priceStr.length)
           text += `${itemTitle}${spaces}${priceStr}\n`
         } else {
           const spaces = ' '.repeat(Math.max(0, 32 - priceStr.length))
           text += `${itemTitle}\n${spaces}${priceStr}\n`
         }
       })
+    }
 
-      text += `--------------------------------\n`
+    text += `--------------------------------\n`
 
-      if (effectiveDiscount > 0) {
-        const subtotal = itemsSum > 0 ? itemsSum : Number(data.totalAmount || 0) + effectiveDiscount
-        const subLabel = 'Subtotal'
-        const subStr = formatRupiah(subtotal)
-        const subSpaces = ' '.repeat(Math.max(1, 32 - subLabel.length - subStr.length))
-        text += `${subLabel}${subSpaces}${subStr}\n`
+    if (effectiveDiscount > 0) {
+      const subtotal = itemsSum > 0 ? itemsSum : data.totalAmount + effectiveDiscount
+      const subLabel = 'Subtotal'
+      const subStr = formatRupiah(subtotal)
+      const subSpaces = ' '.repeat(Math.max(0, 32 - subLabel.length - subStr.length))
+      text += `${subLabel}${subSpaces}${subStr}\n`
 
-        const discLabel = 'Diskon'
-        const discStr = `-${formatRupiah(effectiveDiscount)}`
-        const discSpaces = ' '.repeat(Math.max(1, 32 - discLabel.length - discStr.length))
-        text += `${discLabel}${discSpaces}${discStr}\n`
+      const discLabel = 'Diskon'
+      const discStr = `-${formatRupiah(effectiveDiscount)}`
+      const discSpaces = ' '.repeat(Math.max(0, 32 - discLabel.length - discStr.length))
+      text += `${discLabel}${discSpaces}${discStr}\n`
+    }
+
+    const totalLabel = 'TOTAL'
+    const totalValStr = formatRupiah(data.totalAmount || 0)
+    const totalSpaces = ' '.repeat(Math.max(0, 32 - totalLabel.length - totalValStr.length))
+    text += `${totalLabel}${totalSpaces}${totalValStr}\n`
+
+    if (data.paymentMethod) {
+      text += `Bayar: ${data.paymentMethod}\n`
+    }
+
+    text += `--------------------------------\n`
+    const footerStr = String(settings.footerText || 'Terima kasih atas kunjungan Anda!').substring(0, 32)
+    text += `${footerStr}\n\n\n\n`
+
+    const copies = Math.max(1, settings.printCopies || 1)
+    let fullText = text
+    if (copies > 1) {
+      fullText = (text + '\n').repeat(copies)
+    }
+
+    try {
+      // Base64 encoding via TextEncoder for clean UTF-8 text transmission
+      const bytes = new TextEncoder().encode(fullText)
+      let binary = ''
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i])
       }
-
-      const totalLabel = 'TOTAL'
-      const totalValStr = formatRupiah(Number(data.totalAmount || 0))
-      const totalSpaces = ' '.repeat(Math.max(1, 32 - totalLabel.length - totalValStr.length))
-      text += `${totalLabel}${totalSpaces}${totalValStr}\n`
-
-      if (data.paymentMethod) {
-        text += `Bayar: ${String(data.paymentMethod)}\n`
-      }
-
-      text += `--------------------------------\n`
-      const footerStr = String(settings.footerText || 'Terima kasih atas kunjungan Anda!').substring(0, 32)
-      text += `${footerStr}\n\n\n\n`
-
-      const copies = Math.max(1, Number(settings.printCopies || 1))
-      let fullText = text
-      if (copies > 1) {
-        fullText = (text + '\n').repeat(copies)
-      }
-
-      window.location.href = `rawbt:${encodeURIComponent(fullText)}`
+      const base64 = btoa(binary)
+      
+      // Intent resmi RawBT untuk Android: data:text/plain;base64,...
+      const intentUrl = `intent:data:text/plain;base64,${base64}#Intent;scheme=rawbt;package=ru.a404.rawbtprinter;end;`
+      window.location.href = intentUrl
     } catch (err) {
       console.error('[RawBT Print Error]:', err)
-      // Fallback emergency text if any formatting error occurs
       const simpleText = `KEDAI KOPI\n--------------------------------\nNo: ${data.orderNumber || ''}\nTotal: ${formatRupiah(Number(data.totalAmount || 0))}\n--------------------------------\n\n\n\n`
-      window.location.href = `rawbt:${encodeURIComponent(simpleText)}`
+      const bytes = new TextEncoder().encode(simpleText)
+      let binary = ''
+      for (let i = 0; i < bytes.length; i++) {
+        binary += String.fromCharCode(bytes[i])
+      }
+      const base64 = btoa(binary)
+      window.location.href = `intent:data:text/plain;base64,${base64}#Intent;scheme=rawbt;package=ru.a404.rawbtprinter;end;`
     }
     return
   }
