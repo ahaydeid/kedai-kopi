@@ -1,31 +1,117 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { FiInbox } from 'react-icons/fi'
 import { useBaristaContext } from '../BaristaContext'
 import { BaristaOrderCard, BaristaOrder } from '../_components/BaristaOrderCard'
+import { getPaginatedOrders, FetchedOrderWithItems, subscribeToOrders } from '@/services/supabase/orderService'
 
 type FilterPeriod = 'Hari Ini' | 'Minggu Ini' | 'Bulan Ini'
 
+function mapFetchedOrderToBaristaOrder(item: FetchedOrderWithItems): BaristaOrder {
+  return {
+    id: item.id,
+    orderNumber: item.order_number,
+    customerName: item.customer_name,
+    tableNumber: item.table_number ? String(item.table_number) : null,
+    orderType: item.order_type || (item.table_number ? 'dine_in' : 'takeaway'),
+    dateTime: formatOrderDateTime(item.created_at),
+    createdAt: item.created_at,
+    items: item.order_items.map((i) => ({
+      name: `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.menu_name}`,
+      price: Number(i.price) * i.quantity,
+    })),
+    totalAmount: Number(item.total_amount),
+    discountAmount: Number(item.claimed_points || 0),
+    claimedPoints: Number(item.claimed_points || 0),
+    status: item.status as 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan',
+  }
+}
+
+function formatOrderDateTime(isoString: string): string {
+  if (!isoString) return ''
+  const date = new Date(isoString)
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+  const hours = String(date.getHours()).padStart(2, '0')
+  const mins = String(date.getMinutes()).padStart(2, '0')
+  return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}, ${hours}:${mins}`
+}
+
 export default function RiwayatPage() {
-  const { orders, handleUpdateStatus, handlePrintStruk } = useBaristaContext()
+  const { handleUpdateStatus, handlePrintStruk } = useBaristaContext()
   const [filter, setFilter] = useState<FilterPeriod>('Hari Ini')
-  const [displayLimit, setDisplayLimit] = useState<number>(5)
+  const [historyOrders, setHistoryOrders] = useState<BaristaOrder[]>([])
+  const [page, setPage] = useState<number>(1)
+  const [hasMore, setHasMore] = useState<boolean>(true)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [loadingMore, setLoadingMore] = useState<boolean>(false)
   const observerTargetRef = useRef<HTMLDivElement | null>(null)
 
-  const filtered = orders.filter((o: BaristaOrder) => o.status === 'Selesai')
+  const mapFilterToQuery = (f: FilterPeriod) => {
+    if (f === 'Hari Ini') return 'hari-ini'
+    if (f === 'Minggu Ini') return 'minggu-ini'
+    if (f === 'Bulan Ini') return 'bulan-ini'
+    return 'semua'
+  }
 
-  // Reset displayLimit jika filter periode berubah
-  useEffect(() => {
-    setDisplayLimit(5)
-  }, [filter])
+  const loadHistoryPage = useCallback(async (targetPage: number, currentFilter: FilterPeriod, isInitial = false) => {
+    if (isInitial) {
+      setLoading(true)
+    } else {
+      setLoadingMore(true)
+    }
 
-  // Trigger Lazy Loading saat scroll mendekati bawah
+    const pageSize = 10
+    const res = await getPaginatedOrders({
+      page: targetPage,
+      pageSize,
+      timeFilter: mapFilterToQuery(currentFilter),
+    })
+
+    const mapped = res.data
+      .filter((o) => o.status === 'Selesai')
+      .map(mapFetchedOrderToBaristaOrder)
+
+    if (isInitial) {
+      setHistoryOrders(mapped)
+    } else {
+      setHistoryOrders((prev) => {
+        const existingIds = new Set(prev.map((o) => o.id))
+        const newItems = mapped.filter((o) => !existingIds.has(o.id))
+        return [...prev, ...newItems]
+      })
+    }
+
+    setHasMore(targetPage * pageSize < res.totalCount)
+    setLoading(false)
+    setLoadingMore(false)
+  }, [])
+
+  // Refetch saat filter periode berubah
   useEffect(() => {
+    setPage(1)
+    setHistoryOrders([])
+    loadHistoryPage(1, filter, true)
+  }, [filter, loadHistoryPage])
+
+  // Realtime listener Supabase jika ada transaksi baru selesai
+  useEffect(() => {
+    const unsubscribe = subscribeToOrders(() => {
+      loadHistoryPage(1, filter, false)
+    })
+    return () => unsubscribe()
+  }, [filter, loadHistoryPage])
+
+  // Infinite Scroll Trigger
+  useEffect(() => {
+    if (!hasMore || loadingMore || loading) return
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && displayLimit < filtered.length) {
-          setDisplayLimit((prev) => prev + 5)
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          const nextPage = page + 1
+          setPage(nextPage)
+          loadHistoryPage(nextPage, filter, false)
         }
       },
       { threshold: 0.1 }
@@ -41,9 +127,7 @@ export default function RiwayatPage() {
         observer.unobserve(currentTarget)
       }
     }
-  }, [displayLimit, filtered.length])
-
-  const visibleOrders = filtered.slice(0, displayLimit)
+  }, [page, hasMore, loadingMore, loading, filter, loadHistoryPage])
 
   return (
     <div>
@@ -65,8 +149,14 @@ export default function RiwayatPage() {
         ))}
       </div>
 
-      {/* Daftar Pesanan */}
-      {filtered.length === 0 ? (
+      {/* Loading Skeleton awal */}
+      {loading ? (
+        <div className="max-w-md mx-auto px-4 py-8 space-y-3">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="h-32 bg-slate-100 dark:bg-slate-800 animate-pulse rounded-xl" />
+          ))}
+        </div>
+      ) : historyOrders.length === 0 ? (
         <div className="max-w-md mx-auto h-64 flex flex-col items-center justify-center gap-3 text-slate-400 dark:text-slate-600">
           <FiInbox className="h-12 w-12 stroke-[1.5]" />
           <div className="text-center space-y-0.5">
@@ -77,7 +167,7 @@ export default function RiwayatPage() {
         </div>
       ) : (
         <div className="max-w-md mx-auto px-1.5 pt-1.5 pb-28 flex flex-col gap-2">
-          {visibleOrders.map((order) => (
+          {historyOrders.map((order) => (
             <BaristaOrderCard
               key={order.id}
               order={order}
@@ -86,13 +176,13 @@ export default function RiwayatPage() {
             />
           ))}
 
-          {/* Sentinel untuk Trigger Lazy Load (+5) */}
-          {displayLimit < filtered.length && (
+          {/* Sentinel untuk Trigger Infinite Scroll Server-Side */}
+          {hasMore && (
             <div
               ref={observerTargetRef}
               className="py-6 text-center text-xs text-slate-400 font-medium animate-pulse"
             >
-              Memuat riwayat transaksi lainnya...
+              {loadingMore ? 'Memuat riwayat transaksi lainnya...' : ''}
             </div>
           )}
         </div>

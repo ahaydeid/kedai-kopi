@@ -49,6 +49,7 @@ function mapFetchedOrderToBaristaOrder(item: FetchedOrderWithItems): BaristaOrde
     tableNumber: item.table_number ? String(item.table_number) : null,
     orderType: item.order_type || (item.table_number ? 'dine_in' : 'takeaway'),
     dateTime: formatOrderDateTime(item.created_at),
+    createdAt: item.created_at,
     items: item.order_items.map((i) => ({
       name: `${i.quantity > 1 ? `${i.quantity}x ` : ''}${i.menu_name}`,
       price: Number(i.price) * i.quantity,

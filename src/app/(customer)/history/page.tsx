@@ -4,7 +4,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { FiClock } from 'react-icons/fi'
-import { getMyOrders, subscribeToOrders, FetchedOrderWithItems } from '@/services/supabase/orderService'
+import { getPaginatedMyOrders, subscribeToOrders, FetchedOrderWithItems } from '@/services/supabase/orderService'
 import { getCurrentUser } from '@/services/supabase/authService'
 import { formatOrderIdDisplay } from '@/utils/orderId'
 
@@ -99,55 +99,89 @@ export default function CustomerHistoryPage() {
     return true
   })
 
-  const [displayLimit, setDisplayLimit] = useState<number>(5)
+  const [page, setPage] = useState<number>(1)
+  const [totalCount, setTotalCount] = useState<number>(0)
+  const [hasMore, setHasMore] = useState<boolean>(true)
+  const [loadingMore, setLoadingMore] = useState<boolean>(false)
   const observerTargetRef = useRef<HTMLDivElement | null>(null)
 
-  const fetchHistoryOrders = useCallback(async (isSilent = false) => {
+  const loadHistoryPage = useCallback(async (targetPage: number, isInitial = false) => {
     const user = await getCurrentUser()
     if (!user) {
       router.push('/login')
       return
     }
 
-    const hasData = historyClientMemoryCache !== null || historyOrders.length > 0
-    if (!isSilent && !hasData) {
-      setLoading(true)
+    if (isInitial) {
+      const hasLocalCache = historyClientMemoryCache !== null || historyOrders.length > 0
+      if (!hasLocalCache) setLoading(true)
+    } else {
+      setLoadingMore(true)
     }
 
-    const orders = await getMyOrders(user.id, ['Selesai', 'Dibatalkan'])
-    const historyOnly = orders
+    const pageSize = 10
+    const res = await getPaginatedMyOrders({
+      userId: user.id,
+      page: targetPage,
+      pageSize,
+      statusFilter: ['Selesai', 'Dibatalkan'],
+    })
+
+    const mapped = res.data
       .map(mapToHistoryOrder)
       .filter((o): o is HistoryOrder => o !== null)
 
-    setHistoryOrders(historyOnly)
-    historyClientMemoryCache = historyOnly
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(historyOnly))
-      } catch {}
+    if (isInitial) {
+      setHistoryOrders(mapped)
+      historyClientMemoryCache = mapped
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(mapped))
+        } catch {}
+      }
+    } else {
+      setHistoryOrders((prev) => {
+        const existingIds = new Set(prev.map((o) => o.id))
+        const newItems = mapped.filter((o) => !existingIds.has(o.id))
+        const updated = [...prev, ...newItems]
+        historyClientMemoryCache = updated
+        if (typeof window !== 'undefined') {
+          try {
+            localStorage.setItem(HISTORY_CACHE_KEY, JSON.stringify(updated))
+          } catch {}
+        }
+        return updated
+      })
     }
+
+    setTotalCount(res.totalCount)
+    setHasMore(targetPage * pageSize < res.totalCount)
     setLoading(false)
+    setLoadingMore(false)
   }, [router, historyOrders.length])
 
   useEffect(() => {
-    const hasData = historyClientMemoryCache !== null || historyOrders.length > 0
-    fetchHistoryOrders(hasData)
+    loadHistoryPage(1, true)
 
     const unsubscribe = subscribeToOrders(() => {
-      fetchHistoryOrders(true)
+      loadHistoryPage(1, false)
     })
 
     return () => {
       unsubscribe()
     }
-  }, [fetchHistoryOrders, historyOrders.length])
+  }, [loadHistoryPage])
 
-  // Lazy Load Trigger saat scroll mendekati bawah list
+  // Infinite Scroll Trigger
   useEffect(() => {
+    if (!hasMore || loadingMore || loading) return
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && displayLimit < historyOrders.length) {
-          setDisplayLimit((prev) => prev + 5)
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          const nextPage = page + 1
+          setPage(nextPage)
+          loadHistoryPage(nextPage, false)
         }
       },
       { threshold: 0.1 }
@@ -163,10 +197,9 @@ export default function CustomerHistoryPage() {
         observer.unobserve(currentTarget)
       }
     }
-  }, [displayLimit, historyOrders.length])
+  }, [page, hasMore, loadingMore, loading, loadHistoryPage])
 
   const hasHistory = historyOrders.length > 0
-  const visibleOrders = historyOrders.slice(0, displayLimit)
 
   return (
     <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-50 font-sans selection:bg-[#3D2514] selection:text-white">
@@ -178,7 +211,7 @@ export default function CustomerHistoryPage() {
           </h1>
           {hasHistory && (
             <span className="text-xs font-normal text-slate-400">
-              {historyOrders.length} transaksi
+              {totalCount || historyOrders.length} transaksi
             </span>
           )}
         </div>
@@ -187,7 +220,7 @@ export default function CustomerHistoryPage() {
       {/* Main Content Area */}
       <main className="flex-1 w-full max-w-md mx-auto px-1.5 pt-1.5 pb-28">
         {loading ? (
-          /* Skeleton Loader (Hanya saat kunjungan pertama tanpa cache) */
+          /* Skeleton Loader */
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div key={i} className="bg-white dark:bg-slate-900 rounded p-3.5 space-y-2 animate-pulse">
@@ -212,7 +245,7 @@ export default function CustomerHistoryPage() {
         ) : hasHistory ? (
           <>
             <div className="space-y-3">
-              {visibleOrders.map((order) => {
+              {historyOrders.map((order) => {
                 const status = STATUS_CONFIG[order.status]
                 const total = order.items.reduce((sum, i) => sum + i.price, 0)
                 const pointsEarned = order.items.reduce((sum, i) => sum + i.points, 0)
@@ -284,13 +317,13 @@ export default function CustomerHistoryPage() {
               })}
             </div>
 
-            {/* Element Sentinel untuk Trigger Lazy Load (+5) */}
-            {displayLimit < historyOrders.length && (
+            {/* Element Sentinel untuk Trigger Infinite Scroll Server-Side */}
+            {hasMore && (
               <div
                 ref={observerTargetRef}
                 className="py-6 text-center text-xs text-slate-400 font-medium animate-pulse"
               >
-                Memuat riwayat transaksi lainnya...
+                {loadingMore ? 'Memuat riwayat transaksi lainnya...' : ''}
               </div>
             )}
           </>

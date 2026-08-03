@@ -264,6 +264,48 @@ export async function getMyOrders(
   return (data as FetchedOrderWithItems[]) || []
 }
 
+export async function getPaginatedMyOrders(params: {
+  userId: string
+  page: number
+  pageSize: number
+  statusFilter?: ('Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan')[]
+}): Promise<{ data: FetchedOrderWithItems[]; totalCount: number }> {
+  const { userId, page, pageSize, statusFilter } = params
+  if (!userId) return { data: [], totalCount: 0 }
+
+  const supabase = createClient()
+  let query = supabase
+    .from('orders')
+    .select('*, order_items(*)', { count: 'exact' })
+    .eq('user_id', userId)
+
+  if (statusFilter && statusFilter.length > 0) {
+    query = query.in('status', statusFilter)
+  }
+
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
+
+  const { data, count, error } = await query
+    .order('created_at', { ascending: false })
+    .range(from, to)
+
+  if (error) {
+    console.warn('Error fetching paginated my orders:', error)
+    const local = getCachedOrdersSync().filter((o) => o.user_id === userId)
+    const filtered = statusFilter && statusFilter.length > 0 ? local.filter((o) => statusFilter.includes(o.status)) : local
+    return {
+      data: filtered.slice(from, to + 1),
+      totalCount: filtered.length,
+    }
+  }
+
+  return {
+    data: (data as FetchedOrderWithItems[]) || [],
+    totalCount: count ?? 0,
+  }
+}
+
 export interface PaginatedOrdersResult {
   data: FetchedOrderWithItems[]
   totalCount: number
@@ -294,7 +336,9 @@ export async function getPaginatedOrders(params: {
       const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
       query = query.gte('created_at', startOfDay)
     } else if (timeFilter === 'minggu-ini') {
-      const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).toISOString()
+      const dayOfWeek = now.getDay()
+      const diffToMonday = (dayOfWeek + 6) % 7
+      const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday).toISOString()
       query = query.gte('created_at', startOfWeek)
     } else if (timeFilter === 'bulan-ini') {
       const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()

@@ -18,6 +18,7 @@ export interface BaristaOrder {
   tableNumber?: string | null
   orderType?: 'dine_in' | 'takeaway' | string
   dateTime: string
+  createdAt?: string
   items: BaristaOrderItem[]
   totalAmount: number
   discountAmount?: number
