@@ -63,6 +63,8 @@ export function TableManagement() {
   // QR Modal State
   const [qrModalTable, setQrModalTable] = useState<TableData | null>(null)
   const [isPrintingAll, setIsPrintingAll] = useState(false)
+  const [isPrintOptionsOpen, setIsPrintOptionsOpen] = useState(false)
+  const [printMode, setPrintMode] = useState<'with_table' | 'no_table'>('with_table')
   const [isCopied, setIsCopied] = useState(false)
 
   const sortedTables = React.useMemo(() => {
@@ -82,8 +84,14 @@ export function TableManagement() {
     return pairs
   }, [sortedTables])
 
-  const handlePrintAllQRs = () => {
+  const handleOpenPrintOptions = () => {
     if (tables.length === 0) return
+    setIsPrintOptionsOpen(true)
+  }
+
+  const handlePrintAllQRs = (mode: 'with_table' | 'no_table') => {
+    setPrintMode(mode)
+    setIsPrintOptionsOpen(false)
     setQrModalTable(null)
     setIsPrintingAll(true)
     setTimeout(() => {
@@ -247,12 +255,12 @@ export function TableManagement() {
         <div className="flex items-center gap-2 shrink-0">
           <Button
             type="button"
-            onClick={handlePrintAllQRs}
+            onClick={handleOpenPrintOptions}
             variant="secondary"
             size="sm"
             disabled={tables.length === 0}
             className="flex items-center gap-1.5 shrink-0"
-            title="Cetak Seluruh QR Code Meja dalam 1 Lembar"
+            title="Cetak Seluruh QR Code Meja"
           >
             <FiPrinter className="w-4 h-4" />
             <span>Print QR</span>
@@ -670,6 +678,58 @@ export function TableManagement() {
         </div>
       )}
 
+      {/* Modal Pilihan Format Cetak QR */}
+      <Modal
+        isOpen={isPrintOptionsOpen}
+        onClose={() => setIsPrintOptionsOpen(false)}
+        title="Pilihan Cetak QR Code"
+        size="sm"
+      >
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Pilih format QR Code yang ingin Anda cetak:
+          </p>
+
+          <div className="grid grid-cols-1 gap-3">
+            <button
+              type="button"
+              onClick={() => handlePrintAllQRs('with_table')}
+              className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-600 dark:hover:border-amber-500 bg-white dark:bg-slate-900 text-left transition-all group cursor-pointer shadow-2xs"
+            >
+              <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 group-hover:bg-amber-100 shrink-0 mt-0.5">
+                <BsQrCode className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                  Dengan Nomor Meja
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Link QR khusus per meja (`?meja=01`, `?meja=02`, dst.) lengkap dengan nomor meja.
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handlePrintAllQRs('no_table')}
+              className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-sky-600 dark:hover:border-sky-500 bg-white dark:bg-slate-900 text-left transition-all group cursor-pointer shadow-2xs"
+            >
+              <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-400 group-hover:bg-sky-100 shrink-0 mt-0.5">
+                <FiPrinter className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                  Tanpa Nomor Meja
+                </div>
+                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Link QR umum menuju halaman menu (`/menu`) tanpa nomor meja.
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+      </Modal>
+
       {/* Hidden Printable All Tables QR Layout (2 Cards per A4 Sheet) */}
       {isPrintingAll && (
         <div id="printable-all-qr-container" className="hidden print:block">
@@ -732,25 +792,16 @@ export function TableManagement() {
             }
           ` }} />
 
-          {tablePairs.map((pair, index) => (
-            <div key={index} className="print-all-page">
-              {/* Card Top */}
-              <div className="print-all-card">
-                <div className="print-all-brand-header">
-                  <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
-                  <span>Kedai Kopi</span>
-                </div>
-                <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
-                <div className="print-all-qr-container">
-                  <QRCodeSVG value={pair[0].qrUrl} size={260} level="H" />
-                </div>
-                <h1 className="print-all-title">MEJA #{pair[0].number}</h1>
-              </div>
+          {tablePairs.map((pair, index) => {
+            const card0Url = printMode === 'no_table' ? `${getCustomerBaseUrl()}/menu` : pair[0].qrUrl
+            const card0Title = printMode === 'no_table' ? 'KEDAI KOPI' : `MEJA #${pair[0].number}`
 
-              {pair[1] && <div className="print-all-cut-line"></div>}
+            const card1Url = pair[1] ? (printMode === 'no_table' ? `${getCustomerBaseUrl()}/menu` : pair[1].qrUrl) : ''
+            const card1Title = pair[1] ? (printMode === 'no_table' ? 'KEDAI KOPI' : `MEJA #${pair[1].number}`) : ''
 
-              {/* Card Bottom */}
-              {pair[1] && (
+            return (
+              <div key={index} className="print-all-page">
+                {/* Card Top */}
                 <div className="print-all-card">
                   <div className="print-all-brand-header">
                     <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
@@ -758,13 +809,30 @@ export function TableManagement() {
                   </div>
                   <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
                   <div className="print-all-qr-container">
-                    <QRCodeSVG value={pair[1].qrUrl} size={260} level="H" />
+                    <QRCodeSVG value={card0Url} size={260} level="H" />
                   </div>
-                  <h1 className="print-all-title">MEJA #{pair[1].number}</h1>
+                  <h1 className="print-all-title">{card0Title}</h1>
                 </div>
-              )}
-            </div>
-          ))}
+
+                {pair[1] && <div className="print-all-cut-line"></div>}
+
+                {/* Card Bottom */}
+                {pair[1] && (
+                  <div className="print-all-card">
+                    <div className="print-all-brand-header">
+                      <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
+                      <span>Kedai Kopi</span>
+                    </div>
+                    <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
+                    <div className="print-all-qr-container">
+                      <QRCodeSVG value={card1Url} size={260} level="H" />
+                    </div>
+                    <h1 className="print-all-title">{card1Title}</h1>
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
