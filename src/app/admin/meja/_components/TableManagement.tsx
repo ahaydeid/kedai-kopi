@@ -22,17 +22,27 @@ export interface TableData {
   qrUrl: string
 }
 
+function getCustomerBaseUrl(): string {
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('url_masuk_pelanggan')
+    if (saved) return saved.replace(/\/+$/, '')
+    return window.location.origin
+  }
+  return 'https://kedaikopi.ahadi.my.id'
+}
+
 export function TableManagement() {
   const isOnline = useNetworkStatus()
   const [tables, setTables] = useState<TableData[]>(() => {
     const syncCache = getCachedTablesSync()
     if (syncCache.length > 0) {
+      const baseUrl = getCustomerBaseUrl()
       return syncCache.map((t) => ({
         id: t.id,
         number: t.number,
         capacity: t.capacity,
         status: t.status,
-        qrUrl: `https://kedaikopi.com/?meja=${t.number}`,
+        qrUrl: `${baseUrl}?meja=${t.number}`,
       }))
     }
     return []
@@ -55,12 +65,13 @@ export function TableManagement() {
   const fetchTablesFromSupabase = React.useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true)
     const data = await getTables()
+    const baseUrl = getCustomerBaseUrl()
     const mapped: TableData[] = data.map((t) => ({
       id: t.id,
       number: t.number,
       capacity: t.capacity,
       status: t.status,
-      qrUrl: `https://kedaikopi.com/?meja=${t.number}`,
+      qrUrl: `${baseUrl}?meja=${t.number}`,
     }))
     setTables(mapped)
     setLoading(false)
