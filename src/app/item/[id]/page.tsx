@@ -1,7 +1,7 @@
 import { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
+import { ItemRedirectClient } from './ItemRedirectClient'
 
 interface ItemPageProps {
   params: Promise<{ id: string }>
@@ -85,6 +85,5 @@ export default async function ItemRedirectPage({ params }: ItemPageProps) {
   const resolvedParams = await params
   const id = resolvedParams.id
 
-  // Server-side redirect ke /menu?item=<id>
-  redirect(`/menu?item=${id}`)
+  return <ItemRedirectClient id={id} />
 }
