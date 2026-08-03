@@ -38,7 +38,9 @@ function wrapText(str: string, maxLen = 32): string[] {
 
 export function getPrinterSettings() {
   const profile = getCachedStoreProfileSync()
-  const DEFAULT_SETTINGS = {
+  let settings = {
+    printerName: 'RPP02N Thermal Printer',
+    bridgeUrl: 'http://127.0.0.1:5000',
     connectionType: 'bluetooth',
     paperWidth: '58mm',
     autoPrint: true,
@@ -53,16 +55,15 @@ export function getPrinterSettings() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved)
-        return {
-          ...DEFAULT_SETTINGS,
-          ...parsed,
-          headerText: parsed.headerText && parsed.headerText !== 'Kedai Kopi' ? parsed.headerText : (profile.storeName || 'Kedai Moods'),
-          addressText: parsed.addressText && parsed.addressText !== 'Balaraja, Tangerang' ? parsed.addressText : (profile.address || 'Ruko Al Husna, Saga, Balaraja, Tangerang'),
-        }
+        settings = { ...settings, ...parsed }
       } catch {}
     }
   }
-  return DEFAULT_SETTINGS
+
+  if (profile.storeName) settings.headerText = profile.storeName
+  if (profile.address) settings.addressText = profile.address
+
+  return settings
 }
 
 function formatRupiah(num: number): string {

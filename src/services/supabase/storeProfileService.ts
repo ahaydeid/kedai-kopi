@@ -99,6 +99,18 @@ export async function updateStoreProfile(profile: StoreProfile): Promise<boolean
   profileMemoryCache = profile
   if (typeof window !== 'undefined') {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(profile))
+    try {
+      const savedPrinter = localStorage.getItem('setting_thermal_printer')
+      const parsedPrinter = savedPrinter ? JSON.parse(savedPrinter) : {}
+      localStorage.setItem(
+        'setting_thermal_printer',
+        JSON.stringify({
+          ...parsedPrinter,
+          headerText: profile.storeName,
+          addressText: profile.address,
+        })
+      )
+    } catch {}
   }
 
   try {

@@ -10,7 +10,7 @@ import Swal from 'sweetalert2'
 import { Modal } from '@/components/ui/Modal'
 import { printThermalReceipt } from '@/utils/printReceipt'
 import { scanAndConnectBluetoothDevice, scanAndConnectUSBDevice } from '@/services/printer/webBluetoothPrinter'
-import { getCachedStoreProfileSync } from '@/services/supabase/storeProfileService'
+import { getCachedStoreProfileSync, updateStoreProfile } from '@/services/supabase/storeProfileService'
 
 interface PrinterSettings {
   printerName: string
@@ -181,6 +181,15 @@ export function ThermalPrinterTab() {
     if (typeof window !== 'undefined') {
       localStorage.setItem('setting_thermal_printer', JSON.stringify(settings))
     }
+    // Sync ke Store Profile
+    try {
+      await updateStoreProfile({
+        ...profile,
+        storeName: settings.headerText || profile.storeName,
+        address: settings.addressText || profile.address,
+      })
+    } catch {}
+
     setDraftSettings(settings)
     setIsEditing(false)
     await checkLivePrinterStatus()
