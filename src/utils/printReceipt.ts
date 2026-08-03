@@ -144,6 +144,7 @@ export async function printThermalReceipt(data: ReceiptData) {
         <div class="row"><span>No.</span><span>${data.orderNumber}</span></div>
         ${data.customerName ? `<div class="row"><span>Nama</span><span>${data.customerName}</span></div>` : ''}
         <div class="row"><span>Tipe</span><span>${orderTypeLabel}</span></div>
+        ${data.notes ? `<div class="row" style="margin-top: 2px;"><span style="font-weight: bold;">Catatan</span><span>${data.notes}</span></div>` : ''}
         ${data.paymentMethod ? `<div class="row"><span>Bayar</span><span>${data.paymentMethod}</span></div>` : ''}
         <div class="divider"></div>
         ${itemsHtml}
