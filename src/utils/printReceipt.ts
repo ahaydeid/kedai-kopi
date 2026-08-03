@@ -47,7 +47,18 @@ function getCandidateBridgeUrls(configuredUrl?: string): string[] {
   if (configuredUrl) return [configuredUrl]
   if (process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL) return [process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL]
 
-  // Selalu prioritaskan localhost & 127.0.0.1 terlebih dahulu agar respons cetak instan (0ms)
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host === 'localhost') {
+      return ['http://localhost:5000', 'http://127.0.0.1:5000']
+    }
+    if (host === '127.0.0.1') {
+      return ['http://127.0.0.1:5000', 'http://localhost:5000']
+    }
+    if (host) {
+      return [`http://${host}:5000`, 'http://localhost:5000', 'http://127.0.0.1:5000']
+    }
+  }
   return ['http://localhost:5000', 'http://127.0.0.1:5000']
 }
 

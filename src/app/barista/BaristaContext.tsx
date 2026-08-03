@@ -37,7 +37,7 @@ function formatOrderDateTime(isoString: string): string {
   const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
   const hours = String(date.getHours()).padStart(2, '0')
   const mins = String(date.getMinutes()).padStart(2, '0')
-  return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}, ${hours}:${mins} WIB`
+  return `${date.getDate()} ${monthNames[date.getMonth()]} ${date.getFullYear()}, ${hours}:${mins}`
 }
 
 function mapFetchedOrderToBaristaOrder(item: FetchedOrderWithItems): BaristaOrder {
