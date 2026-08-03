@@ -263,7 +263,7 @@ export function TableManagement() {
             title="Cetak Seluruh QR Code Meja"
           >
             <FiPrinter className="w-4 h-4" />
-            <span>Print QR</span>
+            <span>Cetak QR</span>
           </Button>
 
           <Button onClick={handleOpenAdd} variant="primary" size="sm" className="flex items-center gap-1.5 shrink-0">
