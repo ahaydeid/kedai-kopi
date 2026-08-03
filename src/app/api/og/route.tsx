@@ -21,7 +21,7 @@ export async function GET(request: Request) {
         const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(itemId)
 
         let query = supabase
-          .from('menus')
+          .from('menu')
           .select('name, price, main_category, sub_category, images')
 
         if (isUuid) {

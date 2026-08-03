@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
     const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)
 
     let query = supabase
-      .from('menus')
+      .from('menu')
       .select('id, name, slug, price, main_category, sub_category, description, images')
 
     if (isUuid) {

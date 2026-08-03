@@ -293,5 +293,5 @@ VALUES
 ON CONFLICT (setting_key) DO NOTHING;
 
 -- Migration: 20260803000019_add_slug_to_menus.sql
-ALTER TABLE public.menus ADD COLUMN IF NOT EXISTS slug VARCHAR(255);
-CREATE INDEX IF NOT EXISTS idx_menus_slug ON public.menus (slug);
+ALTER TABLE public.menu ADD COLUMN IF NOT EXISTS slug VARCHAR(255);
+CREATE INDEX IF NOT EXISTS idx_menu_slug ON public.menu (slug);
