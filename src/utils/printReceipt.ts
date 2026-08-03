@@ -253,7 +253,14 @@ export async function printThermalReceipt(data: ReceiptData) {
       fullText = (text + '\n').repeat(copies)
     }
 
-    window.location.href = `rawbt:data:text/plain;charset=utf-8,${encodeURIComponent(fullText)}`
+    // UTF-8 → Base64 yang benar (TextEncoder aman untuk karakter Indonesia/rupiah)
+    const bytes = new TextEncoder().encode(fullText)
+    let binary = ''
+    for (let i = 0; i < bytes.length; i++) {
+      binary += String.fromCharCode(bytes[i])
+    }
+    const base64 = btoa(binary)
+    window.location.href = `rawbt:base64,${base64}`
     return
   }
 
