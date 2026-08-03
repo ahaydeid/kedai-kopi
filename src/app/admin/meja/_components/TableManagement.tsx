@@ -685,47 +685,31 @@ export function TableManagement() {
         title="Pilihan Cetak QR Code"
         size="sm"
       >
-        <div className="p-5 space-y-4">
-          <p className="text-xs text-slate-500 dark:text-slate-400">
+        <div className="p-5 space-y-4 text-center">
+          <p className="text-sm text-slate-600 dark:text-slate-300">
             Pilih format QR Code yang ingin Anda cetak:
           </p>
 
-          <div className="grid grid-cols-1 gap-3">
-            <button
+          <div className="flex items-center gap-3 pt-2">
+            <Button
               type="button"
-              onClick={() => handlePrintAllQRs('with_table')}
-              className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-amber-600 dark:hover:border-amber-500 bg-white dark:bg-slate-900 text-left transition-all group cursor-pointer shadow-2xs"
-            >
-              <div className="p-2.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-400 group-hover:bg-amber-100 shrink-0 mt-0.5">
-                <BsQrCode className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                  Dengan Nomor Meja
-                </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Link QR khusus per meja (`?meja=01`, `?meja=02`, dst.) lengkap dengan nomor meja.
-                </div>
-              </div>
-            </button>
-
-            <button
-              type="button"
+              variant="secondary"
+              size="sm"
+              className="flex-1 flex items-center justify-center py-2.5"
               onClick={() => handlePrintAllQRs('no_table')}
-              className="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-sky-600 dark:hover:border-sky-500 bg-white dark:bg-slate-900 text-left transition-all group cursor-pointer shadow-2xs"
             >
-              <div className="p-2.5 rounded-lg bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-400 group-hover:bg-sky-100 shrink-0 mt-0.5">
-                <FiPrinter className="w-5 h-5" />
-              </div>
-              <div>
-                <div className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                  Tanpa Nomor Meja
-                </div>
-                <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Link QR umum menuju halaman menu (`/menu`) tanpa nomor meja.
-                </div>
-              </div>
-            </button>
+              Tanpa Nomor Meja
+            </Button>
+
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="flex-1 flex items-center justify-center py-2.5"
+              onClick={() => handlePrintAllQRs('with_table')}
+            >
+              Dengan Nomor Meja
+            </Button>
           </div>
         </div>
       </Modal>
