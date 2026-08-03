@@ -20,6 +20,22 @@ export interface ReceiptData {
   paymentMethod?: string
 }
 
+function wrapText(str: string, maxLen = 32): string[] {
+  const words = String(str || '').split(' ')
+  const lines: string[] = []
+  let currentLine = ''
+  for (const word of words) {
+    if ((currentLine + (currentLine ? ' ' : '') + word).length <= maxLen) {
+      currentLine += (currentLine ? ' ' : '') + word
+    } else {
+      if (currentLine) lines.push(currentLine)
+      currentLine = word
+    }
+  }
+  if (currentLine) lines.push(currentLine)
+  return lines
+}
+
 export function getPrinterSettings() {
   const profile = getCachedStoreProfileSync()
   const DEFAULT_SETTINGS = {
@@ -28,7 +44,7 @@ export function getPrinterSettings() {
     autoPrint: true,
     printCopies: 1,
     headerText: profile.storeName || 'Kedai Moods',
-    addressText: profile.address || 'Balaraja, Tangerang',
+    addressText: profile.address || 'Ruko Al Husna, Saga, Balaraja, Tangerang',
     footerText: 'Terima kasih atas kunjungan Anda!',
   }
 
@@ -36,7 +52,13 @@ export function getPrinterSettings() {
     const saved = localStorage.getItem('setting_thermal_printer')
     if (saved) {
       try {
-        return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) }
+        const parsed = JSON.parse(saved)
+        return {
+          ...DEFAULT_SETTINGS,
+          ...parsed,
+          headerText: parsed.headerText && parsed.headerText !== 'Kedai Kopi' ? parsed.headerText : (profile.storeName || 'Kedai Moods'),
+          addressText: parsed.addressText && parsed.addressText !== 'Balaraja, Tangerang' ? parsed.addressText : (profile.address || 'Ruko Al Husna, Saga, Balaraja, Tangerang'),
+        }
       } catch {}
     }
   }
@@ -194,7 +216,10 @@ export async function printThermalReceipt(data: ReceiptData) {
     const headerStr = String(settings.headerText || 'KEDAI KOPI').substring(0, 32)
     text += `${headerStr}\n`
     if (settings.addressText) {
-      text += `${String(settings.addressText).substring(0, 32)}\n`
+      const addrLines = wrapText(settings.addressText, 32)
+      addrLines.forEach((line) => {
+        text += `${line}\n`
+      })
     }
     text += `--------------------------------\n`
     text += `Tgl : ${nowStr}\n`

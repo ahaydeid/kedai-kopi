@@ -50,16 +50,34 @@ function buildEscPosBuffer(data) {
     chunks.push(Buffer.from('\n', 'latin1'))
   }
 
-  // Header Text
-  chunks.push(Buffer.from(CMD_BOLD_ON + CMD_FONT_HEADER, 'latin1'))
-  const headerStr = String(data.storeName || data.headerText || 'Kedai Moods').substring(0, 32)
-  chunks.push(Buffer.from(`${headerStr}\n`, 'latin1'))
-  chunks.push(Buffer.from(CMD_FONT_NORMAL + CMD_BOLD_OFF, 'latin1'))
-  if (data.addressText || data.storeAddress) {
-    const addressStr = String(data.addressText || data.storeAddress).substring(0, 32)
-    chunks.push(Buffer.from(`${addressStr}\n`, 'latin1'))
+function wrapText(str, maxLen = 32) {
+  const words = String(str || '').split(' ')
+  const lines = []
+  let currentLine = ''
+  for (const word of words) {
+    if ((currentLine + (currentLine ? ' ' : '') + word).length <= maxLen) {
+      currentLine += (currentLine ? ' ' : '') + word
+    } else {
+      if (currentLine) lines.push(currentLine)
+      currentLine = word
+    }
   }
-  chunks.push(Buffer.from(`--------------------------------\n`, 'latin1'))
+  if (currentLine) lines.push(currentLine)
+  return lines
+}
+
+// Header Text
+chunks.push(Buffer.from(CMD_BOLD_ON + CMD_FONT_HEADER, 'latin1'))
+const headerStr = String(data.storeName || data.headerText || 'Kedai Moods').substring(0, 32)
+chunks.push(Buffer.from(`${headerStr}\n`, 'latin1'))
+chunks.push(Buffer.from(CMD_FONT_NORMAL + CMD_BOLD_OFF, 'latin1'))
+if (data.addressText || data.storeAddress) {
+  const addrLines = wrapText(data.addressText || data.storeAddress, 32)
+  addrLines.forEach((line) => {
+    chunks.push(Buffer.from(`${line}\n`, 'latin1'))
+  })
+}
+chunks.push(Buffer.from(`--------------------------------\n`, 'latin1'))
 
   // Metadata
   chunks.push(Buffer.from(CMD_ALIGN_LEFT, 'latin1'))
