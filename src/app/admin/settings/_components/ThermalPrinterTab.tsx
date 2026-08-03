@@ -10,6 +10,7 @@ import Swal from 'sweetalert2'
 import { Modal } from '@/components/ui/Modal'
 import { printThermalReceipt } from '@/utils/printReceipt'
 import { scanAndConnectBluetoothDevice, scanAndConnectUSBDevice } from '@/services/printer/webBluetoothPrinter'
+import { getCachedStoreProfileSync } from '@/services/supabase/storeProfileService'
 
 interface PrinterSettings {
   printerName: string
@@ -24,6 +25,8 @@ interface PrinterSettings {
 }
 
 export function ThermalPrinterTab() {
+  const profile = getCachedStoreProfileSync()
+
   const DEFAULT_SETTINGS: PrinterSettings = {
     printerName: 'RPP02N Thermal Printer',
     bridgeUrl: 'http://127.0.0.1:5000',
@@ -31,8 +34,8 @@ export function ThermalPrinterTab() {
     paperWidth: '58mm',
     autoPrint: true,
     printCopies: 1,
-    headerText: 'Kedai Kopi',
-    addressText: 'Balaraja, Tangerang',
+    headerText: profile.storeName || 'Kedai Moods',
+    addressText: profile.address || 'Ruko Al Husna, Saga, Balaraja, Tangerang',
     footerText: 'Terima kasih atas kunjungan Anda!',
   }
 
@@ -93,7 +96,13 @@ export function ThermalPrinterTab() {
         try {
           const parsed = JSON.parse(saved)
           const pName = parsed.printerName || (parsed.deviceName && parsed.deviceName !== 'POS-58 Thermal Printer' ? parsed.deviceName : 'RPP02N Thermal Printer')
-          const merged = { ...DEFAULT_SETTINGS, ...parsed, printerName: pName }
+          const merged = {
+            ...DEFAULT_SETTINGS,
+            ...parsed,
+            printerName: pName,
+            headerText: parsed.headerText && parsed.headerText !== 'Kedai Kopi' ? parsed.headerText : (profile.storeName || 'Kedai Moods'),
+            addressText: parsed.addressText && parsed.addressText !== 'Balaraja, Tangerang' ? parsed.addressText : (profile.address || 'Ruko Al Husna, Saga, Balaraja, Tangerang'),
+          }
           setSettings(merged)
           setDraftSettings(merged)
           setDeviceName(pName)
@@ -101,6 +110,9 @@ export function ThermalPrinterTab() {
         } catch {
           // fallback default
         }
+      } else {
+        setSettings(DEFAULT_SETTINGS)
+        setDraftSettings(DEFAULT_SETTINGS)
       }
       checkLivePrinterStatus(activeUrl)
     }
