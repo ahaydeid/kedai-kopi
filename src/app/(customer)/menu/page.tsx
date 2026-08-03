@@ -103,7 +103,32 @@ export default function CustomerMenuPage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [isCartOpen, setIsCartOpen] = useState<boolean>(false)
   const [orderType, setOrderType] = useState<'dine_in' | 'takeaway'>('dine_in')
-  const [tableNumber, setTableNumber] = useState<string>('05')
+  const [tableNumber, setTableNumber] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const mejaParam = urlParams.get('meja')
+      if (mejaParam) {
+        const cleanMeja = mejaParam.trim().padStart(2, '0')
+        localStorage.setItem('customer_table_number', cleanMeja)
+        return cleanMeja
+      }
+      const savedMeja = localStorage.getItem('customer_table_number')
+      if (savedMeja) return savedMeja
+    }
+    return '01'
+  })
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search)
+      const mejaParam = urlParams.get('meja')
+      if (mejaParam) {
+        const cleanMeja = mejaParam.trim().padStart(2, '0')
+        setTableNumber(cleanMeja)
+        localStorage.setItem('customer_table_number', cleanMeja)
+      }
+    }
+  }, [])
 
   // Image Gallery Modal state (Produk Tunggal)
   const [selectedGalleryProduct, setSelectedGalleryProduct] = useState<MenuItem | null>(null)

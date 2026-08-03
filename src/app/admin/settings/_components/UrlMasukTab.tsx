@@ -47,7 +47,7 @@ export const UrlMasukTab: React.FC = () => {
     playSwalSound("confirm");
     Swal.fire({
       title: "Simpan URL Masuk?",
-      text: "Konfigurasi URL akan diperbarui di Supabase dan dijadikan dasar pembuatan QR Code Meja.",
+      text: "Konfigurasi URL akan diperbarui untuk akses login dan pembuatan QR Code Meja.",
       icon: "question",
       showCancelButton: true,
       confirmButtonColor: "#0284c7",

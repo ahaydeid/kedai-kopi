@@ -5,6 +5,7 @@ import { TableTable } from './TableTable'
 import { Button } from '@/components/ui/Button'
 import { ActionButton } from '@/components/ui/ActionButton'
 import { Modal } from '@/components/ui/Modal'
+import { QRCodeSVG } from 'qrcode.react'
 import { Badge } from '@/components/ui/Badge'
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiGrid, FiList, FiUsers, FiChevronLeft, FiChevronRight, FiPrinter } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
@@ -476,9 +477,14 @@ export function TableManagement() {
       >
         {qrModalTable && (
           <div className="p-5 text-center space-y-4">
-            <div className="mx-auto w-64 h-64 bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center space-y-3">
-              <BsQrCode className="w-50 h-50 text-slate-900" />
+            <div className="mx-auto w-64 h-64 bg-white border border-slate-100 rounded-xl p-4 flex flex-col items-center justify-center space-y-3 shadow-xs">
+              <QRCodeSVG value={qrModalTable.qrUrl} size={180} level="H" />
               <span className="font-extrabold text-sm text-slate-900 tracking-wider">MEJA #{qrModalTable.number}</span>
+            </div>
+
+            {/* Display URL di luar kotak QR */}
+            <div className="mx-auto w-64 bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-mono text-xs px-3 py-1.5 rounded-lg break-all select-all text-center">
+              {qrModalTable.qrUrl}
             </div>
 
             <div className="flex items-center gap-2 pt-1">
@@ -564,7 +570,7 @@ export function TableManagement() {
               .print-brand-logo { width: 22px !important; height: 22px !important; object-fit: contain !important; }
               .print-subtitle { font-size: 12px !important; font-weight: 700 !important; color: #64748b !important; text-transform: uppercase !important; margin-bottom: 8px !important; letter-spacing: 1.5px !important; }
               .print-qr-container { background: #fff !important; border: 2px solid #e2e8f0 !important; padding: 12px !important; border-radius: 20px !important; display: inline-block !important; }
-              .print-qr-code { width: 280px !important; height: 280px !important; }
+              .print-qr-code { width: 260px !important; height: 260px !important; }
               .print-title { font-size: 46px !important; font-weight: 900 !important; color: #0f172a !important; margin: 8px 0 0 !important; }
               .print-cut-line {
                 width: 100% !important;
@@ -583,7 +589,7 @@ export function TableManagement() {
             </div>
             <div className="print-subtitle">Scan untuk Pesan Menu</div>
             <div className="print-qr-container">
-              <BsQrCode className="print-qr-code text-slate-900" />
+              <QRCodeSVG value={qrModalTable.qrUrl} size={260} level="H" />
             </div>
             <h1 className="print-title">MEJA #{qrModalTable.number}</h1>
           </div>
@@ -598,7 +604,7 @@ export function TableManagement() {
             </div>
             <div className="print-subtitle">Scan untuk Pesan Menu</div>
             <div className="print-qr-container">
-              <BsQrCode className="print-qr-code text-slate-900" />
+              <QRCodeSVG value={qrModalTable.qrUrl} size={260} level="H" />
             </div>
             <h1 className="print-title">MEJA #{qrModalTable.number}</h1>
           </div>
