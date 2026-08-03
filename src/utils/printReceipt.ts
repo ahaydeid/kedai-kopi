@@ -1,3 +1,5 @@
+import { getCachedStoreProfileSync } from '@/services/supabase/storeProfileService'
+
 export interface ReceiptItem {
   name: string
   quantity: number
@@ -19,13 +21,14 @@ export interface ReceiptData {
 }
 
 export function getPrinterSettings() {
+  const profile = getCachedStoreProfileSync()
   const DEFAULT_SETTINGS = {
     connectionType: 'bluetooth',
     paperWidth: '58mm',
     autoPrint: true,
     printCopies: 1,
-    headerText: 'Kedai Kopi',
-    addressText: 'Balaraja, Tangerang',
+    headerText: profile.storeName || 'Kedai Moods',
+    addressText: profile.address || 'Balaraja, Tangerang',
     footerText: 'Terima kasih atas kunjungan Anda!',
   }
 

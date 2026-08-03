@@ -52,7 +52,7 @@ function buildEscPosBuffer(data) {
 
   // Header Text
   chunks.push(Buffer.from(CMD_BOLD_ON + CMD_FONT_HEADER, 'latin1'))
-  const headerStr = String(data.storeName || data.headerText || 'Kedai Kopi').substring(0, 32)
+  const headerStr = String(data.storeName || data.headerText || 'Kedai Moods').substring(0, 32)
   chunks.push(Buffer.from(`${headerStr}\n`, 'latin1'))
   chunks.push(Buffer.from(CMD_FONT_NORMAL + CMD_BOLD_OFF, 'latin1'))
   if (data.addressText || data.storeAddress) {

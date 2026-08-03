@@ -13,6 +13,7 @@ import Swal from 'sweetalert2'
 import { playSound, playSwalSound } from '@/utils/sound'
 
 import { getTables, getCachedTablesSync, createTable, updateTable, deleteTable, subscribeToTables, TableItem } from '@/services/supabase/tableService'
+import { getCachedStoreProfileSync } from '@/services/supabase/storeProfileService'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
 
 export interface TableData {
@@ -54,6 +55,8 @@ export function TableManagement() {
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table')
   const [statusFilter, setStatusFilter] = useState<'semua' | 'Tersedia' | 'Penuh' | 'Dipesan' | 'Tidak tersedia'>('semua')
   const [currentPage, setCurrentPage] = useState(1)
+
+  const storeProfile = React.useMemo(() => getCachedStoreProfileSync(), [])
 
   // Modal State
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -651,8 +654,8 @@ export function TableManagement() {
           {/* Card 1 (Top) */}
           <div className="print-card">
             <div className="print-brand-header">
-              <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-brand-logo" />
-              <span>Kedai Kopi</span>
+              <img src="/img/logo-login.webp" alt="Logo" className="print-brand-logo" />
+              <span>{storeProfile.storeName}</span>
             </div>
             <div className="print-subtitle">Scan untuk Pesan Menu</div>
             <div className="print-qr-container">
@@ -666,8 +669,8 @@ export function TableManagement() {
           {/* Card 2 (Bottom) */}
           <div className="print-card">
             <div className="print-brand-header">
-              <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-brand-logo" />
-              <span>Kedai Kopi</span>
+              <img src="/img/logo-login.webp" alt="Logo" className="print-brand-logo" />
+              <span>{storeProfile.storeName}</span>
             </div>
             <div className="print-subtitle">Scan untuk Pesan Menu</div>
             <div className="print-qr-container">
@@ -782,18 +785,18 @@ export function TableManagement() {
 
           {tablePairs.map((pair, index) => {
             const card0Url = printMode === 'no_table' ? `${getCustomerBaseUrl()}/menu` : pair[0].qrUrl
-            const card0Title = printMode === 'no_table' ? 'KEDAI KOPI' : `MEJA #${pair[0].number}`
+            const card0Title = printMode === 'no_table' ? storeProfile.storeName.toUpperCase() : `MEJA #${pair[0].number}`
 
             const card1Url = pair[1] ? (printMode === 'no_table' ? `${getCustomerBaseUrl()}/menu` : pair[1].qrUrl) : ''
-            const card1Title = pair[1] ? (printMode === 'no_table' ? 'KEDAI KOPI' : `MEJA #${pair[1].number}`) : ''
+            const card1Title = pair[1] ? (printMode === 'no_table' ? storeProfile.storeName.toUpperCase() : `MEJA #${pair[1].number}`) : ''
 
             return (
               <div key={index} className="print-all-page">
                 {/* Card Top */}
                 <div className="print-all-card">
                   <div className="print-all-brand-header">
-                    <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
-                    <span>Kedai Kopi</span>
+                    <img src="/img/logo-login.webp" alt="Logo" className="print-all-brand-logo" />
+                    <span>{storeProfile.storeName}</span>
                   </div>
                   <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
                   <div className="print-all-qr-container">
@@ -808,8 +811,8 @@ export function TableManagement() {
                 {pair[1] && (
                   <div className="print-all-card">
                     <div className="print-all-brand-header">
-                      <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
-                      <span>Kedai Kopi</span>
+                      <img src="/img/logo-login.webp" alt="Logo" className="print-all-brand-logo" />
+                      <span>{storeProfile.storeName}</span>
                     </div>
                     <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
                     <div className="print-all-qr-container">
