@@ -122,7 +122,7 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
             <button
               type="button"
               onClick={handlePrev}
-              className="absolute left-1.5 z-20 p-2 rounded-full bg-slate-900/10 hover:bg-slate-900/30 text-slate-800 dark:text-white border border-slate-200/80 dark:border-white/20 backdrop-blur-[2px] transition-colors cursor-pointer shadow-none"
+              className="absolute left-1.5 z-20 p-2 rounded-full bg-slate-900/10 hover:bg-slate-900/30 text-white dark:text-white dark:border-white/20 backdrop-blur-[2px] transition-colors cursor-pointer shadow-none"
               title="Foto Produk Sebelumnya"
             >
               <FiChevronLeft className="h-5 w-5" />
@@ -148,7 +148,7 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
             <button
               type="button"
               onClick={handleNext}
-              className="absolute right-1.5 z-20 p-2 rounded-full bg-slate-900/10 hover:bg-slate-900/30 text-slate-800 dark:text-white border border-slate-200/80 dark:border-white/20 backdrop-blur-[2px] transition-colors cursor-pointer shadow-none"
+              className="absolute right-1.5 z-20 p-2 rounded-full bg-slate-900/10 hover:bg-slate-900/30 text-white dark:text-white dark:border-white/20 backdrop-blur-[2px] transition-colors cursor-pointer shadow-none"
               title="Foto Selanjutnya"
             >
               <FiChevronRight className="h-5 w-5" />
