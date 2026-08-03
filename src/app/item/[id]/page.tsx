@@ -33,7 +33,6 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
       .single()
 
     if (data) {
-      title = `${data.name} - Kedai Kopi`
       if (data.price) {
         priceText = new Intl.NumberFormat('id-ID', {
           style: 'currency',
@@ -41,7 +40,10 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
           minimumFractionDigits: 0,
         }).format(Number(data.price))
       }
-      description = `${data.main_category || 'Menu'} ${priceText ? `(${priceText})` : ''} · ${data.description || 'Pesan sekarang di Kedai Kopi!'}`
+      title = priceText ? `${data.name} (${priceText}) - Kedai Kopi` : `${data.name} - Kedai Kopi`
+      description = priceText
+        ? `Harga ${priceText} · ${data.main_category || 'Menu'} ${data.sub_category ? `(${data.sub_category})` : ''} - ${data.description || 'Pesan sekarang di Kedai Kopi!'}`
+        : `${data.description || 'Pesan sekarang di Kedai Kopi!'}`
       if (data.images && data.images.length > 0) {
         itemImageUrl = data.images[0]
       }
