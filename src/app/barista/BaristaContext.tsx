@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useMemo, useEffect, useCallback } from 'react'
 import { BaristaOrder, BaristaOrderItem } from './_components/BaristaOrderCard'
 import { playSound, playSwalSound } from '@/utils/sound'
+import { requestNotificationPermission, showOrderNotification } from '@/utils/notification'
 import { printThermalReceipt } from '@/utils/printReceipt'
 import Swal from 'sweetalert2'
 import {
@@ -77,6 +78,7 @@ export function BaristaProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
+    requestNotificationPermission()
     fetchOrdersFromSupabase()
 
     // Real-time listener Supabase
@@ -84,6 +86,9 @@ export function BaristaProvider({ children }: { children: React.ReactNode }) {
       fetchOrdersFromSupabase()
       if (payload.eventType === 'INSERT') {
         playSound('notif.mp3')
+        if (payload.new) {
+          showOrderNotification(payload.new)
+        }
       }
     })
 
