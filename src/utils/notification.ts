@@ -78,3 +78,41 @@ export async function showOrderNotification(payloadNew: {
     console.warn('System Notification Error:', err)
   }
 }
+
+export async function showCustomerOrderCompletedNotification(payloadNew: {
+  id?: string
+  order_number?: string
+  customer_name?: string
+  total_amount?: number
+  table_number?: string
+  order_type?: string
+}) {
+  if (typeof window === 'undefined' || !('Notification' in window)) return
+  if (Notification.permission !== 'granted') return
+
+  const soundMode = localStorage.getItem('setting_sound_mode') !== 'hening'
+  if (!soundMode) return
+
+  const orderNum = payloadNew.order_number || ''
+  const customer = payloadNew.customer_name || 'Pelanggan'
+  const displayId = orderNum ? `#${orderNum}` : ''
+
+  const title = `🎉 Pesanan ${displayId} Siap Diambil!`
+  const body = `Halo ${customer}, pesanan Anda sudah Selesai dibuat. Silakan ambil pesanan Anda di konter barista. Selamat menikmati! ☕`
+
+  try {
+    const notif = new Notification(title, {
+      body,
+      icon: '/icon.png',
+      badge: '/icon.png',
+      tag: `customer-order-completed-${orderNum}-${Date.now()}`,
+    })
+
+    notif.onclick = () => {
+      window.focus()
+      notif.close()
+    }
+  } catch (err) {
+    console.warn('Customer Notification Error:', err)
+  }
+}

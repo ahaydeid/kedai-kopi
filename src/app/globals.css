@@ -165,7 +165,15 @@ body {
 }
 
 .swal2-popup .swal2-cancel {
-  color: #475569 !important;
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  box-shadow: none !important;
+}
+
+.swal2-popup .swal2-cancel:hover {
+  background-color: #e2e8f0 !important;
 }
 
 @media (min-width: 640px) {

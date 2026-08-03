@@ -34,15 +34,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
       ? "orders" 
       : pathname.startsWith("/admin/order-history")
         ? "order-history"
-        : pathname.startsWith("/admin/menu")
-          ? "menu"
-          : pathname.startsWith("/admin/member")
-            ? "member"
-            : pathname.startsWith("/admin/meja")
-              ? "meja"
-              : pathname.startsWith("/admin/settings")
-                ? "pengaturan"
-                : "";
+        : pathname.startsWith("/admin/campaign")
+          ? "campaign"
+          : pathname.startsWith("/admin/menu")
+            ? "menu"
+            : pathname.startsWith("/admin/member")
+              ? "member"
+              : pathname.startsWith("/admin/meja")
+                ? "meja"
+                : pathname.startsWith("/admin/settings")
+                  ? "pengaturan"
+                  : "";
 
   const config = {
     bgDarkClass: "bg-sky-900 dark:bg-zinc-900",
@@ -128,6 +130,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, setIsCollapsed })
     { type: "header", label: "Operasional" },
     { type: "item", id: "orders", label: "Pesanan", href: "/admin/orders", icon: HiOutlineClipboardDocumentList },
     { type: "item", id: "order-history", label: "Riwayat", href: "/admin/order-history", icon: HiOutlineClock },
+    { type: "item", id: "campaign", label: "Campaign", href: "/admin/campaign", icon: HiOutlineMegaphone },
     { type: "header", label: "Master Data" },
     { type: "item", id: "menu", label: "Menu", href: "/admin/menu", icon: FiCoffee },
     { type: "item", id: "meja", label: "Meja", href: "/admin/meja", icon: HiOutlineRectangleGroup },

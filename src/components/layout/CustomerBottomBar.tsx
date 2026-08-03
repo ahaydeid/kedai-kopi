@@ -8,6 +8,9 @@ import { HiOutlineUserCircle, HiOutlineClipboardDocumentList } from 'react-icons
 import { getOrders, subscribeToOrders } from '@/services/supabase/orderService'
 import { getCurrentUser } from '@/services/supabase/authService'
 
+import { playSound } from '@/utils/sound'
+import { requestNotificationPermission, showCustomerOrderCompletedNotification } from '@/utils/notification'
+
 interface CustomerBottomBarProps {
   activeTab?: 'menu' | 'orders' | 'history' | 'profile'
   orderBadgeCount?: number
@@ -34,6 +37,7 @@ export const CustomerBottomBar: React.FC<CustomerBottomBarProps> = ({
 
   useEffect(() => {
     let isMounted = true
+    requestNotificationPermission()
 
     async function loadActiveCount() {
       const user = await getCurrentUser()
@@ -74,8 +78,27 @@ export const CustomerBottomBar: React.FC<CustomerBottomBarProps> = ({
     loadUserAvatar()
 
     // Realtime subscription ke Supabase orders table
-    const unsubscribe = subscribeToOrders(() => {
+    const unsubscribe = subscribeToOrders(async (payload) => {
       loadActiveCount()
+
+      // Jika ada update status pesanan menjadi 'Selesai'
+      if (payload?.eventType === 'UPDATE' && payload?.new?.status === 'Selesai') {
+        const user = await getCurrentUser()
+        if (user && payload.new) {
+          const nameToMatch = (user.user_metadata?.full_name || user.email?.split('@')[0] || '').toLowerCase()
+          const userEmail = (user.email || '').toLowerCase()
+          const orderCustomer = (payload.new.customer_name || '').toLowerCase()
+
+          if (
+            payload.new.user_id === user.id ||
+            orderCustomer === nameToMatch ||
+            orderCustomer === userEmail
+          ) {
+            playSound('paymentacc.mp3')
+            showCustomerOrderCompletedNotification(payload.new)
+          }
+        }
+      }
     })
 
     return () => {

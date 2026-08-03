@@ -116,7 +116,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
               {formatOrderIdDisplay(order.orderNumber)}
             </span>
             <span className="text-[11px] text-slate-500 dark:text-slate-400 truncate">
-              • {order.dateTime}
+              • {order.dateTime.split(', ')[1] || order.dateTime}
             </span>
           </div>
 
@@ -136,7 +136,7 @@ export function CompletedOrderCard({ order, defaultExpanded = false }: Completed
             <span className="font-medium text-slate-900 dark:text-slate-100 truncate">{order.customerName}</span>
           </div>
           <span className="text-xs font-medium text-slate-400 shrink-0">
-            Meja #05
+            {tableLabelDisplay}
           </span>
         </div>
 
