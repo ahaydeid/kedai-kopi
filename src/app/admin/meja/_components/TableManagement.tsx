@@ -472,7 +472,7 @@ export function TableManagement() {
       <Modal
         isOpen={Boolean(qrModalTable)}
         onClose={() => setQrModalTable(null)}
-        title={`QR Code Pemesanan - Meja #${qrModalTable?.number}`}
+        title={`QR Code Meja`}
         size="sm"
       >
         {qrModalTable && (

@@ -255,7 +255,7 @@ export function MemberManagement() {
       <div className="flex flex-col gap-1 sm:flex-row sm:items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            Member
+            Master Member
           </h1>
         </div>
       </div>
