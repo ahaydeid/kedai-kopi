@@ -2,12 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
-import { FiLock, FiVolume2, FiPrinter, FiChevronLeft } from "react-icons/fi";
+import { FiLock, FiVolume2, FiPrinter, FiChevronLeft, FiGlobe } from "react-icons/fi";
 
 import { SidebarMenu, MenuItem } from "./_components/SidebarMenu";
 import { SuaraNotifikasiTab } from "./_components/SuaraNotifikasiTab";
 import { AksesBaristaTab } from "./_components/AksesBaristaTab";
 import { ThermalPrinterTab } from "./_components/ThermalPrinterTab";
+import { UrlMasukTab } from "./_components/UrlMasukTab";
 import { playSwalSound } from "@/utils/sound";
 
 export default function SettingsPage() {
@@ -20,7 +21,7 @@ export default function SettingsPage() {
     if (typeof window !== "undefined") {
       const hash = window.location.hash.replace("#", "");
       const savedTab = localStorage.getItem("settings_active_tab");
-      const validTabs = ["barista", "notifikasi", "printer"];
+      const validTabs = ["barista", "notifikasi", "printer", "url_masuk"];
 
       if (hash && validTabs.includes(hash)) {
         setActiveTab(hash);
@@ -85,6 +86,12 @@ export default function SettingsPage() {
       subtitle: "Atur koneksi printer thermal kasir untuk cetak struk otomatis",
       icon: FiPrinter,
     },
+    {
+      id: "url_masuk",
+      title: "Url masuk",
+      subtitle: "Lihat URL health check, IP LAN kasir, dan endpoint API cetak",
+      icon: FiGlobe,
+    },
   ];
 
   return (
@@ -130,6 +137,10 @@ export default function SettingsPage() {
 
             {activeTab === "printer" && (
               <ThermalPrinterTab />
+            )}
+
+            {activeTab === "url_masuk" && (
+              <UrlMasukTab />
             )}
           </div>
         </div>
