@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import { createClient } from '@supabase/supabase-js'
 import { headers } from 'next/headers'
 import { ItemRedirectClient } from './ItemRedirectClient'
+import { slugify } from '@/utils/slugify'
 
 interface ItemPageProps {
   params: Promise<{ id: string }>
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
 
+  let resolvedSlug = id
   if (supabaseUrl && supabaseAnonKey && id) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
     const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)
@@ -41,6 +43,7 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
     const { data } = await query.single()
 
     if (data) {
+      resolvedSlug = data.slug || (data.name ? slugify(data.name) : id)
       if (data.price) {
         priceText = new Intl.NumberFormat('id-ID', {
           style: 'currency',
@@ -58,7 +61,7 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
     }
   }
 
-  const ogApiUrl = baseUrl ? `${baseUrl}/api/og?item=${id}` : `/api/og?item=${id}`
+  const ogApiUrl = baseUrl ? `${baseUrl}/api/og?item=${resolvedSlug}` : `/api/og?item=${resolvedSlug}`
 
   const ogImages = [
     ...(itemImageUrl ? [{ url: itemImageUrl, width: 800, height: 800, alt: title }] : []),
@@ -77,7 +80,7 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
       title,
       description,
       type: 'website',
-      url: baseUrl ? `${baseUrl}/item/${id}` : undefined,
+      url: baseUrl ? `${baseUrl}/item/${resolvedSlug}` : undefined,
       images: ogImages,
     },
     twitter: {
