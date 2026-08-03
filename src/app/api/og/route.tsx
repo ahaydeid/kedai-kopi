@@ -77,10 +77,13 @@ export async function GET(request: Request) {
               <img
                 src={imageUrl}
                 alt={name}
+                width="460"
+                height="460"
                 style={{
-                  width: '100%',
-                  height: '100%',
+                  width: '460px',
+                  height: '460px',
                   objectFit: 'cover',
+                  borderRadius: '24px',
                 }}
               />
             ) : (
