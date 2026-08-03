@@ -81,7 +81,7 @@ function buildEscPosBuffer(data) {
     chunks.push(Buffer.from(`Meja: Meja #${cleanTable}\n`, 'latin1'))
   }
   if (data.notes) {
-    chunks.push(Buffer.from(`Catatan: ${data.notes}\n`, 'latin1'))
+    chunks.push(Buffer.from(`Note: ${data.notes}\n`, 'latin1'))
   }
   chunks.push(Buffer.from(`--------------------------------\n`, 'latin1'))
 
