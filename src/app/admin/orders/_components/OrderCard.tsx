@@ -26,6 +26,7 @@ export interface OrderItem {
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
   orderType?: 'dine_in' | 'takeaway'
   tableNumber?: string | null
+  notes?: string | null
 }
 
 interface OrderCardProps {
@@ -106,6 +107,13 @@ export function OrderCard({ order }: OrderCardProps) {
               <span>-{formatRupiah(order.discountAmount || order.claimedPoints || 0)}</span>
             </div>
           )}
+
+          {order.notes && (
+            <div className="mt-2 bg-amber-50/80 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-[11px] p-2 rounded-lg border border-amber-200/70 dark:border-amber-900/60 leading-relaxed">
+              <span className="font-bold text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">Catatan Pesanan:</span>
+              {order.notes}
+            </div>
+          )}
         </div>
       </div>
 
@@ -121,6 +129,7 @@ export function OrderCard({ order }: OrderCardProps) {
               tableNumber: order.orderType === 'takeaway' || !order.tableNumber ? 'Takeaway' : `Meja #${order.tableNumber}`,
               orderType: order.orderType,
               dateTime: order.dateTime,
+              notes: order.notes,
               items: order.items.map((item) => {
                 const match = item.name.match(/^(\d+)x\s+(.+)$/)
                 if (match) {

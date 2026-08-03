@@ -23,6 +23,7 @@ export interface DatabaseOrder {
   customer_avatar_url?: string | null
   user_id?: string | null
   claimed_points?: number
+  notes?: string | null
 }
 
 export interface DatabaseOrderItem {

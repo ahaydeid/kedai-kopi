@@ -10,6 +10,7 @@ export interface ReceiptData {
   tableNumber?: string | null
   orderType?: 'dine_in' | 'takeaway' | string
   dateTime?: string
+  notes?: string | null
   items: ReceiptItem[]
   totalAmount: number
   discountAmount?: number
@@ -200,6 +201,9 @@ export async function printThermalReceipt(data: ReceiptData) {
       text += `Nama: ${String(data.customerName).substring(0, 24)}\n`
     }
     text += `Tipe: ${orderTypeLabel}\n`
+    if (data.notes) {
+      text += `Catatan: ${String(data.notes).substring(0, 64)}\n`
+    }
     text += `--------------------------------\n`
 
     if (Array.isArray(data.items)) {

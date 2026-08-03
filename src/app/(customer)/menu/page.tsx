@@ -322,11 +322,18 @@ export default function CustomerMenuPage() {
       title: 'Konfirmasi Pesanan',
       html: `
         <div class="text-xs text-slate-500 mb-1">${totalCartItems} item · ${formatRupiah(finalCartPrice)}</div>
-        <div class="text-xs font-medium text-slate-400 mb-4">${orderInfoText}</div>
+        <div class="text-xs font-medium text-slate-400 mb-3">${orderInfoText}</div>
+        <div class="space-y-3 text-left">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Nama Pemesan <span class="text-red-500">*</span></label>
+            <input id="swal-customer-name" type="text" value="${defaultName}" placeholder="Masukkan nama kamu" class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm px-3.5 py-2.5 outline-none focus:border-amber-800 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Catatan Pesanan <span class="text-slate-400 font-normal">(opsional)</span></label>
+            <textarea id="swal-order-notes" rows="2" placeholder="Contoh: Es sedikit, tidak manis, dsb..." class="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-xs p-3 outline-none focus:border-amber-800 transition-colors resize-none"></textarea>
+          </div>
+        </div>
       `,
-      input: 'text',
-      inputValue: defaultName,
-      inputPlaceholder: 'Masukkan nama kamu',
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#3D2514',
@@ -337,16 +344,26 @@ export default function CustomerMenuPage() {
       customClass: {
         popup: 'swal2-popup',
         cancelButton: '!text-slate-600',
-        input: '!rounded-xl !border-slate-200 !text-sm !py-2.5 !mt-1 !mb-5 !shadow-none !outline-none !focus:outline-none !focus:ring-0 !focus:shadow-none !focus:border-amber-800',
       },
-      inputValidator: (value) => {
-        if (!value || !value.trim()) {
-          return 'Nama pemesan wajib diisi!'
+      preConfirm: () => {
+        const nameEl = document.getElementById('swal-customer-name') as HTMLInputElement
+        const notesEl = document.getElementById('swal-order-notes') as HTMLTextAreaElement
+        const nameVal = nameEl?.value?.trim() || ''
+        const notesVal = notesEl?.value?.trim() || ''
+
+        if (!nameVal) {
+          Swal.showValidationMessage('Nama pemesan wajib diisi!')
+          return false
+        }
+
+        return {
+          customerName: nameVal,
+          orderNotes: notesVal,
         }
       },
       didOpen: () => {
         const confirmBtn = Swal.getConfirmButton()
-        const inputEl = Swal.getInput()
+        const inputEl = document.getElementById('swal-customer-name') as HTMLInputElement
         if (confirmBtn && inputEl) {
           const checkInput = () => {
             const val = inputEl.value.trim()
@@ -367,7 +384,7 @@ export default function CustomerMenuPage() {
       },
     }).then(async (result) => {
       if (result.isConfirmed && result.value) {
-        const customerName = result.value.trim()
+        const { customerName, orderNotes } = result.value
         const orderItems = cart.map((c) => ({
           name: c.product.name,
           price: c.product.price,
@@ -384,6 +401,7 @@ export default function CustomerMenuPage() {
           claimedPoints: isClaimed ? claimedDiscountAmount : 0,
           orderType: orderType,
           tableNumber: orderType === 'dine_in' ? tableNumber : null,
+          notes: orderNotes || null,
         })
 
         // Simpan timestamp pemesanan untuk pelanggan anonim

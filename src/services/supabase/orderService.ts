@@ -18,6 +18,7 @@ export interface CreateOrderInput {
   claimedPoints?: number
   orderType?: 'dine_in' | 'takeaway'
   tableNumber?: string | null
+  notes?: string | null
 }
 
 export interface FetchedOrderWithItems {
@@ -30,6 +31,7 @@ export interface FetchedOrderWithItems {
   claimed_points?: number
   order_type?: 'dine_in' | 'takeaway'
   table_number?: string | null
+  notes?: string | null
   status: 'Menunggu' | 'Diproses' | 'Selesai' | 'Dibatalkan'
   created_at: string
   order_items: {
@@ -98,6 +100,7 @@ export async function createOrder(input: CreateOrderInput): Promise<FetchedOrder
         claimed_points: input.claimedPoints ?? 0,
         order_type: input.orderType ?? 'dine_in',
         table_number: input.tableNumber ?? null,
+        notes: input.notes ?? null,
         status: 'Menunggu',
       },
     ])
@@ -141,6 +144,7 @@ export async function createOrder(input: CreateOrderInput): Promise<FetchedOrder
       claimed_points: input.claimedPoints ?? 0,
       order_type: input.orderType ?? 'dine_in',
       table_number: input.tableNumber ?? null,
+      notes: input.notes ?? null,
       status: 'Menunggu',
       created_at: new Date().toISOString(),
       order_items: input.items.map((item, idx) => ({
