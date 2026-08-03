@@ -62,6 +62,41 @@ export function TableManagement() {
 
   // QR Modal State
   const [qrModalTable, setQrModalTable] = useState<TableData | null>(null)
+  const [isPrintingAll, setIsPrintingAll] = useState(false)
+
+  const sortedTables = React.useMemo(() => {
+    return [...tables].sort((a, b) => {
+      const numA = parseInt(a.number, 10)
+      const numB = parseInt(b.number, 10)
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB
+      return a.number.localeCompare(b.number)
+    })
+  }, [tables])
+
+  const tablePairs = React.useMemo(() => {
+    const pairs: TableData[][] = []
+    for (let i = 0; i < sortedTables.length; i += 2) {
+      pairs.push(sortedTables.slice(i, i + 2))
+    }
+    return pairs
+  }, [sortedTables])
+
+  const handlePrintAllQRs = () => {
+    if (tables.length === 0) return
+    setQrModalTable(null)
+    setIsPrintingAll(true)
+    setTimeout(() => {
+      window.print()
+    }, 150)
+  }
+
+  React.useEffect(() => {
+    const handleAfterPrint = () => {
+      setIsPrintingAll(false)
+    }
+    window.addEventListener('afterprint', handleAfterPrint)
+    return () => window.removeEventListener('afterprint', handleAfterPrint)
+  }, [])
 
   const fetchTablesFromSupabase = React.useCallback(async (isSilent = false) => {
     if (!isSilent) setLoading(true)
@@ -208,10 +243,25 @@ export function TableManagement() {
           </h1>
         </div>
 
-        <Button onClick={handleOpenAdd} variant="primary" size="sm" className="flex items-center gap-1.5 shrink-0">
-          <FiPlus className="w-4 h-4" />
-          <span>Tambah Meja</span>
-        </Button>
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            type="button"
+            onClick={handlePrintAllQRs}
+            variant="secondary"
+            size="sm"
+            disabled={tables.length === 0}
+            className="flex items-center gap-1.5 shrink-0"
+            title="Cetak Seluruh QR Code Meja dalam 1 Lembar"
+          >
+            <FiPrinter className="w-4 h-4" />
+            <span>Print QR</span>
+          </Button>
+
+          <Button onClick={handleOpenAdd} variant="primary" size="sm" className="flex items-center gap-1.5 shrink-0">
+            <FiPlus className="w-4 h-4" />
+            <span>Tambah Meja</span>
+          </Button>
+        </div>
       </div>
 
       {/* Toolbar: Search, Page Size & View Toggle */}
@@ -524,8 +574,8 @@ export function TableManagement() {
         )}
       </Modal>
 
-      {/* Hidden Printable QR Layout for Direct Printing */}
-      {qrModalTable && (
+      {/* Hidden Printable Single QR Layout for Direct Printing */}
+      {qrModalTable && !isPrintingAll && (
         <div id="printable-qr-container" className="hidden print:block">
           <style dangerouslySetInnerHTML={{ __html: `
             @media print {
@@ -608,6 +658,104 @@ export function TableManagement() {
             </div>
             <h1 className="print-title">MEJA #{qrModalTable.number}</h1>
           </div>
+        </div>
+      )}
+
+      {/* Hidden Printable All Tables QR Layout (2 Cards per A4 Sheet) */}
+      {isPrintingAll && (
+        <div id="printable-all-qr-container" className="hidden print:block">
+          <style dangerouslySetInnerHTML={{ __html: `
+            @media print {
+              @page { size: A4 portrait; margin: 0; }
+              body * { visibility: hidden !important; }
+              #printable-all-qr-container, #printable-all-qr-container * { visibility: visible !important; }
+              #printable-all-qr-container {
+                position: absolute !important;
+                left: 0 !important;
+                top: 0 !important;
+                width: 100vw !important;
+                background: #fff !important;
+                box-sizing: border-box !important;
+              }
+              .print-all-page {
+                width: 100vw !important;
+                height: 100vh !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: space-evenly !important;
+                padding: 20px !important;
+                box-sizing: border-box !important;
+                page-break-after: always !important;
+                break-after: page !important;
+              }
+              .print-all-card {
+                border: 3px solid #1e293b !important;
+                padding: 16px 24px 20px !important;
+                border-radius: 24px !important;
+                width: 100% !important;
+                max-width: 440px !important;
+                box-sizing: border-box !important;
+                text-align: center !important;
+              }
+              .print-all-brand-header {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 8px !important;
+                font-size: 14px !important;
+                font-weight: 700 !important;
+                color: #334155 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 1px !important;
+                margin-bottom: 6px !important;
+              }
+              .print-all-brand-logo { width: 22px !important; height: 22px !important; object-fit: contain !important; }
+              .print-all-subtitle { font-size: 12px !important; font-weight: 700 !important; color: #64748b !important; text-transform: uppercase !important; margin-bottom: 8px !important; letter-spacing: 1.5px !important; }
+              .print-all-qr-container { background: #fff !important; border: 2px solid #e2e8f0 !important; padding: 12px !important; border-radius: 20px !important; display: inline-block !important; }
+              .print-all-title { font-size: 46px !important; font-weight: 900 !important; color: #0f172a !important; margin: 8px 0 0 !important; }
+              .print-all-cut-line {
+                width: 100% !important;
+                max-width: 480px !important;
+                border-top: 1px dashed #94a3b8 !important;
+                margin: 8px 0 !important;
+              }
+            }
+          ` }} />
+
+          {tablePairs.map((pair, index) => (
+            <div key={index} className="print-all-page">
+              {/* Card Top */}
+              <div className="print-all-card">
+                <div className="print-all-brand-header">
+                  <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
+                  <span>Kedai Kopi</span>
+                </div>
+                <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
+                <div className="print-all-qr-container">
+                  <QRCodeSVG value={pair[0].qrUrl} size={260} level="H" />
+                </div>
+                <h1 className="print-all-title">MEJA #{pair[0].number}</h1>
+              </div>
+
+              {pair[1] && <div className="print-all-cut-line"></div>}
+
+              {/* Card Bottom */}
+              {pair[1] && (
+                <div className="print-all-card">
+                  <div className="print-all-brand-header">
+                    <img src="/img/logo-login.webp" alt="Logo Kedai Kopi" className="print-all-brand-logo" />
+                    <span>Kedai Kopi</span>
+                  </div>
+                  <div className="print-all-subtitle">Scan untuk Pesan Menu</div>
+                  <div className="print-all-qr-container">
+                    <QRCodeSVG value={pair[1].qrUrl} size={260} level="H" />
+                  </div>
+                  <h1 className="print-all-title">MEJA #{pair[1].number}</h1>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>
