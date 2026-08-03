@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { OrderCard, OrderItem } from './OrderCard'
 import { CompletedOrderCard } from './CompletedOrderCard'
 import { getOrders, getCachedOrdersSync, subscribeToOrders, FetchedOrderWithItems, hasOrdersCache } from '@/services/supabase/orderService'
+import { playSound } from '@/utils/sound'
 
 let ordersClientCache: OrderItem[] | null = null
 
@@ -77,8 +78,11 @@ export function OrdersManagement() {
   useEffect(() => {
     fetchOrders(ordersClientCache !== null || hasOrdersCache())
 
-    const unsubscribe = subscribeToOrders(() => {
+    const unsubscribe = subscribeToOrders((payload) => {
       fetchOrders(true)
+      if (payload?.eventType === 'INSERT') {
+        playSound('notif.mp3')
+      }
     })
 
     return () => {

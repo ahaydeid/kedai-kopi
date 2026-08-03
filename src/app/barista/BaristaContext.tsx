@@ -83,7 +83,7 @@ export function BaristaProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = subscribeToOrders((payload) => {
       fetchOrdersFromSupabase()
       if (payload.eventType === 'INSERT') {
-        playSound('present.mp3')
+        playSound('notif.mp3')
       }
     })
 
