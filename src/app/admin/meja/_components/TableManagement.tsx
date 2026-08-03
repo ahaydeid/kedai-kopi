@@ -7,7 +7,7 @@ import { ActionButton } from '@/components/ui/ActionButton'
 import { Modal } from '@/components/ui/Modal'
 import { QRCodeSVG } from 'qrcode.react'
 import { Badge } from '@/components/ui/Badge'
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiGrid, FiList, FiUsers, FiChevronLeft, FiChevronRight, FiPrinter } from 'react-icons/fi'
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiGrid, FiList, FiUsers, FiChevronLeft, FiChevronRight, FiPrinter, FiCheck } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import Swal from 'sweetalert2'
 import { playSound, playSwalSound } from '@/utils/sound'
@@ -63,6 +63,7 @@ export function TableManagement() {
   // QR Modal State
   const [qrModalTable, setQrModalTable] = useState<TableData | null>(null)
   const [isPrintingAll, setIsPrintingAll] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
 
   const sortedTables = React.useMemo(() => {
     return [...tables].sort((a, b) => {
@@ -521,7 +522,10 @@ export function TableManagement() {
       {/* Modal QR Code Preview */}
       <Modal
         isOpen={Boolean(qrModalTable)}
-        onClose={() => setQrModalTable(null)}
+        onClose={() => {
+          setQrModalTable(null)
+          setIsCopied(false)
+        }}
         title={`QR Code Meja`}
         size="sm"
       >
@@ -542,19 +546,24 @@ export function TableManagement() {
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="flex-1 flex items-center justify-center gap-1.5"
+                className="flex-1 flex items-center justify-center gap-1.5 transition-all"
                 onClick={() => {
                   navigator.clipboard.writeText(qrModalTable.qrUrl)
                   playSound('present.mp3')
-                  Swal.fire({
-                    title: 'Disalin!',
-                    text: 'Link QR Code berhasil disalin ke clipboard.',
-                    icon: 'success',
-                    confirmButtonColor: '#3D2514',
-                  })
+                  setIsCopied(true)
+                  setTimeout(() => {
+                    setIsCopied(false)
+                  }, 2000)
                 }}
               >
-                Salin Link
+                {isCopied ? (
+                  <>
+                    <FiCheck className="w-4 h-4" />
+                    <span>Disalin</span>
+                  </>
+                ) : (
+                  <span>Salin Link</span>
+                )}
               </Button>
 
               <Button
