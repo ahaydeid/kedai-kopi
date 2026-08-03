@@ -43,11 +43,29 @@ function formatRupiah(num: number): string {
   return 'Rp ' + Math.floor(num).toLocaleString('id-ID')
 }
 
+function getCandidateBridgeUrls(configuredUrl?: string): string[] {
+  if (configuredUrl) return [configuredUrl]
+  if (process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL) return [process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL]
+
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname
+    if (host === 'localhost') {
+      return ['http://localhost:5000', 'http://127.0.0.1:5000']
+    }
+    if (host === '127.0.0.1') {
+      return ['http://127.0.0.1:5000', 'http://localhost:5000']
+    }
+    if (host) {
+      return [`http://${host}:5000`, 'http://localhost:5000', 'http://127.0.0.1:5000']
+    }
+  }
+  return ['http://localhost:5000', 'http://127.0.0.1:5000']
+}
+
 export async function printThermalReceipt(data: ReceiptData) {
   if (typeof window === 'undefined') return
 
   const settings = getPrinterSettings()
-  const bridgeUrl = settings.bridgeUrl || process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL || 'http://127.0.0.1:5000'
 
   const paperWidth = settings.paperWidth === '80mm' ? '80mm' : '58mm'
   const maxWidthPx = settings.paperWidth === '80mm' ? '300px' : '210px'
@@ -69,6 +87,27 @@ export async function printThermalReceipt(data: ReceiptData) {
   const autoDisc = itemsSum > data.totalAmount ? itemsSum - data.totalAmount : 0
   const effectiveDiscount = explicitDisc > 0 ? explicitDisc : autoDisc
 
+  const discountHtml =
+    effectiveDiscount > 0
+      ? `
+    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+      <span>Subtotal</span>
+      <span>${formatRupiah(itemsSum > 0 ? itemsSum : data.totalAmount + effectiveDiscount)}</span>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+      <span>Potongan Poin</span>
+      <span>-${formatRupiah(effectiveDiscount)}</span>
+    </div>
+  `
+      : ''
+
+  const orderTypeLabel =
+    String(data.orderType || '').toLowerCase() === 'takeaway' ||
+    String(data.tableNumber || '').toLowerCase() === 'takeaway' ||
+    !data.tableNumber
+      ? 'Take Away'
+      : `Meja #${String(data.tableNumber).replace(/^Meja\s*#?/i, '').trim()}`
+
   const receiptHtml = `
     <!DOCTYPE html>
     <html>
@@ -89,55 +128,29 @@ export async function printThermalReceipt(data: ReceiptData) {
             padding: 8px;
             color: #000;
           }
-          .text-center { text-align: center; }
-          .header-title { font-size: 14px; font-weight: bold; }
-          .divider { border-bottom: 1px dashed #000; margin: 6px 0; }
-          .double-divider { border-bottom: 2px solid #000; margin: 6px 0; }
-          .row { display: flex; justify-content: space-between; }
+          .center { text-align: center; }
           .bold { font-weight: bold; }
-          letter-spacing: 0.5px;
-          }
+          .divider { border-top: 1px dashed #000; margin: 4px 0; }
+          .row { display: flex; justify-content: space-between; margin-bottom: 2px; }
+          .total-row { display: flex; justify-content: space-between; font-weight: bold; margin-top: 4px; }
         </style>
       </head>
       <body>
-        <div class="text-center header-title uppercase">${settings.headerText}</div>
-        ${settings.addressText ? `<div class="text-center" style="font-size: 9px; margin-top: 2px;">${settings.addressText}</div>` : ''}
-        
+        <div class="center bold" style="font-size: 13px; margin-bottom: 2px;">${settings.headerText}</div>
+        ${settings.addressText ? `<div class="center" style="font-size: 9px; margin-bottom: 4px;">${settings.addressText}</div>` : ''}
         <div class="divider"></div>
-
-        <div class="row"><span>Tgl :</span><span>${nowStr}</span></div>
-        <div class="row"><span>ID  :</span><span class="bold">${String(data.orderNumber || '').replace(/^#\s*/, '').startsWith('ORD-') ? String(data.orderNumber || '').replace(/^#\s*/, '') : `ORD-${String(data.orderNumber || '').replace(/^#\s*/, '')}`}</span></div>
-        ${data.customerName ? `<div class="row"><span>Nama:</span><span>${data.customerName}</span></div>` : ''}
-        ${
-          String(data.orderType || '').toLowerCase() === 'takeaway' || String(data.tableNumber || '').toLowerCase() === 'takeaway' || !data.tableNumber
-            ? `<div class="row"><span>Tipe:</span><span>Take Away</span></div>`
-            : `<div class="row"><span>Meja:</span><span>Meja #${String(data.tableNumber).replace(/^Meja\s*#?/i, '').trim()}</span></div>`
-        }
-
+        <div class="row"><span>Tgl</span><span>${nowStr}</span></div>
+        <div class="row"><span>No.</span><span>${data.orderNumber}</span></div>
+        ${data.customerName ? `<div class="row"><span>Nama</span><span>${data.customerName}</span></div>` : ''}
+        <div class="row"><span>Tipe</span><span>${orderTypeLabel}</span></div>
+        ${data.paymentMethod ? `<div class="row"><span>Bayar</span><span>${data.paymentMethod}</span></div>` : ''}
         <div class="divider"></div>
-
-        <div>
-          ${itemsHtml}
-        </div>
-
-        ${
-          effectiveDiscount > 0
-            ? `
-            <div class="row"><span>Subtotal:</span><span>${formatRupiah(itemsSum > 0 ? itemsSum : data.totalAmount + effectiveDiscount)}</span></div>
-            <div class="row"><span>Diskon:</span><span>-${formatRupiah(effectiveDiscount)}</span></div>
-            `
-            : ''
-        }
-        <div class="row bold" style="font-size: 12px; margin-top: 2px;">
-          <span>TOTAL</span>
-          <span>${formatRupiah(data.totalAmount)}</span>
-        </div>
-
-        ${data.paymentMethod ? `<div class="row" style="font-size: 10px; margin-top: 2px;"><span>Bayar:</span><span>${data.paymentMethod}</span></div>` : ''}
-
-        <div class="double-divider"></div>
-
-        <div class="text-center" style="font-size: 9px; margin-top: 4px;">${settings.footerText}</div>
+        ${itemsHtml}
+        <div class="divider"></div>
+        ${discountHtml}
+        <div class="total-row"><span>TOTAL</span><span>${formatRupiah(data.totalAmount)}</span></div>
+        <div class="divider"></div>
+        <div class="center" style="font-size: 9px; margin-top: 4px;">${settings.footerText}</div>
       </body>
     </html>
   `
@@ -169,25 +182,7 @@ export async function printThermalReceipt(data: ReceiptData) {
     }
   }
 
-function getCandidateBridgeUrls(configuredUrl?: string): string[] {
-  if (configuredUrl) return [configuredUrl]
-  if (process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL) return [process.env.NEXT_PUBLIC_PRINT_BRIDGE_URL]
-
-  if (typeof window !== 'undefined') {
-    const host = window.location.hostname
-    if (host === 'localhost') {
-      return ['http://localhost:5000', 'http://127.0.0.1:5000']
-    }
-    if (host === '127.0.0.1') {
-      return ['http://127.0.0.1:5000', 'http://localhost:5000']
-    }
-    if (host) {
-      return [`http://${host}:5000`, 'http://localhost:5000', 'http://127.0.0.1:5000']
-    }
-  }
-  return ['http://localhost:5000', 'http://127.0.0.1:5000']
-}
-
+  // --- Android HP: route via RawBT direct scheme ---
   const isAndroid = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent)
   if (isAndroid || settings.connectionType === 'rawbt') {
     let text = ''
@@ -204,12 +199,7 @@ function getCandidateBridgeUrls(configuredUrl?: string): string[] {
     if (data.customerName) {
       text += `Nama: ${String(data.customerName).substring(0, 24)}\n`
     }
-    if (String(data.orderType || '').toLowerCase() === 'takeaway' || String(data.tableNumber || '').toLowerCase() === 'takeaway' || !data.tableNumber) {
-      text += `Tipe: Take Away\n`
-    } else {
-      const tableNo = String(data.tableNumber).replace(/^Meja\s*#?/i, '').trim()
-      text += `Meja: Meja #${tableNo}\n`
-    }
+    text += `Tipe: ${orderTypeLabel}\n`
     text += `--------------------------------\n`
 
     if (Array.isArray(data.items)) {
@@ -267,12 +257,13 @@ function getCandidateBridgeUrls(configuredUrl?: string): string[] {
     return
   }
 
+  // --- Browser / iframe print (PC non-bluetooth) ---
   if (settings.connectionType === 'browser') {
     executeIframeBrowserPrint()
     return
   }
 
-  // Connection type is 'bluetooth' (Default Direct ESC/POS Printing to /dev/rfcomm0)
+  // --- Default: Local Print Bridge (PC Linux → /dev/rfcomm0) ---
   const candidateUrls = getCandidateBridgeUrls(settings.bridgeUrl)
   let lastError = ''
 
