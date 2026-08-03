@@ -18,11 +18,19 @@ export async function GET(request: Request) {
       const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
       if (supabaseUrl && supabaseAnonKey) {
         const supabase = createClient(supabaseUrl, supabaseAnonKey)
-        const { data } = await supabase
+        const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(itemId)
+
+        let query = supabase
           .from('menus')
           .select('name, price, main_category, sub_category, images')
-          .eq('id', itemId)
-          .single()
+
+        if (isUuid) {
+          query = query.eq('id', itemId)
+        } else {
+          query = query.eq('slug', itemId)
+        }
+
+        const { data } = await query.single()
 
         if (data) {
           name = data.name || name

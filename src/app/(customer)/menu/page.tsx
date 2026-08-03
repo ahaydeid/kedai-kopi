@@ -15,12 +15,14 @@ import { getCurrentUser } from '@/services/supabase/authService'
 import { createClient } from '@/services/supabase/client'
 import { CheckCircle } from '@/components/ui/CheckCircle'
 import { DatabaseMenu } from '@/types/database'
+import { slugify } from '@/utils/slugify'
 
 function mapDatabaseMenuToCustomerMenuItem(item: DatabaseMenu): MenuItem {
   const images = item.images && item.images.length > 0 ? item.images : ['/img/kedai-kopi.jpeg']
   return {
     id: item.id,
     name: item.name,
+    slug: item.slug || slugify(item.name),
     category: item.sub_category,
     mainCategory: item.main_category,
     price: Number(item.price),
@@ -138,7 +140,9 @@ export default function CustomerMenuPage() {
     const itemParam = urlParams.get('item')
 
     if (itemParam) {
-      const targetItem = menuList.find((m) => m.id === itemParam)
+      const targetItem = menuList.find(
+        (m) => m.id === itemParam || m.slug === itemParam || slugify(m.name) === itemParam
+      )
       if (targetItem) {
         handleAddToCart(targetItem)
 

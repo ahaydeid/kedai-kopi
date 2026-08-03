@@ -2,6 +2,7 @@ import { createClient } from './client'
 import { DatabaseMenu } from '@/types/database'
 import { compressImage } from '@/utils/imageCompression'
 import { offlineDB } from '@/services/offline/db'
+import { slugify } from '@/utils/slugify'
 
 export type CreateMenuInput = Omit<DatabaseMenu, 'id' | 'created_at'>
 
@@ -202,9 +203,13 @@ export async function uploadMenuImage(file: File): Promise<string | null> {
 
 export async function createMenuItem(input: CreateMenuInput): Promise<DatabaseMenu | null> {
   const supabase = createClient()
+  const payload = {
+    ...input,
+    slug: input.slug || slugify(input.name),
+  }
   const { data, error } = await supabase
     .from('menu')
-    .insert([input])
+    .insert([payload])
     .select()
     .single()
 
@@ -221,6 +226,7 @@ export async function updateMenuItem(id: string, input: Partial<CreateMenuInput>
   const supabase = createClient()
   const updateData = {
     ...input,
+    ...(input.name ? { slug: input.slug || slugify(input.name) } : {}),
     updated_at: new Date().toISOString(),
   }
   const { data, error } = await supabase

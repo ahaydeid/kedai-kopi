@@ -1,6 +1,7 @@
 export interface MenuItem {
   id: string
   name: string
+  slug?: string
   category: string
   mainCategory?: string
   price: number

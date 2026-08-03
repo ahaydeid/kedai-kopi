@@ -1,6 +1,7 @@
 export interface DatabaseMenu {
   id: string
   name: string
+  slug?: string
   main_category: string
   sub_category: string
   price: number

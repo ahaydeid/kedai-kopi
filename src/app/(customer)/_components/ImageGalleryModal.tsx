@@ -5,6 +5,7 @@ import { Modal } from '@/components/ui/Modal'
 import { FiChevronLeft, FiChevronRight, FiCoffee, FiLink, FiCheck } from 'react-icons/fi'
 import { FaWhatsapp } from 'react-icons/fa6'
 import { MenuItem } from '@/types/customer'
+import { slugify } from '@/utils/slugify'
 
 interface ImageGalleryModalProps {
   isOpen: boolean
@@ -69,7 +70,8 @@ export const ImageGalleryModal: React.FC<ImageGalleryModalProps> = ({
   const getItemShareUrl = () => {
     if (!product) return ''
     const origin = typeof window !== 'undefined' ? window.location.origin : ''
-    return `${origin}/item/${product.id}`
+    const itemSlug = product.slug || slugify(product.name) || product.id
+    return `${origin}/item/${itemSlug}`
   }
 
   const handleShareWA = () => {

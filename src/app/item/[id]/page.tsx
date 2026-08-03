@@ -26,11 +26,19 @@ export async function generateMetadata({ params }: ItemPageProps): Promise<Metad
 
   if (supabaseUrl && supabaseAnonKey && id) {
     const supabase = createClient(supabaseUrl, supabaseAnonKey)
-    const { data } = await supabase
+    const isUuid = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(id)
+
+    let query = supabase
       .from('menus')
-      .select('name, price, main_category, sub_category, description, images')
-      .eq('id', id)
-      .single()
+      .select('id, name, slug, price, main_category, sub_category, description, images')
+
+    if (isUuid) {
+      query = query.eq('id', id)
+    } else {
+      query = query.eq('slug', id)
+    }
+
+    const { data } = await query.single()
 
     if (data) {
       if (data.price) {
