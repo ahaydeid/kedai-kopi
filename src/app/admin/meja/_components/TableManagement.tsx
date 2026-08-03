@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/Badge'
 import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX, FiGrid, FiList, FiUsers, FiChevronLeft, FiChevronRight, FiPrinter } from 'react-icons/fi'
 import { BsQrCode } from 'react-icons/bs'
 import Swal from 'sweetalert2'
-import { playSwalSound } from '@/utils/sound'
+import { playSound, playSwalSound } from '@/utils/sound'
 
 import { getTables, getCachedTablesSync, createTable, updateTable, deleteTable, subscribeToTables, TableItem } from '@/services/supabase/tableService'
 import { useNetworkStatus } from '@/hooks/useNetworkStatus'
@@ -533,7 +533,7 @@ export function TableManagement() {
             </div>
 
             {/* Display URL di luar kotak QR */}
-            <div className="mx-auto w-64 bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-mono text-xs px-3 py-1.5 rounded-lg break-all select-all text-center">
+            <div className="mx-auto w-fit max-w-full bg-gray-50 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 font-mono text-xs px-3.5 py-2 rounded-lg break-all select-all text-center">
               {qrModalTable.qrUrl}
             </div>
 
@@ -545,7 +545,7 @@ export function TableManagement() {
                 className="flex-1 flex items-center justify-center gap-1.5"
                 onClick={() => {
                   navigator.clipboard.writeText(qrModalTable.qrUrl)
-                  playSwalSound('success')
+                  playSound('present.mp3')
                   Swal.fire({
                     title: 'Disalin!',
                     text: 'Link QR Code berhasil disalin ke clipboard.',
