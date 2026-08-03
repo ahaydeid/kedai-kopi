@@ -685,31 +685,49 @@ export function TableManagement() {
         title="Pilihan Cetak QR Code"
         size="sm"
       >
-        <div className="p-5 space-y-4 text-center">
-          <p className="text-sm text-slate-600 dark:text-slate-300">
+        <div className="p-5 space-y-4">
+          <p className="text-xs text-slate-500 dark:text-slate-400 text-center">
             Pilih format QR Code yang ingin Anda cetak:
           </p>
 
-          <div className="flex items-center gap-3 pt-2">
-            <Button
+          <div className="grid grid-cols-2 gap-3 pt-1">
+            {/* Card Kiri: Tanpa Nomor Meja */}
+            <button
               type="button"
-              variant="secondary"
-              size="sm"
-              className="flex-1 flex items-center justify-center py-2.5"
               onClick={() => handlePrintAllQRs('no_table')}
+              className="relative overflow-hidden p-4 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-slate-400 dark:hover:border-slate-600 bg-slate-50/70 dark:bg-slate-900/80 text-left transition-all group cursor-pointer flex flex-col justify-between min-h-[110px]"
             >
-              Tanpa Nomor Meja
-            </Button>
+              {/* Icon Tipis (Saru sebagai BG) */}
+              <FiPrinter className="absolute -right-3 -bottom-3 w-20 h-20 text-slate-400 dark:text-slate-500 opacity-15 group-hover:opacity-25 transition-opacity pointer-events-none" />
 
-            <Button
+              <div className="relative z-10 space-y-1">
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-slate-900 dark:group-hover:text-white">
+                  Tanpa Nomor Meja
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                  Link umum ke halaman <code className="font-mono bg-slate-200/60 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">/menu</code>
+                </div>
+              </div>
+            </button>
+
+            {/* Card Kanan: Dengan Nomor Meja */}
+            <button
               type="button"
-              variant="primary"
-              size="sm"
-              className="flex-1 flex items-center justify-center py-2.5"
               onClick={() => handlePrintAllQRs('with_table')}
+              className="relative overflow-hidden p-4 rounded-xl border border-amber-200 dark:border-amber-900/60 hover:border-amber-400 dark:hover:border-amber-700 bg-amber-50/50 dark:bg-amber-950/30 text-left transition-all group cursor-pointer flex flex-col justify-between min-h-[110px]"
             >
-              Dengan Nomor Meja
-            </Button>
+              {/* Icon Tipis (Saru sebagai BG) */}
+              <BsQrCode className="absolute -right-3 -bottom-3 w-20 h-20 text-amber-600 dark:text-amber-400 opacity-15 group-hover:opacity-25 transition-opacity pointer-events-none" />
+
+              <div className="relative z-10 space-y-1">
+                <div className="font-bold text-sm text-slate-900 dark:text-slate-100 group-hover:text-amber-950 dark:group-hover:text-amber-200">
+                  Dengan Nomor Meja
+                </div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 leading-tight">
+                  Link khusus per meja <code className="font-mono bg-amber-100 dark:bg-amber-900/60 px-1 py-0.5 rounded text-[10px]">?meja=01</code>
+                </div>
+              </div>
+            </button>
           </div>
         </div>
       </Modal>
