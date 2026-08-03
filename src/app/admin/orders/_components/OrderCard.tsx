@@ -109,8 +109,8 @@ export function OrderCard({ order }: OrderCardProps) {
           )}
 
           {order.notes && (
-            <div className="mt-2 bg-amber-50/80 dark:bg-amber-950/40 text-amber-900 dark:text-amber-200 text-[11px] p-2 rounded-lg border border-amber-200/70 dark:border-amber-900/60 leading-relaxed">
-              <span className="font-bold text-[10px] uppercase tracking-wider text-amber-700 dark:text-amber-400 block mb-0.5">Catatan Pesanan:</span>
+            <div className="mt-2 bg-slate-100 dark:bg-slate-800/80 text-slate-700 dark:text-slate-300 text-[11px] p-2.5 rounded-lg leading-relaxed">
+              <span className="font-semibold text-[10px] uppercase tracking-wider text-slate-500 dark:text-slate-400 block mb-0.5">Catatan Pesanan:</span>
               {order.notes}
             </div>
           )}
