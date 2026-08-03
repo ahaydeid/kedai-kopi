@@ -1,4 +1,4 @@
--- Migration: 20260803000019_add_slug_to_menus.sql
+-- Migration: 20260803000019_add_slug_to_menu.sql
 -- Description: Add slug column to public.menu and populate initial slugs from name
 
 -- 1. Add slug column if it does not exist
